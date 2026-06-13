@@ -24,6 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { PublicSiteShell } from "@/components/public/public-site-shell";
 import {
   authenticatePublicPersonAction,
   cancelOwnPendingRequestAction,
@@ -40,16 +41,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
   const state = await getSolicitarPageState(searchParams);
 
   return (
-    <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-      <Container maxWidth="lg">
+    <PublicSiteShell>
+      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
+        <Container maxWidth="lg">
         <Stack spacing={3}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Typography variant="overline" color="primary.main">
-              Fase 5
-            </Typography>
-            <Typography variant="h3">Solicitud publica de turnos</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, borderLeft: "4px solid", borderColor: "primary.main", pl: 2 }}>
+            <Typography variant="h3">Solicitar turnos</Typography>
             <Typography variant="body1" color="text.secondary">
-              Busca tu nombre, valida tu PIN y registra solicitudes pendientes sobre turnos publicos disponibles.
+              Busque su nombre, confirme su PIN y seleccione los turnos disponibles que le interesan.
             </Typography>
           </Box>
 
@@ -69,7 +68,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                   <Stack spacing={2.5}>
                     <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                       <PersonSearchRoundedIcon color="primary" />
-                      <Typography variant="h5">1. Busca tu nombre</Typography>
+                        <Typography variant="h5">1. Busque su nombre</Typography>
                     </Stack>
                     <form action="/solicitar">
                       <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
@@ -125,7 +124,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                     <Stack spacing={2.5}>
                       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                         <LockOpenRoundedIcon color="primary" />
-                        <Typography variant="h5">2. Valida tu PIN</Typography>
+                        <Typography variant="h5">2. Confirme su PIN</Typography>
                       </Stack>
                       <Typography color="text.secondary">
                         Persona seleccionada: <strong>{state.selectedPerson.firstName} {state.selectedPerson.lastName}</strong>
@@ -149,7 +148,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             fullWidth
                           />
                           <Button type="submit" variant="contained" size="large">
-                            Entrar al flujo publico
+                            Continuar
                           </Button>
                         </Stack>
                       </form>
@@ -171,9 +170,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
                     }}
                   >
                     <Box>
-                      <Typography variant="h5">
-                        Sesion activa para {state.currentPerson.firstName} {state.currentPerson.lastName}
-                      </Typography>
+                        <Typography variant="h5">
+                          Sesión activa para {state.currentPerson.firstName} {state.currentPerson.lastName}
+                        </Typography>
                       <Typography color="text.secondary">
                         Puedes registrar solicitudes pendientes y cancelar las que aun no hayan sido revisadas.
                       </Typography>
@@ -190,7 +189,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
               <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
                   <Stack spacing={2.5}>
-                    <Typography variant="h5">Filtrar turnos visibles</Typography>
+                        <Typography variant="h5">Filtrar turnos</Typography>
                     <form action="/solicitar">
                       <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                         <FormControl fullWidth>
@@ -227,10 +226,10 @@ export default async function SolicitarPage({ searchParams }: Props) {
                       <Stack spacing={2.5}>
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                           <EventAvailableRoundedIcon color="primary" />
-                          <Typography variant="h5">Turnos disponibles para solicitar</Typography>
+                          <Typography variant="h5">Turnos disponibles</Typography>
                         </Stack>
                         <Typography color="text.secondary">
-                          Selecciona uno o varios turnos abiertos. La sugerencia de pareja es opcional y se aplica a toda esta solicitud múltiple.
+                          Seleccione uno o varios turnos abiertos. La sugerencia de pareja es opcional y se aplica a esta solicitud.
                         </Typography>
 
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
@@ -406,7 +405,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
             </Stack>
           )}
         </Stack>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </PublicSiteShell>
   );
 }

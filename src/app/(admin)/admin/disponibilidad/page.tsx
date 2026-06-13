@@ -1,4 +1,5 @@
 import { createAvailabilityAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatDate } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
@@ -7,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Box, Card, CardContent, Container, TextField, Typography } from "@mui/material";
 
 export default async function AdminAvailabilityPage() {
+  await requireCurrentAdminPageAccess();
   const [{ people }, records] = await Promise.all([
     getMasterDataPageData(),
     prisma.availabilityException.findMany({

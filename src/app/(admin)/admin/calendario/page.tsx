@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, Container, Stack, Typography } from "@mui/material";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getPrintableCalendarData } from "@/features/admin/stats/queries";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
 };
 
 export default async function AdminPrintableCalendarPage({ searchParams }: Props) {
+  await requireCurrentAdminPageAccess();
   const state = await getPrintableCalendarData(searchParams);
 
   return (

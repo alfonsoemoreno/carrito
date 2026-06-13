@@ -12,21 +12,20 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { getAsignacionesPageState } from "@/features/public/queries";
+import { PublicSiteShell } from "@/components/public/public-site-shell";
 
 export default async function AsignacionesPage() {
   const state = await getAsignacionesPageState();
 
   return (
-    <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-      <Container maxWidth="lg">
+    <PublicSiteShell>
+      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
+        <Container maxWidth="lg">
         <Stack spacing={3}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Typography variant="overline" color="primary.main">
-              Fase 5
-            </Typography>
-            <Typography variant="h3">Consulta de asignaciones</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, borderLeft: "4px solid", borderColor: "primary.main", pl: 2 }}>
+            <Typography variant="h3">Asignaciones</Typography>
             <Typography variant="body1" color="text.secondary">
-              Vista publica de asignaciones confirmadas y panel personal para revisar tu historial reciente.
+              Consulte las asignaciones visibles y, si ya inició sesión, revise también su historial personal.
             </Typography>
           </Box>
 
@@ -177,7 +176,8 @@ export default async function AsignacionesPage() {
             </Stack>
           ) : null}
         </Stack>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </PublicSiteShell>
   );
 }

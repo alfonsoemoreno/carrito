@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
   getAdminAssignmentOverview,
   getAdminRequestsPageState,
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export default async function AdminRequestsPage({ searchParams }: Props) {
+  await requireCurrentAdminPageAccess();
   const [overview, state] = await Promise.all([
     getAdminAssignmentOverview(),
     getAdminRequestsPageState(searchParams),
@@ -36,7 +38,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Fase 6"
+          eyebrow="Operación"
           title="Bandeja de solicitudes"
           description="Prioriza turnos con pendientes y entra a la vista centrada en resolver cada asignacion."
         >

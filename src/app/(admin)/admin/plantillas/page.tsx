@@ -1,4 +1,5 @@
 import { createTemplateAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatTime } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
@@ -19,6 +20,7 @@ const dayOptions = [
 const dayNames = new Map(dayOptions.map((option) => [option.value, option.label]));
 
 export default async function AdminTemplatesPage() {
+  await requireCurrentAdminPageAccess();
   const [{ zones }, templates] = await Promise.all([
     getMasterDataPageData(),
     prisma.shiftTemplate.findMany({

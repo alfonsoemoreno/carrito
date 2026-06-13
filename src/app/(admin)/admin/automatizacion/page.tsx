@@ -14,6 +14,7 @@ import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
   generateMissingFutureShiftsAction,
   refreshShiftStatusesAction,
@@ -22,13 +23,14 @@ import { getAutomationDashboardData } from "@/features/admin/automation/queries"
 import { formatDate } from "@/features/admin/master-data/utils";
 
 export default async function AdminAutomationPage() {
+  await requireCurrentAdminPageAccess();
   const data = await getAutomationDashboardData();
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Fase 7"
+          eyebrow="Automatización"
           title="Automatizacion y reglas"
           description="Mantiene el horizonte de turnos futuros, recalcula estados operativos y concentra alertas de cobertura."
         >

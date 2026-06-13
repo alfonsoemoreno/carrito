@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Manrope } from "next/font/google";
+import { IBM_Plex_Mono, Noto_Sans } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const sans = Noto_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -44,10 +44,15 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${manrope.variable} ${mono.variable}`}
+      className={`${sans.variable} ${mono.variable}`}
     >
       <body>
-        <AppProviders>{children}</AppProviders>
+        <a href="#main-content" className="skip-link">
+          Saltar al contenido
+        </a>
+        <AppProviders>
+          <div id="main-content">{children}</div>
+        </AppProviders>
       </body>
     </html>
   );

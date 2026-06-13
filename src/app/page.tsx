@@ -13,11 +13,12 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { PublicSiteShell } from "@/components/public/public-site-shell";
 
 const highlights = [
-  "Acceso publico por persona + PIN",
-  "Backoffice con Neon Auth para administradores",
-  "Solicitudes y consultas conectadas a Neon mediante Prisma",
+  "Consulta personal mediante PIN",
+  "Solicitud de turnos desde un flujo guiado",
+  "Administración segura para coordinadores y encargados",
 ];
 
 const entryPoints = [
@@ -25,77 +26,80 @@ const entryPoints = [
     href: "/solicitar",
     icon: <EventAvailableRoundedIcon />,
     title: "Solicitar turnos",
-    body: "Entrada publica para revisar disponibilidad y enviar solicitudes.",
+    body: "Revise los turnos disponibles y envíe una solicitud en pocos pasos.",
   },
   {
     href: "/asignaciones",
     icon: <AssignmentRoundedIcon />,
     title: "Consultar asignaciones",
-    body: "Vista general publica y consulta personal protegida por PIN.",
+    body: "Consulte asignaciones visibles y revise su historial reciente.",
   },
   {
     href: "/admin",
     icon: <AdminPanelSettingsRoundedIcon />,
     title: "Panel administrativo",
-    body: "Base del backoffice protegida con Neon Auth para administradores.",
+    body: "Administre personas, zonas, solicitudes y reportes desde el panel.",
   },
 ] as const;
 
 export default function HomePage() {
   return (
-    <Box component="main" sx={{ py: { xs: 4, md: 8 } }}>
-      <Container maxWidth="lg">
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}
-        >
+    <PublicSiteShell>
+      <Box component="main" sx={{ py: { xs: 4, md: 8 } }}>
+        <Container maxWidth="lg">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              gap: 3,
-              alignItems: { xs: "flex-start", md: "stretch" },
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.55fr) minmax(320px, 0.9fr)" },
+              gap: { xs: 2, md: 3 },
+              alignItems: "stretch",
             }}
           >
             <Card
               elevation={0}
               sx={{
                 flex: 1.5,
-                borderRadius: 6,
-                border: "1px solid",
-                borderColor: "divider",
                 background:
-                  "linear-gradient(135deg, rgba(20,99,86,0.10), rgba(255,250,242,0.95))",
+                  "linear-gradient(135deg, rgba(91,120,182,0.16), rgba(255,255,255,0.98) 62%)",
               }}
             >
               <CardContent sx={{ p: { xs: 3, md: 5 } }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 2.75 } }}>
                   <Chip
-                    label="Fase 5 completada"
+                    label="Acceso rápido"
                     color="primary"
                     sx={{ alignSelf: "flex-start", fontWeight: 700 }}
                   />
                   <Typography variant="h2" sx={{ maxWidth: 720 }}>
-                    Carrito ya opera el flujo publico y el backoffice base.
+                    Un flujo claro para consultar turnos, pedir cambios y administrar asignaciones.
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    La instalacion actual ya incluye modulos maestros administrativos,
-                    autenticacion Neon para backoffice y acceso publico por persona
-                    + PIN para solicitar y consultar turnos.
+                    La aplicación está organizada para que cualquier publicador encuentre su turno rápido
+                    y para que el equipo administrativo resuelva solicitudes sin fricción.
                   </Typography>
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: { xs: "column", sm: "row" },
                       gap: 1.5,
+                      pt: 1,
+                      flexWrap: "wrap",
                     }}
                   >
                     <Link href="/solicitar">
                       <Button size="large" variant="contained">
-                        Ver flujo publico
+                        Solicitar turnos
+                      </Button>
+                    </Link>
+                    <Link href="/asignaciones">
+                      <Button size="large" variant="outlined">
+                        Ver asignaciones
                       </Button>
                     </Link>
                     <Link href="/admin">
                       <Button size="large" variant="outlined">
-                        Abrir backoffice
+                        Abrir administración
                       </Button>
                     </Link>
                   </Box>
@@ -107,22 +111,16 @@ export default function HomePage() {
               elevation={0}
               sx={{
                 flex: 1,
-                borderRadius: 6,
-                border: "1px solid",
-                borderColor: "divider",
                 backgroundColor: "background.paper",
               }}
             >
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
                   <Typography variant="overline" color="primary.main">
-                    Bootstrap actual
+                    Lo que puede hacer aquí
                   </Typography>
                   {highlights.map((item) => (
-                    <Box
-                      key={item}
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                    >
+                    <Box key={item} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
                       <PlaceRoundedIcon color="primary" fontSize="small" />
                       <Typography variant="body2">{item}</Typography>
                     </Box>
@@ -132,14 +130,14 @@ export default function HomePage() {
             </Card>
           </Box>
 
-          <Card elevation={0} sx={{ borderRadius: 6, border: "1px solid", borderColor: "divider" }}>
+          <Card elevation={0}>
             <CardContent sx={{ p: { xs: 3, md: 4 } }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <Typography variant="h4">Puntos de entrada iniciales</Typography>
+                <Typography variant="h4">Seleccione lo que necesita hacer</Typography>
                 <Box
                   sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
                     gap: 2,
                   }}
                 >
@@ -149,14 +147,11 @@ export default function HomePage() {
                       elevation={0}
                       sx={{
                         flex: 1,
-                        borderRadius: 4,
-                        border: "1px solid",
-                        borderColor: "divider",
-                        backgroundColor: "background.default",
+                        backgroundColor: "#f7f7f7",
                       }}
                     >
                       <CardContent>
-                        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
                           <Box sx={{ color: "primary.main" }}>{item.icon}</Box>
                           <Typography variant="h5">{item.title}</Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -164,8 +159,8 @@ export default function HomePage() {
                           </Typography>
                           <Divider />
                           <Link href={item.href}>
-                            <Button variant="text" sx={{ px: 0 }}>
-                              Abrir
+                            <Button variant="outlined" fullWidth>
+                              Entrar
                             </Button>
                           </Link>
                         </Box>
@@ -176,8 +171,9 @@ export default function HomePage() {
               </Box>
             </CardContent>
           </Card>
-        </Box>
-      </Container>
-    </Box>
+          </Box>
+        </Container>
+      </Box>
+    </PublicSiteShell>
   );
 }

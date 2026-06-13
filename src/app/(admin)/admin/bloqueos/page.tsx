@@ -1,4 +1,5 @@
 import { createShiftBlockAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatDate, formatTime } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
@@ -7,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Box, Card, CardContent, Container, TextField, Typography } from "@mui/material";
 
 export default async function AdminBlocksPage() {
+  await requireCurrentAdminPageAccess();
   const [{ zones, shifts }, blocks] = await Promise.all([
     getMasterDataPageData(),
     prisma.shiftBlock.findMany({

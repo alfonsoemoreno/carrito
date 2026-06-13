@@ -1,21 +1,25 @@
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   Container,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   Stack,
+  Typography,
 } from "@mui/material";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { FormCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getExportsPageState } from "@/features/admin/exports/queries";
 
 type Props = {
@@ -23,6 +27,7 @@ type Props = {
 };
 
 export default async function AdminExportsPage({ searchParams }: Props) {
+  await requireCurrentAdminPageAccess();
   const state = await getExportsPageState(searchParams);
   const query = new URLSearchParams({
     from: state.filters.from,
@@ -34,7 +39,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Fase 8"
+          eyebrow="Reportes"
           title="Exportaciones"
           description="Descarga datos operativos en CSV compatible con Excel y abre un calendario imprimible por rango."
         >
@@ -105,6 +110,57 @@ export default async function AdminExportsPage({ searchParams }: Props) {
               </Link>
             </FormCard>
           </Box>
+
+          <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+            <CardContent>
+              <Stack spacing={2}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Typography variant="h5">Auditoria reciente de exportaciones</Typography>
+                  <Typography color="text.secondary">
+                    Cada descarga CSV queda registrada con administrador, fecha, volumen y contexto basico.
+                  </Typography>
+                </Box>
+
+                {state.recentExports.length === 0 ? (
+                  <Alert severity="info">Aun no hay exportaciones registradas.</Alert>
+                ) : (
+                  <Stack spacing={1.5}>
+                    {state.recentExports.map((entry) => (
+                      <Box
+                        key={entry.id}
+                        sx={{
+                          borderRadius: 4,
+                          border: "1px solid",
+                          borderColor: "divider",
+                          p: 2,
+                        }}
+                      >
+                        <Stack spacing={1}>
+                          <Stack
+                            direction={{ xs: "column", md: "row" }}
+                            spacing={1}
+                            sx={{ alignItems: { xs: "flex-start", md: "center" } }}
+                          >
+                            <Chip size="small" color="primary" label={entry.actionLabel} />
+                            <Typography variant="body2" color="text.secondary">
+                              {entry.createdAtLabel}
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body1">
+                            {entry.actorLabel} descargo <strong>{entry.fileName}</strong> con {entry.rowCount} filas.
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {entry.filtersLabel}
+                            {entry.ipAddress ? ` · IP ${entry.ipAddress}` : ""}
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
         </AdminPageShell>
       </Container>
     </Box>

@@ -24,10 +24,10 @@ export function FormCard({
   children: ReactNode;
 }) {
   return (
-    <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider", height: "100%" }}>
+    <Card sx={{ height: "100%" }}>
       <CardHeader title={title} subheader={description} />
       <Divider />
-      <CardContent>{children}</CardContent>
+      <CardContent sx={{ p: 3 }}>{children}</CardContent>
     </Card>
   );
 }
@@ -81,10 +81,11 @@ export function EmptyState({
   return (
     <Box
       sx={{
-        borderRadius: 4,
+        borderRadius: 1,
         border: "1px dashed",
         borderColor: "divider",
         p: 3,
+        backgroundColor: "rgba(255,255,255,0.55)",
       }}
     >
       <Typography variant="h6">{title}</Typography>
@@ -112,7 +113,7 @@ export function ModuleLinkCard({
           <Typography variant="h5">{title}</Typography>
           <Typography color="text.secondary">{description}</Typography>
           <a href={href}>
-            <Button variant="outlined">Abrir modulo</Button>
+            <Button variant="outlined">Abrir módulo</Button>
           </a>
         </Stack>
       </CardContent>

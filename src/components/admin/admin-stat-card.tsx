@@ -13,14 +13,16 @@ export function AdminStatCard({
   helper: string;
 }) {
   return (
-    <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider", height: "100%" }}>
-      <CardContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          <Box sx={{ color: "primary.main" }}>{icon}</Box>
+    <Card sx={{ height: "100%", backgroundColor: "background.paper" }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+          <Box sx={{ color: "primary.main", display: "inline-flex" }}>{icon}</Box>
           <Typography variant="overline" color="text.secondary">
             {label}
           </Typography>
-          <Typography variant="h4">{value}</Typography>
+          <Typography variant="h4" sx={{ lineHeight: 1.1 }}>
+            {value}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {helper}
           </Typography>

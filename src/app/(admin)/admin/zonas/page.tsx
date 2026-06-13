@@ -1,10 +1,12 @@
 import { createZoneAction, updateZoneVisibilityAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton, SwitchField } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
 import { Box, Button, Card, CardContent, Chip, Container, TextField, Typography } from "@mui/material";
 
 export default async function AdminZonesPage() {
+  await requireCurrentAdminPageAccess();
   const zones = await prisma.zone.findMany({
     orderBy: { name: "asc" },
     include: {

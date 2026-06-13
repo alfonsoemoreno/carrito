@@ -1,10 +1,12 @@
 import { createPersonAction, resetPersonPinAction, updatePersonStatusAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
 import { Box, Button, Card, CardContent, Chip, Container, Divider, TextField, Typography } from "@mui/material";
 
 export default async function AdminPeoplePage() {
+  await requireCurrentAdminPageAccess();
   const people = await prisma.person.findMany({
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   });

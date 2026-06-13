@@ -14,13 +14,24 @@ export function AdminPageShell({
 }) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Chip
-          label={eyebrow}
-          color="primary"
-          size="small"
-          sx={{ alignSelf: "flex-start", fontWeight: 700 }}
-        />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          borderLeft: "4px solid",
+          borderColor: "primary.main",
+          pl: 2,
+        }}
+      >
+        {eyebrow ? (
+          <Chip
+            label={eyebrow}
+            color="primary"
+            size="small"
+            sx={{ alignSelf: "flex-start", fontWeight: 700 }}
+          />
+        ) : null}
         <Typography variant="h3">{title}</Typography>
         <Typography color="text.secondary">{description}</Typography>
       </Box>

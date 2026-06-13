@@ -1,6 +1,6 @@
 import { AssignmentStatus, ShiftRequestStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatTime } from "@/features/admin/master-data/utils";
+import { formatDate, formatDateTime, formatTime } from "@/features/admin/master-data/utils";
 import { resolveStatsRange } from "@/features/admin/stats/utils";
 
 export async function getAssignmentsExportRows(input: {
@@ -115,7 +115,7 @@ export async function getExportsPageState(rawSearchParams: Promise<{ [key: strin
     to: Array.isArray(searchParams.to) ? searchParams.to[0] : searchParams.to,
   });
 
-  const [zones, assignmentCount, requestCount, pendingCount, confirmedCount] = await Promise.all([
+  const [zones, assignmentCount, requestCount, pendingCount, confirmedCount, recentExports] = await Promise.all([
     prisma.zone.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -166,6 +166,28 @@ export async function getExportsPageState(rawSearchParams: Promise<{ [key: strin
         },
       },
     }),
+    prisma.auditLog.findMany({
+      where: {
+        actorType: "ADMIN",
+        entityType: "admin_export",
+        action: {
+          in: [
+            "EXPORT_ASSIGNMENTS_CSV_DOWNLOADED",
+            "EXPORT_REQUESTS_CSV_DOWNLOADED",
+          ],
+        },
+      },
+      include: {
+        actorAdmin: {
+          select: {
+            displayName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
   ]);
 
   return {
@@ -181,5 +203,36 @@ export async function getExportsPageState(rawSearchParams: Promise<{ [key: strin
       pendingCount,
       confirmedCount,
     },
+    recentExports: recentExports.map((entry) => {
+      const meta = (entry.meta ?? {}) as {
+        exportType?: string;
+        fileName?: string;
+        rowCount?: number;
+        filters?: {
+          from?: string | null;
+          to?: string | null;
+          zoneId?: string | null;
+        };
+        ipAddress?: string | null;
+      };
+
+      return {
+        id: entry.id,
+        createdAtLabel: formatDateTime(entry.createdAt),
+        actorLabel: entry.actorAdmin?.displayName || entry.actorAdmin?.email || "Admin",
+        actionLabel:
+          meta.exportType === "requests" ? "Solicitudes CSV" : "Asignaciones CSV",
+        fileName: meta.fileName ?? "",
+        rowCount: typeof meta.rowCount === "number" ? meta.rowCount : 0,
+        ipAddress: meta.ipAddress ?? "",
+        filtersLabel: [
+          meta.filters?.from ? `Desde ${meta.filters.from}` : null,
+          meta.filters?.to ? `Hasta ${meta.filters.to}` : null,
+          meta.filters?.zoneId ? `Zona filtrada` : "Todas las zonas",
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      };
+    }),
   };
 }

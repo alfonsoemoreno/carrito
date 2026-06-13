@@ -1,4 +1,5 @@
 import { createRelationshipAction } from "@/features/admin/master-data/actions";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatDateTime } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
@@ -7,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Box, Card, CardContent, Chip, Container, TextField, Typography } from "@mui/material";
 
 export default async function AdminRelationshipsPage() {
+  await requireCurrentAdminPageAccess();
   const [{ people }, relationships] = await Promise.all([
     getMasterDataPageData(),
     prisma.relationship.findMany({

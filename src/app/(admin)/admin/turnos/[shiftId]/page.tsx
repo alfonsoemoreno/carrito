@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
   confirmShiftAssignmentAction,
   rejectShiftRequestAction,
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export default async function AdminShiftAssignmentPage({ params, searchParams }: Props) {
+  await requireCurrentAdminPageAccess();
   const { shiftId } = await params;
   const state = await getShiftAssignmentPageState(shiftId, searchParams);
 
@@ -44,8 +46,8 @@ export default async function AdminShiftAssignmentPage({ params, searchParams }:
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Fase 6"
-          title="Asignacion por turno"
+          eyebrow="Operación"
+          title="Asignación por turno"
           description="Revisa pendientes, rechaza solicitudes y confirma la pareja definitiva del turno."
         >
           {state.notice ? <Alert severity="success">{state.notice}</Alert> : null}

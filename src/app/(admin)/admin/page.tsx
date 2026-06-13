@@ -8,6 +8,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { ModuleLinkCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getAdminOverview } from "@/features/admin/master-data/queries";
 import {
   Box,
@@ -20,74 +21,75 @@ const modules = [
     href: "/admin/personas",
     title: "Personas",
     description: "Alta de publicadores, cambios de estado y reseteo de PIN.",
-    badge: "Fase 4",
+    badge: "Maestro",
   },
   {
     href: "/admin/relaciones",
     title: "Relaciones",
     description: "Matrimonios, padre/madre-hijo/hija y excepciones administrativas.",
-    badge: "Fase 4",
+    badge: "Maestro",
   },
   {
     href: "/admin/zonas",
     title: "Zonas",
     description: "Entidades geografica principales con visibilidad publica configurable.",
-    badge: "Fase 4",
+    badge: "Maestro",
   },
   {
     href: "/admin/plantillas",
     title: "Plantillas",
     description: "Horarios recurrentes por zona para generar turnos futuros.",
-    badge: "Fase 4",
+    badge: "Maestro",
   },
   {
     href: "/admin/bloqueos",
     title: "Bloqueos",
     description: "Bloqueos por turno, fecha, zona y rango de fechas.",
-    badge: "Fase 4",
+    badge: "Operación",
   },
   {
     href: "/admin/disponibilidad",
     title: "Disponibilidad",
     description: "Ausencias temporales que impactan asignaciones y sugerencias.",
-    badge: "Fase 4",
+    badge: "Operación",
   },
   {
     href: "/admin/solicitudes",
     title: "Solicitudes",
     description: "Bandeja operativa para revisar pendientes y resolver asignaciones por turno.",
-    badge: "Fase 6",
+    badge: "Revisión",
   },
   {
     href: "/admin/automatizacion",
     title: "Automatizacion",
     description: "Generacion futura de turnos, recalculo de estados y alertas operativas.",
-    badge: "Fase 7",
+    badge: "Automático",
   },
   {
     href: "/admin/estadisticas",
     title: "Estadisticas",
     description: "KPIs operativos y reportes por rango sobre cobertura, solicitudes y turnos.",
-    badge: "Fase 8",
+    badge: "Reporte",
   },
   {
     href: "/admin/exportaciones",
     title: "Exportaciones",
     description: "CSV compatibles con Excel y calendario imprimible para operacion y archivo.",
-    badge: "Fase 8",
+    badge: "Reporte",
   },
 ] as const;
 
 export default async function AdminDashboardPage() {
+  await requireCurrentAdminPageAccess();
   const overview = await getAdminOverview();
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Backoffice"
-          title="Dashboard administrativo"
-          description="La Fase 4 deja operativos los modulos maestros sobre Neon para administrar la base del sistema."
+          eyebrow="Panel administrativo"
+          title="Resumen general"
+          description="Revise el estado del sistema y entre rápidamente a los módulos que necesita usar hoy."
         >
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" }, gap: 2.5 }}>
             <AdminStatCard
@@ -137,7 +139,7 @@ export default async function AdminDashboardPage() {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="h4">Modulos maestros</Typography>
             <Typography color="text.secondary">
-              Ya estan disponibles los modulos maestros y la primera capa operativa para resolver solicitudes.
+              Acceda a los catálogos, la operación diaria y los reportes desde un mismo lugar.
             </Typography>
           </Box>
 

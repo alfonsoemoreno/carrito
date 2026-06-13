@@ -16,6 +16,7 @@ import {
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
+import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getAdminStatsPageState } from "@/features/admin/stats/queries";
 
 type Props = {
@@ -23,14 +24,15 @@ type Props = {
 };
 
 export default async function AdminStatsPage({ searchParams }: Props) {
+  await requireCurrentAdminPageAccess();
   const state = await getAdminStatsPageState(searchParams);
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
         <AdminPageShell
-          eyebrow="Fase 8"
-          title="Estadisticas"
+          eyebrow="Reportes"
+          title="Estadísticas"
           description="KPIs y reportes operativos sobre turnos, solicitudes y cobertura por rango."
         >
           <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
