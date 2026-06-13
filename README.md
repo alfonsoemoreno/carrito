@@ -6,7 +6,7 @@ Estado actual:
 
 - Fase 1 completada: arquitectura y diseno.
 - Fase 2 completada: bootstrap tecnico del proyecto.
-- El dominio funcional completo, migraciones definitivas y seeds demo se implementaran en fases posteriores.
+- Fase 3 completada: modelo de datos, migracion inicial SQL y seed demo.
 
 ## Stack base
 
@@ -45,7 +45,21 @@ cp .env.example .env
 npm run db:generate
 ```
 
-5. Inicia el proyecto:
+5. Aplica tu estrategia de esquema:
+
+```bash
+npm run db:push
+```
+
+o ejecuta la migracion SQL inicial ubicada en `prisma/migrations/202606130001_init/migration.sql`.
+
+6. Carga datos demo:
+
+```bash
+npm run db:seed
+```
+
+7. Inicia el proyecto:
 
 ```bash
 npm run dev
@@ -60,9 +74,11 @@ npm run dev
 - `npm run db:generate`
 - `npm run db:push`
 - `npm run db:migrate:dev`
+- `npm run db:seed`
 - `npm run db:studio`
 
 ## Documentacion de fases
 
 - [Fase 1 - Arquitectura](/Users/alfonsomoreno/Developer/carrito/docs/fase-1-arquitectura.md)
 - [Fase 2 - Bootstrap Tecnico](/Users/alfonsomoreno/Developer/carrito/docs/fase-2-bootstrap-tecnico.md)
+- [Fase 3 - Modelo de Datos](/Users/alfonsomoreno/Developer/carrito/docs/fase-3-modelo-datos.md)
