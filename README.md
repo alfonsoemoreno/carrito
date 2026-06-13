@@ -11,6 +11,7 @@ Estado actual:
 - Fase 5 completada: flujo publico con PIN, solicitudes y consulta.
 - Fase 6 completada: asignacion administrativa inicial.
 - Fase 7 completada: automatizacion operativa y alertas.
+- Fase 8 completada: estadisticas y exportaciones operativas.
 
 ## Stack base
 
@@ -90,3 +91,4 @@ npm run dev
 - [Fase 5 - Flujo Publico](/Users/alfonsomoreno/Developer/carrito/docs/fase-5-flujo-publico.md)
 - [Fase 6 - Asignacion Administrativa](/Users/alfonsomoreno/Developer/carrito/docs/fase-6-asignacion-administrativa.md)
 - [Fase 7 - Automatizacion y Reglas](/Users/alfonsomoreno/Developer/carrito/docs/fase-7-automatizacion-y-reglas.md)
+- [Fase 8 - Estadisticas y Exportaciones](/Users/alfonsomoreno/Developer/carrito/docs/fase-8-estadisticas-y-exportaciones.md)

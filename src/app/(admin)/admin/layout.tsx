@@ -23,6 +23,8 @@ const navItems = [
   { href: "/admin/disponibilidad", label: "Disponibilidad" },
   { href: "/admin/solicitudes", label: "Solicitudes" },
   { href: "/admin/automatizacion", label: "Automatizacion" },
+  { href: "/admin/estadisticas", label: "Estadisticas" },
+  { href: "/admin/exportaciones", label: "Exportaciones" },
   { href: "/admin/cuenta", label: "Sesion" },
   { href: "/account/settings", label: "Cuenta" },
 ] as const;

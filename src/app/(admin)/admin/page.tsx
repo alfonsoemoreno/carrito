@@ -3,6 +3,8 @@ import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import AutoModeRoundedIcon from "@mui/icons-material/AutoModeRounded";
+import BarChartRoundedIcon from "@mui/icons-material/BarChartRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { ModuleLinkCard } from "@/components/admin/master-data-cards";
@@ -62,6 +64,18 @@ const modules = [
     description: "Generacion futura de turnos, recalculo de estados y alertas operativas.",
     badge: "Fase 7",
   },
+  {
+    href: "/admin/estadisticas",
+    title: "Estadisticas",
+    description: "KPIs operativos y reportes por rango sobre cobertura, solicitudes y turnos.",
+    badge: "Fase 8",
+  },
+  {
+    href: "/admin/exportaciones",
+    title: "Exportaciones",
+    description: "CSV compatibles con Excel y calendario imprimible para operacion y archivo.",
+    badge: "Fase 8",
+  },
 ] as const;
 
 export default async function AdminDashboardPage() {
@@ -105,6 +119,18 @@ export default async function AdminDashboardPage() {
               label="Cobertura operativa"
               value={`${overview.shiftsWithPendingRequests} / ${overview.blockedUpcomingShifts}`}
               helper="Turnos con pendientes y bloqueos futuros que requieren seguimiento."
+            />
+            <AdminStatCard
+              icon={<BarChartRoundedIcon />}
+              label="Foco analitico"
+              value={`${overview.pendingRequests} / ${overview.openShifts}`}
+              helper="Base inmediata para reportes de solicitudes versus turnos abiertos."
+            />
+            <AdminStatCard
+              icon={<DownloadRoundedIcon />}
+              label="Base exportable"
+              value={`${overview.people} / ${overview.zones}`}
+              helper="Volumen base de personas y zonas para reportes y exportaciones."
             />
           </Box>
 
