@@ -49,6 +49,12 @@ const modules = [
     description: "Ausencias temporales que impactan asignaciones y sugerencias.",
     badge: "Fase 4",
   },
+  {
+    href: "/admin/solicitudes",
+    title: "Solicitudes",
+    description: "Bandeja operativa para revisar pendientes y resolver asignaciones por turno.",
+    badge: "Fase 6",
+  },
 ] as const;
 
 export default async function AdminDashboardPage() {
@@ -83,16 +89,16 @@ export default async function AdminDashboardPage() {
             />
             <AdminStatCard
               icon={<VisibilityOffRoundedIcon />}
-              label="Bloqueos e indisponibilidad"
-              value={`${overview.blocks} / ${overview.availability}`}
-              helper="Restricciones manuales que afectan planificacion y sugerencias."
+              label="Pendientes y restricciones"
+              value={`${overview.pendingRequests} / ${overview.blocks + overview.availability}`}
+              helper="Solicitudes pendientes y restricciones manuales que afectan la planificacion."
             />
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="h4">Modulos maestros</Typography>
             <Typography color="text.secondary">
-              Estos modulos cubren la administracion base del sistema antes de entrar en solicitudes y asignaciones.
+              Ya estan disponibles los modulos maestros y la primera capa operativa para resolver solicitudes.
             </Typography>
           </Box>
 

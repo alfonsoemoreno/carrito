@@ -21,6 +21,7 @@ const navItems = [
   { href: "/admin/plantillas", label: "Plantillas" },
   { href: "/admin/bloqueos", label: "Bloqueos" },
   { href: "/admin/disponibilidad", label: "Disponibilidad" },
+  { href: "/admin/solicitudes", label: "Solicitudes" },
   { href: "/admin/cuenta", label: "Sesion" },
   { href: "/account/settings", label: "Cuenta" },
 ] as const;

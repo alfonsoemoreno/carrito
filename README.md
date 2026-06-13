@@ -9,6 +9,7 @@ Estado actual:
 - Fase 3 completada: modelo de datos, migracion inicial SQL y seed demo.
 - Fase 4 completada: modulos maestros del backoffice.
 - Fase 5 completada: flujo publico con PIN, solicitudes y consulta.
+- Fase 6 completada: asignacion administrativa inicial.
 
 ## Stack base
 
@@ -86,3 +87,4 @@ npm run dev
 - [Fase 3 - Modelo de Datos](/Users/alfonsomoreno/Developer/carrito/docs/fase-3-modelo-datos.md)
 - [Fase 4 - Modulos Maestros](/Users/alfonsomoreno/Developer/carrito/docs/fase-4-modulos-maestros.md)
 - [Fase 5 - Flujo Publico](/Users/alfonsomoreno/Developer/carrito/docs/fase-5-flujo-publico.md)
+- [Fase 6 - Asignacion Administrativa](/Users/alfonsomoreno/Developer/carrito/docs/fase-6-asignacion-administrativa.md)
