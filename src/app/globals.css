@@ -1,13 +1,13 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "@neondatabase/auth/ui/css";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --app-background: #f4efe6;
+  --app-surface: #fffaf2;
+  --app-ink: #1d2420;
+  --app-muted: #6f746f;
+  --app-accent: #146356;
+  --app-accent-strong: #0e4d43;
+  --app-border: rgba(29, 36, 32, 0.12);
 }
 
 html {
@@ -24,9 +24,10 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--app-ink);
+  background:
+    radial-gradient(circle at top, rgba(20, 99, 86, 0.14), transparent 36%),
+    linear-gradient(180deg, #f7f2ea 0%, #efe8db 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,8 +43,20 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+#__next,
+main {
+  min-height: 100%;
+}
+
+@media (max-width: 600px) {
   html {
-    color-scheme: dark;
+    font-size: 15px;
   }
 }
