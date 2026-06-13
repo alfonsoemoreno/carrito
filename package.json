@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate:dev": "prisma migrate dev",
-    "db:seed": "node prisma/seed.mjs",
+    "db:seed": "node --env-file=.env prisma/seed.mjs",
     "db:studio": "prisma studio"
   },
   "dependencies": {

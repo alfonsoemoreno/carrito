@@ -17,7 +17,7 @@ import Link from "next/link";
 const highlights = [
   "Acceso publico por persona + PIN",
   "Backoffice con Neon Auth para administradores",
-  "Arquitectura modular lista para Prisma + Neon",
+  "Solicitudes y consultas conectadas a Neon mediante Prisma",
 ];
 
 const entryPoints = [
@@ -69,17 +69,17 @@ export default function HomePage() {
               <CardContent sx={{ p: { xs: 3, md: 5 } }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
                   <Chip
-                    label="Fase 2 completada"
+                    label="Fase 5 completada"
                     color="primary"
                     sx={{ alignSelf: "flex-start", fontWeight: 700 }}
                   />
                   <Typography variant="h2" sx={{ maxWidth: 720 }}>
-                    Carrito deja listo el esqueleto tecnico del sistema.
+                    Carrito ya opera el flujo publico y el backoffice base.
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    Esta base ya incluye Next.js App Router, Material UI, Prisma,
-                    preparacion para Neon y Neon Auth, estructura modular y PWA
-                    inicial.
+                    La instalacion actual ya incluye modulos maestros administrativos,
+                    autenticacion Neon para backoffice y acceso publico por persona
+                    + PIN para solicitar y consultar turnos.
                   </Typography>
                   <Box
                     sx={{

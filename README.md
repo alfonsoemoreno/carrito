@@ -7,6 +7,8 @@ Estado actual:
 - Fase 1 completada: arquitectura y diseno.
 - Fase 2 completada: bootstrap tecnico del proyecto.
 - Fase 3 completada: modelo de datos, migracion inicial SQL y seed demo.
+- Fase 4 completada: modulos maestros del backoffice.
+- Fase 5 completada: flujo publico con PIN, solicitudes y consulta.
 
 ## Stack base
 
@@ -82,3 +84,5 @@ npm run dev
 - [Fase 1 - Arquitectura](/Users/alfonsomoreno/Developer/carrito/docs/fase-1-arquitectura.md)
 - [Fase 2 - Bootstrap Tecnico](/Users/alfonsomoreno/Developer/carrito/docs/fase-2-bootstrap-tecnico.md)
 - [Fase 3 - Modelo de Datos](/Users/alfonsomoreno/Developer/carrito/docs/fase-3-modelo-datos.md)
+- [Fase 4 - Modulos Maestros](/Users/alfonsomoreno/Developer/carrito/docs/fase-4-modulos-maestros.md)
+- [Fase 5 - Flujo Publico](/Users/alfonsomoreno/Developer/carrito/docs/fase-5-flujo-publico.md)

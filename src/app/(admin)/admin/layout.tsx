@@ -11,10 +11,18 @@ import {
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+export const dynamic = "force-dynamic";
+
 const navItems = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/personas", label: "Personas" },
+  { href: "/admin/relaciones", label: "Relaciones" },
+  { href: "/admin/zonas", label: "Zonas" },
+  { href: "/admin/plantillas", label: "Plantillas" },
+  { href: "/admin/bloqueos", label: "Bloqueos" },
+  { href: "/admin/disponibilidad", label: "Disponibilidad" },
+  { href: "/admin/cuenta", label: "Sesion" },
   { href: "/account/settings", label: "Cuenta" },
-  { href: "/auth/sign-in", label: "Auth" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -40,7 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <DashboardRoundedIcon color="primary" />
                 <Typography variant="h6">Carrito Admin</Typography>
               </Box>
-              <Box sx={{ display: "flex", gap: 2 }}>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "flex-end" }}>
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
