@@ -10,6 +10,7 @@ Estado actual:
 - Fase 4 completada: modulos maestros del backoffice.
 - Fase 5 completada: flujo publico con PIN, solicitudes y consulta.
 - Fase 6 completada: asignacion administrativa inicial.
+- Fase 7 completada: automatizacion operativa y alertas.
 
 ## Stack base
 
@@ -88,3 +89,4 @@ npm run dev
 - [Fase 4 - Modulos Maestros](/Users/alfonsomoreno/Developer/carrito/docs/fase-4-modulos-maestros.md)
 - [Fase 5 - Flujo Publico](/Users/alfonsomoreno/Developer/carrito/docs/fase-5-flujo-publico.md)
 - [Fase 6 - Asignacion Administrativa](/Users/alfonsomoreno/Developer/carrito/docs/fase-6-asignacion-administrativa.md)
+- [Fase 7 - Automatizacion y Reglas](/Users/alfonsomoreno/Developer/carrito/docs/fase-7-automatizacion-y-reglas.md)

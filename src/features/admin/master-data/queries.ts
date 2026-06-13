@@ -12,6 +12,7 @@ export async function getAdminOverview() {
     availability,
     pendingRequests,
     shiftsWithPendingRequests,
+    blockedUpcomingShifts,
   ] = await Promise.all([
     prisma.person.count(),
     prisma.person.count({ where: { status: "ACTIVE" } }),
@@ -31,6 +32,14 @@ export async function getAdminOverview() {
         },
       },
     }),
+    prisma.shift.count({
+      where: {
+        status: "BLOCKED",
+        shiftDate: {
+          gte: new Date(),
+        },
+      },
+    }),
   ]);
 
   return {
@@ -44,6 +53,7 @@ export async function getAdminOverview() {
     availability,
     pendingRequests,
     shiftsWithPendingRequests,
+    blockedUpcomingShifts,
   };
 }
 

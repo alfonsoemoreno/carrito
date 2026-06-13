@@ -2,6 +2,7 @@ import Groups2RoundedIcon from "@mui/icons-material/Groups2Rounded";
 import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import AutoModeRoundedIcon from "@mui/icons-material/AutoModeRounded";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { ModuleLinkCard } from "@/components/admin/master-data-cards";
@@ -55,6 +56,12 @@ const modules = [
     description: "Bandeja operativa para revisar pendientes y resolver asignaciones por turno.",
     badge: "Fase 6",
   },
+  {
+    href: "/admin/automatizacion",
+    title: "Automatizacion",
+    description: "Generacion futura de turnos, recalculo de estados y alertas operativas.",
+    badge: "Fase 7",
+  },
 ] as const;
 
 export default async function AdminDashboardPage() {
@@ -92,6 +99,12 @@ export default async function AdminDashboardPage() {
               label="Pendientes y restricciones"
               value={`${overview.pendingRequests} / ${overview.blocks + overview.availability}`}
               helper="Solicitudes pendientes y restricciones manuales que afectan la planificacion."
+            />
+            <AdminStatCard
+              icon={<AutoModeRoundedIcon />}
+              label="Cobertura operativa"
+              value={`${overview.shiftsWithPendingRequests} / ${overview.blockedUpcomingShifts}`}
+              helper="Turnos con pendientes y bloqueos futuros que requieren seguimiento."
             />
           </Box>
 
