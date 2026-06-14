@@ -71,6 +71,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
           shift.ownLatestRequest?.status !== "CONFIRMED",
       )
     : [];
+  const hasAvailableShifts = zoneAvailableShifts.length > 0;
   const requestReturnTo = buildScheduleHref(
     { ...state.filters, selectedDate: "" },
     "available",
@@ -348,199 +349,203 @@ export default async function SolicitarPage({ searchParams }: Props) {
                               </Link>
                             </Stack>
 
-                            <Box
-                              sx={{
-                                display: "grid",
-                                gridTemplateColumns: {
-                                  xs: "1fr",
-                                  md: "minmax(0, 1fr)",
-                                },
-                                gap: 2,
-                              }}
-                            >
-                              <TextField
-                                name="comments"
-                                label="Comentario general"
-                                placeholder="Observación opcional para estas solicitudes"
-                                fullWidth
-                              />
-                            </Box>
+                            {hasAvailableShifts ? (
+                              <>
+                                <Box
+                                  sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: {
+                                      xs: "1fr",
+                                      md: "minmax(0, 1fr)",
+                                    },
+                                    gap: 2,
+                                  }}
+                                >
+                                  <TextField
+                                    name="comments"
+                                    label="Comentario general"
+                                    placeholder="Observación opcional para estas solicitudes"
+                                    fullWidth
+                                  />
+                                </Box>
 
-                            <Divider />
+                                <Divider />
 
-                            {zoneAvailableShifts.length > 0 ? (
-                              <Stack spacing={1.25}>
-                                {zoneAvailableShifts.map((shift) => {
-                                  const disabled =
-                                    shift.status !== "OPEN" ||
-                                    shift.ownLatestRequest?.status ===
-                                      "PENDING" ||
-                                    shift.ownLatestRequest?.status ===
-                                      "CONFIRMED";
+                                <Stack spacing={1.25}>
+                                  {zoneAvailableShifts.map((shift) => {
+                                    const disabled =
+                                      shift.status !== "OPEN" ||
+                                      shift.ownLatestRequest?.status ===
+                                        "PENDING" ||
+                                      shift.ownLatestRequest?.status ===
+                                        "CONFIRMED";
 
-                                  return (
-                                    <Card
-                                      key={shift.id}
-                                      elevation={0}
-                                      sx={{
-                                        borderRadius: 3,
-                                        border: "1px solid",
-                                        borderColor: "divider",
-                                        backgroundColor: "#ffffff",
-                                      }}
-                                    >
-                                      <CardContent
+                                    return (
+                                      <Card
+                                        key={shift.id}
+                                        elevation={0}
                                         sx={{
-                                          px: 1.5,
-                                          py: 1.35,
-                                          "&:last-child": { pb: 1.35 },
+                                          borderRadius: 3,
+                                          border: "1px solid",
+                                          borderColor: "divider",
+                                          backgroundColor: "#ffffff",
                                         }}
                                       >
-                                        <Stack spacing={1}>
-                                          <Stack
-                                            direction="row"
-                                            spacing={1.25}
-                                            sx={{
-                                              justifyContent: "space-between",
-                                              alignItems: "flex-start",
-                                            }}
-                                          >
-                                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                                              <Typography
-                                                variant="subtitle1"
-                                                sx={{ fontWeight: 700 }}
+                                        <CardContent
+                                          sx={{
+                                            px: 1.5,
+                                            py: 1.35,
+                                            "&:last-child": { pb: 1.35 },
+                                          }}
+                                        >
+                                          <Stack spacing={1}>
+                                            <Stack
+                                              direction="row"
+                                              spacing={1.25}
+                                              sx={{
+                                                justifyContent: "space-between",
+                                                alignItems: "flex-start",
+                                              }}
+                                            >
+                                              <Box
+                                                sx={{ flex: 1, minWidth: 0 }}
                                               >
-                                                {shift.dateLabel}
-                                              </Typography>
+                                                <Typography
+                                                  variant="subtitle1"
+                                                  sx={{ fontWeight: 700 }}
+                                                >
+                                                  {shift.dateLabel}
+                                                </Typography>
+                                                <Typography
+                                                  variant="body2"
+                                                  color="text.secondary"
+                                                >
+                                                  {shift.zoneName} ·{" "}
+                                                  {shift.startLabel} -{" "}
+                                                  {shift.endLabel}
+                                                </Typography>
+                                              </Box>
+                                              <Stack
+                                                spacing={0.5}
+                                                sx={{
+                                                  alignItems: "flex-end",
+                                                  flexShrink: 0,
+                                                }}
+                                              >
+                                                <Chip
+                                                  label={
+                                                    shift.status === "OPEN"
+                                                      ? "Abierto"
+                                                      : "Completo"
+                                                  }
+                                                  color={
+                                                    shift.status === "OPEN"
+                                                      ? "success"
+                                                      : "default"
+                                                  }
+                                                  size="small"
+                                                />
+                                              </Stack>
+                                            </Stack>
+
+                                            {shift.ownLatestRequest ? (
+                                              <Alert
+                                                severity={
+                                                  shift.ownLatestRequest
+                                                    .status === "PENDING"
+                                                    ? "info"
+                                                    : "success"
+                                                }
+                                              >
+                                                Ya tienes una solicitud{" "}
+                                                {shift.ownLatestRequest.status.toLowerCase()}{" "}
+                                                para este turno.
+                                              </Alert>
+                                            ) : null}
+
+                                            {shift.publicAssignments.length >
+                                            0 ? (
                                               <Typography
-                                                variant="body2"
+                                                variant="caption"
                                                 color="text.secondary"
                                               >
-                                                {shift.zoneName} ·{" "}
-                                                {shift.startLabel} -{" "}
-                                                {shift.endLabel}
+                                                Ya tomado por{" "}
+                                                {shift.publicAssignments
+                                                  .map((item) => item.label)
+                                                  .join(", ")}
                                               </Typography>
-                                            </Box>
-                                            <Stack
-                                              spacing={0.5}
+                                            ) : null}
+
+                                            <Box
                                               sx={{
-                                                alignItems: "flex-end",
-                                                flexShrink: 0,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                gap: 1,
+                                                minHeight: 44,
+                                                px: 1.25,
+                                                py: 0.35,
+                                                border: "1px solid",
+                                                borderColor:
+                                                  "var(--app-form-border)",
+                                                borderRadius: "4px",
+                                                backgroundColor:
+                                                  "var(--app-form-fill)",
+                                                boxShadow:
+                                                  "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
                                               }}
                                             >
-                                              <Chip
-                                                label={
-                                                  shift.status === "OPEN"
-                                                    ? "Abierto"
-                                                    : "Completo"
+                                              <Typography
+                                                variant="caption"
+                                                sx={{
+                                                  color:
+                                                    "var(--app-form-label)",
+                                                  fontWeight: 600,
+                                                }}
+                                              >
+                                                {disabled
+                                                  ? "No disponible para nueva solicitud"
+                                                  : "Incluir en esta solicitud"}
+                                              </Typography>
+                                              <Checkbox
+                                                name="shiftIds"
+                                                value={shift.id}
+                                                disabled={
+                                                  disabled ||
+                                                  state.config
+                                                    .maintenanceModeEnabled
                                                 }
-                                                color={
-                                                  shift.status === "OPEN"
-                                                    ? "success"
-                                                    : "default"
-                                                }
-                                                size="small"
+                                                sx={{
+                                                  flexShrink: 0,
+                                                  ml: 0.5,
+                                                  p: 0.5,
+                                                }}
                                               />
-                                            </Stack>
+                                            </Box>
                                           </Stack>
-
-                                          {shift.ownLatestRequest ? (
-                                            <Alert
-                                              severity={
-                                                shift.ownLatestRequest
-                                                  .status === "PENDING"
-                                                  ? "info"
-                                                  : "success"
-                                              }
-                                            >
-                                              Ya tienes una solicitud{" "}
-                                              {shift.ownLatestRequest.status.toLowerCase()}{" "}
-                                              para este turno.
-                                            </Alert>
-                                          ) : null}
-
-                                          {shift.publicAssignments.length >
-                                          0 ? (
-                                            <Typography
-                                              variant="caption"
-                                              color="text.secondary"
-                                            >
-                                              Ya tomado por{" "}
-                                              {shift.publicAssignments
-                                                .map((item) => item.label)
-                                                .join(", ")}
-                                            </Typography>
-                                          ) : null}
-
-                                          <Box
-                                            sx={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              justifyContent: "space-between",
-                                              gap: 1,
-                                              minHeight: 44,
-                                              px: 1.25,
-                                              py: 0.35,
-                                              border: "1px solid",
-                                              borderColor:
-                                                "var(--app-form-border)",
-                                              borderRadius: "4px",
-                                              backgroundColor:
-                                                "var(--app-form-fill)",
-                                              boxShadow:
-                                                "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
-                                            }}
-                                          >
-                                            <Typography
-                                              variant="caption"
-                                              sx={{
-                                                color: "var(--app-form-label)",
-                                                fontWeight: 600,
-                                              }}
-                                            >
-                                              {disabled
-                                                ? "No disponible para nueva solicitud"
-                                                : "Incluir en esta solicitud"}
-                                            </Typography>
-                                            <Checkbox
-                                              name="shiftIds"
-                                              value={shift.id}
-                                              disabled={
-                                                disabled ||
-                                                state.config
-                                                  .maintenanceModeEnabled
-                                              }
-                                              sx={{
-                                                flexShrink: 0,
-                                                ml: 0.5,
-                                                p: 0.5,
-                                              }}
-                                            />
-                                          </Box>
-                                        </Stack>
-                                      </CardContent>
-                                    </Card>
-                                  );
-                                })}
-                              </Stack>
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
+                                </Stack>
+                              </>
                             ) : (
-                              <Alert severity="info">
-                                No hay turnos abiertos para el lugar
-                                seleccionado en el rango activo.
+                              <Alert severity="warning">
+                                No hay turnos disponibles para este lugar en el
+                                rango activo. Cambia de lugar para seguir.
                               </Alert>
                             )}
 
-                            <Button
-                              type="submit"
-                              variant="contained"
-                              size="large"
-                              disabled={
-                                state.config.maintenanceModeEnabled ||
-                                zoneAvailableShifts.length === 0
-                              }
-                            >
-                              5. Solicitar turnos seleccionados
-                            </Button>
+                            {hasAvailableShifts ? (
+                              <Button
+                                type="submit"
+                                variant="contained"
+                                size="large"
+                                disabled={state.config.maintenanceModeEnabled}
+                              >
+                                5. Solicitar turnos seleccionados
+                              </Button>
+                            ) : null}
                           </Stack>
                         </CardContent>
                       </Card>

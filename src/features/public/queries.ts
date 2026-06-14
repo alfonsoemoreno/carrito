@@ -745,3 +745,82 @@ export async function getAsignacionesPageState() {
     ...snapshot,
   };
 }
+
+export async function getAsignacionesCalendarPageState() {
+  const [config, currentPerson] = await Promise.all([
+    getPublicConfig(),
+    getCurrentPublicPerson(),
+  ]);
+  const { from, to } = buildVisibleDateRange(config.visibleWeeks);
+
+  const assignments = currentPerson
+    ? await prisma.assignment.findMany({
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+          shift: {
+            shiftDate: {
+              gte: from,
+              lte: to,
+            },
+            zone: {
+              status: "ACTIVE",
+              publicVisible: true,
+            },
+          },
+        },
+        orderBy: [
+          { shift: { shiftDate: "asc" } },
+          { shift: { startTime: "asc" } },
+          { shift: { zone: { name: "asc" } } },
+        ],
+        select: {
+          id: true,
+          shift: {
+            select: {
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
+              zone: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+          person1: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+          person2: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      })
+    : [];
+
+  return {
+    currentPerson,
+    range: {
+      from,
+      to,
+      fromLabel: toDateOnlyString(from),
+      toLabel: toDateOnlyString(to),
+    },
+    assignments: assignments.map((assignment) => ({
+      id: assignment.id,
+      dateKey: toDateOnlyString(assignment.shift.shiftDate),
+      dateLabel: formatDate(assignment.shift.shiftDate),
+      timeLabel: `${formatTime(assignment.shift.startTime)} - ${formatTime(assignment.shift.endTime)}`,
+      zoneName: assignment.shift.zone.name,
+      participantNames: [
+        `${assignment.person1.firstName} ${assignment.person1.lastName}`,
+        `${assignment.person2.firstName} ${assignment.person2.lastName}`,
+      ],
+    })),
+  };
+}
