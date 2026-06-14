@@ -22,8 +22,8 @@ const adminSections: AppShellSection[] = [
       },
       {
         href: "/admin/zonas",
-        label: "Zonas",
-        description: "Zonas visibles y operativas.",
+        label: "Lugares",
+        description: "Lugares visibles y operativos.",
       },
       {
         href: "/admin/plantillas",
@@ -38,7 +38,7 @@ const adminSections: AppShellSection[] = [
       {
         href: "/admin/bloqueos",
         label: "Bloqueos",
-        description: "Fechas, zonas y turnos bloqueados.",
+        description: "Fechas, lugares y turnos bloqueados.",
       },
       {
         href: "/admin/disponibilidad",

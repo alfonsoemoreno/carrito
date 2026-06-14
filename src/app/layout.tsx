@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | Carrito",
   },
   description:
-    "Sistema de gestion de turnos para zonas de publicaciones de una congregacion.",
+    "Sistema de gestion de turnos para lugares de predicacion publica de una congregacion.",
   applicationName: "Carrito",
   manifest: "/manifest.webmanifest",
   appleWebApp: {

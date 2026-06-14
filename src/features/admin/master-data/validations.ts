@@ -9,13 +9,17 @@ import {
 } from "@prisma/client";
 import { z } from "zod";
 
-const optionalText = z.string().trim().optional().transform((value) => {
-  if (!value) {
-    return undefined;
-  }
+const optionalText = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) => {
+    if (!value) {
+      return undefined;
+    }
 
-  return value;
-});
+    return value;
+  });
 
 export const createPersonSchema = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -23,7 +27,11 @@ export const createPersonSchema = z.object({
   gender: z.nativeEnum(PersonGender),
   status: z.nativeEnum(PersonStatus).default(PersonStatus.ACTIVE),
   phone: optionalText,
-  email: z.email().optional().or(z.literal("")).transform((value) => value || undefined),
+  email: z
+    .email()
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
   notes: optionalText,
   pin: z.string().trim().min(4).max(12),
 });
@@ -74,8 +82,18 @@ export const createTemplateSchema = z
 
 export const createShiftBlockSchema = z
   .object({
-    zoneId: z.string().uuid().optional().or(z.literal("")).transform((value) => value || undefined),
-    shiftId: z.string().uuid().optional().or(z.literal("")).transform((value) => value || undefined),
+    zoneId: z
+      .string()
+      .uuid()
+      .optional()
+      .or(z.literal(""))
+      .transform((value) => value || undefined),
+    shiftId: z
+      .string()
+      .uuid()
+      .optional()
+      .or(z.literal(""))
+      .transform((value) => value || undefined),
     blockType: z.nativeEnum(ShiftBlockType),
     startDate: z.string().date(),
     endDate: z.string().date(),
@@ -83,7 +101,7 @@ export const createShiftBlockSchema = z
   })
   .refine((values) => values.zoneId || values.shiftId, {
     path: ["zoneId"],
-    message: "Debes seleccionar una zona o un turno especifico.",
+    message: "Debes seleccionar un lugar o un turno especifico.",
   });
 
 export const createAvailabilitySchema = z

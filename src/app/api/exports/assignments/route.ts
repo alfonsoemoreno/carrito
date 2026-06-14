@@ -8,7 +8,10 @@ export async function GET(request: Request) {
   const admin = await getCurrentAdminActorOrNull();
 
   if (!admin) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -22,7 +25,16 @@ export async function GET(request: Request) {
   });
 
   const csv = buildCsv([
-    ["id", "zona", "fecha", "horario", "estado", "pareja", "excepcion", "motivo_excepcion"],
+    [
+      "id",
+      "lugar",
+      "fecha",
+      "horario",
+      "estado",
+      "pareja",
+      "excepcion",
+      "motivo_excepcion",
+    ],
     ...rows.map((row) => [
       row.id,
       row.zone,

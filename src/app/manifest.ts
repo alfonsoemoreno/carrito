@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Carrito",
     short_name: "Carrito",
-    description: "Sistema de gestion de turnos para zonas de publicaciones.",
+    description:
+      "Sistema de gestion de turnos para lugares de predicacion publica.",
     start_url: "/",
     display: "standalone",
     background_color: "#f4efe6",

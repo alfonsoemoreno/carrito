@@ -10,11 +10,7 @@ import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { ModuleLinkCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getAdminOverview } from "@/features/admin/master-data/queries";
-import {
-  Box,
-  Container,
-  Typography,
-} from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 
 const modules = [
   {
@@ -26,55 +22,61 @@ const modules = [
   {
     href: "/admin/relaciones",
     title: "Relaciones",
-    description: "Matrimonios, padre/madre-hijo/hija y excepciones administrativas.",
+    description:
+      "Matrimonios, padre/madre-hijo/hija y excepciones administrativas.",
     badge: "Maestro",
   },
   {
     href: "/admin/zonas",
-    title: "Zonas",
-    description: "Entidades geografica principales con visibilidad publica configurable.",
+    title: "Lugares",
+    description: "Lugares principales con visibilidad publica configurable.",
     badge: "Maestro",
   },
   {
     href: "/admin/plantillas",
     title: "Plantillas",
-    description: "Horarios recurrentes por zona para generar turnos futuros.",
+    description: "Horarios recurrentes por lugar para generar turnos futuros.",
     badge: "Maestro",
   },
   {
     href: "/admin/bloqueos",
     title: "Bloqueos",
-    description: "Bloqueos por turno, fecha, zona y rango de fechas.",
+    description: "Bloqueos por turno, fecha, lugar y rango de fechas.",
     badge: "Operación",
   },
   {
     href: "/admin/disponibilidad",
     title: "Disponibilidad",
-    description: "Ausencias temporales que impactan asignaciones y sugerencias.",
+    description:
+      "Ausencias temporales que impactan asignaciones y sugerencias.",
     badge: "Operación",
   },
   {
     href: "/admin/solicitudes",
     title: "Solicitudes",
-    description: "Bandeja operativa para revisar pendientes y resolver asignaciones por turno.",
+    description:
+      "Bandeja operativa para revisar pendientes y resolver asignaciones por turno.",
     badge: "Revisión",
   },
   {
     href: "/admin/automatizacion",
     title: "Automatizacion",
-    description: "Generacion futura de turnos, recalculo de estados y alertas operativas.",
+    description:
+      "Generacion futura de turnos, recalculo de estados y alertas operativas.",
     badge: "Automático",
   },
   {
     href: "/admin/estadisticas",
     title: "Estadisticas",
-    description: "KPIs operativos y reportes por rango sobre cobertura, solicitudes y turnos.",
+    description:
+      "KPIs operativos y reportes por rango sobre cobertura, solicitudes y turnos.",
     badge: "Reporte",
   },
   {
     href: "/admin/exportaciones",
     title: "Exportaciones",
-    description: "CSV compatibles con Excel y calendario imprimible para operacion y archivo.",
+    description:
+      "CSV compatibles con Excel y calendario imprimible para operacion y archivo.",
     badge: "Reporte",
   },
 ] as const;
@@ -91,7 +93,17 @@ export default async function AdminDashboardPage() {
           title="Resumen general"
           description="Revise el estado del sistema y entre rápidamente a los módulos que necesita usar hoy."
         >
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" }, gap: 2.5 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(4, minmax(0, 1fr))",
+              },
+              gap: 2.5,
+            }}
+          >
             <AdminStatCard
               icon={<Groups2RoundedIcon />}
               label="Personas activas"
@@ -100,9 +112,9 @@ export default async function AdminDashboardPage() {
             />
             <AdminStatCard
               icon={<GridViewRoundedIcon />}
-              label="Zonas y relaciones"
+              label="Lugares y relaciones"
               value={`${overview.zones} / ${overview.relationships}`}
-              helper="Zonas geograficas y relaciones permitidas registradas."
+              helper="Lugares y relaciones permitidas registradas."
             />
             <AdminStatCard
               icon={<ScheduleRoundedIcon />}
@@ -132,18 +144,29 @@ export default async function AdminDashboardPage() {
               icon={<DownloadRoundedIcon />}
               label="Base exportable"
               value={`${overview.people} / ${overview.zones}`}
-              helper="Volumen base de personas y zonas para reportes y exportaciones."
+              helper="Volumen base de personas y lugares para reportes y exportaciones."
             />
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="h4">Modulos maestros</Typography>
             <Typography color="text.secondary">
-              Acceda a los catálogos, la operación diaria y los reportes desde un mismo lugar.
+              Acceda a los catálogos, la operación diaria y los reportes desde
+              un mismo lugar.
             </Typography>
           </Box>
 
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" }, gap: 2.5 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(3, minmax(0, 1fr))",
+              },
+              gap: 2.5,
+            }}
+          >
             {modules.map((module) => (
               <Box key={module.href}>
                 <ModuleLinkCard

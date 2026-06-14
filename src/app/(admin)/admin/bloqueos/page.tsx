@@ -3,9 +3,22 @@ import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatDate, formatTime } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
-import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
+import {
+  EmptyState,
+  FieldGrid,
+  FormCard,
+  SelectField,
+  SubmitButton,
+} from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
-import { Box, Card, CardContent, Container, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 export default async function AdminBlocksPage() {
   await requireCurrentAdminPageAccess();
@@ -28,19 +41,25 @@ export default async function AdminBlocksPage() {
     <Container sx={{ py: { xs: 4, md: 6 } }}>
       <AdminPageShell
         eyebrow="Bloqueos"
-        title="Bloqueos de turnos y zonas"
-        description="Registra bloqueos por turno, fecha, zona o rango de fechas."
+        title="Bloqueos de turnos y lugares"
+        description="Registra bloqueos por turno, fecha, lugar o rango de fechas."
       >
         <form action={createShiftBlockAction}>
-          <FormCard title="Nuevo bloqueo" description="Puedes asociarlo a una zona o a un turno especifico.">
+          <FormCard
+            title="Nuevo bloqueo"
+            description="Puedes asociarlo a un lugar o a un turno especifico."
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <FieldGrid>
                 <SelectField
                   name="zoneId"
-                  label="Zona"
+                  label="Lugar"
                   options={[
-                    { value: "", label: "Sin zona fija" },
-                    ...zones.map((zone) => ({ value: zone.id, label: zone.name })),
+                    { value: "", label: "Sin lugar fijo" },
+                    ...zones.map((zone) => ({
+                      value: zone.id,
+                      label: zone.name,
+                    })),
                   ]}
                   defaultValue=""
                 />
@@ -63,7 +82,7 @@ export default async function AdminBlocksPage() {
                   options={[
                     { value: "SPECIFIC_SHIFT", label: "Turno especifico" },
                     { value: "FULL_DATE", label: "Fecha completa" },
-                    { value: "ZONE", label: "Zona" },
+                    { value: "ZONE", label: "Lugar" },
                     { value: "DATE_RANGE", label: "Rango de fechas" },
                   ]}
                 />
@@ -89,20 +108,47 @@ export default async function AdminBlocksPage() {
         </form>
 
         {blocks.length === 0 ? (
-          <EmptyState title="Sin bloqueos" body="No hay bloqueos registrados." />
+          <EmptyState
+            title="Sin bloqueos"
+            body="No hay bloqueos registrados."
+          />
         ) : (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                xl: "repeat(2, minmax(0, 1fr))",
+              },
+              gap: 2,
+            }}
+          >
             {blocks.map((block) => (
-              <Card key={block.id} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card
+                key={block.id}
+                sx={{
+                  borderRadius: 5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
                 <CardContent>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                  >
                     <Typography variant="h5">{block.blockType}</Typography>
                     <Typography color="text.secondary">
-                      {block.zone?.name || block.shift?.zone.name || "Sin zona"} · {formatDate(block.startDate)} a {formatDate(block.endDate)}
+                      {block.zone?.name ||
+                        block.shift?.zone.name ||
+                        "Sin lugar"}{" "}
+                      · {formatDate(block.startDate)} a{" "}
+                      {formatDate(block.endDate)}
                     </Typography>
                     {block.shift ? (
                       <Typography variant="body2" color="text.secondary">
-                        Turno: {formatDate(block.shift.shiftDate)} · {formatTime(block.shift.startTime)} - {formatTime(block.shift.endTime)}
+                        Turno: {formatDate(block.shift.shiftDate)} ·{" "}
+                        {formatTime(block.shift.startTime)} -{" "}
+                        {formatTime(block.shift.endTime)}
                       </Typography>
                     ) : null}
                     <Typography variant="body2">{block.reason}</Typography>

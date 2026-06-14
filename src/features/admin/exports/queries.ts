@@ -1,6 +1,10 @@
 import { AssignmentStatus, ShiftRequestStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatDateTime, formatTime } from "@/features/admin/master-data/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+} from "@/features/admin/master-data/utils";
 import { resolveStatsRange } from "@/features/admin/stats/utils";
 
 export async function getAssignmentsExportRows(input: {
@@ -107,15 +111,28 @@ export async function getRequestsExportRows(input: {
   }));
 }
 
-export async function getExportsPageState(rawSearchParams: Promise<{ [key: string]: string | string[] | undefined }>) {
+export async function getExportsPageState(
+  rawSearchParams: Promise<{ [key: string]: string | string[] | undefined }>,
+) {
   const searchParams = await rawSearchParams;
-  const zoneId = Array.isArray(searchParams.zoneId) ? searchParams.zoneId[0] : searchParams.zoneId ?? "";
+  const zoneId = Array.isArray(searchParams.zoneId)
+    ? searchParams.zoneId[0]
+    : (searchParams.zoneId ?? "");
   const range = resolveStatsRange({
-    from: Array.isArray(searchParams.from) ? searchParams.from[0] : searchParams.from,
+    from: Array.isArray(searchParams.from)
+      ? searchParams.from[0]
+      : searchParams.from,
     to: Array.isArray(searchParams.to) ? searchParams.to[0] : searchParams.to,
   });
 
-  const [zones, assignmentCount, requestCount, pendingCount, confirmedCount, recentExports] = await Promise.all([
+  const [
+    zones,
+    assignmentCount,
+    requestCount,
+    pendingCount,
+    confirmedCount,
+    recentExports,
+  ] = await Promise.all([
     prisma.zone.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -219,16 +236,19 @@ export async function getExportsPageState(rawSearchParams: Promise<{ [key: strin
       return {
         id: entry.id,
         createdAtLabel: formatDateTime(entry.createdAt),
-        actorLabel: entry.actorAdmin?.displayName || entry.actorAdmin?.email || "Admin",
+        actorLabel:
+          entry.actorAdmin?.displayName || entry.actorAdmin?.email || "Admin",
         actionLabel:
-          meta.exportType === "requests" ? "Solicitudes CSV" : "Asignaciones CSV",
+          meta.exportType === "requests"
+            ? "Solicitudes CSV"
+            : "Asignaciones CSV",
         fileName: meta.fileName ?? "",
         rowCount: typeof meta.rowCount === "number" ? meta.rowCount : 0,
         ipAddress: meta.ipAddress ?? "",
         filtersLabel: [
           meta.filters?.from ? `Desde ${meta.filters.from}` : null,
           meta.filters?.to ? `Hasta ${meta.filters.to}` : null,
-          meta.filters?.zoneId ? `Zona filtrada` : "Todas las zonas",
+          meta.filters?.zoneId ? `Lugar filtrado` : "Todos los lugares",
         ]
           .filter(Boolean)
           .join(" · "),

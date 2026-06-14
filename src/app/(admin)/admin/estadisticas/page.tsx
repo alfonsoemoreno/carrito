@@ -36,20 +36,34 @@ export default async function AdminStatsPage({ searchParams }: Props) {
           title="Estadísticas"
           description="KPIs y reportes operativos sobre turnos, solicitudes y cobertura por rango."
         >
-          <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+          <Card
+            sx={{
+              borderRadius: 5,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
             <CardContent>
               <form action="/admin/estadisticas">
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      md: "repeat(4, minmax(0, 1fr))",
+                    },
                     gap: 2,
                     alignItems: { md: "end" },
                   }}
                 >
                   <FormControl fullWidth>
-                    <InputLabel id="stats-zone-label">Zona</InputLabel>
-                    <Select labelId="stats-zone-label" name="zoneId" defaultValue={state.filters.zoneId} label="Zona">
+                    <InputLabel id="stats-zone-label">Lugar</InputLabel>
+                    <Select
+                      labelId="stats-zone-label"
+                      name="zoneId"
+                      defaultValue={state.filters.zoneId}
+                      label="Lugar"
+                    >
                       <MenuItem value="">Todas</MenuItem>
                       {state.zones.map((zone) => (
                         <MenuItem key={zone.id} value={zone.id}>
@@ -74,7 +88,11 @@ export default async function AdminStatsPage({ searchParams }: Props) {
                     slotProps={{ inputLabel: { shrink: true } }}
                     fullWidth
                   />
-                  <Button type="submit" variant="outlined" sx={{ minWidth: 140 }}>
+                  <Button
+                    type="submit"
+                    variant="outlined"
+                    sx={{ minWidth: 140 }}
+                  >
                     Aplicar
                   </Button>
                 </Box>
@@ -85,14 +103,38 @@ export default async function AdminStatsPage({ searchParams }: Props) {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(4, minmax(0, 1fr))",
+              },
               gap: 2.5,
             }}
           >
-            <AdminStatCard icon={<BarChartRoundedIcon />} label="Turnos totales" value={state.kpis.totalShifts} helper={`Abiertos ${state.kpis.openShifts} · Bloqueados ${state.kpis.blockedShifts} · Completos ${state.kpis.fullShifts}`} />
-            <AdminStatCard icon={<QueryStatsRoundedIcon />} label="Cobertura" value={`${state.kpis.coverageRate}%`} helper={`Asignaciones confirmadas ${state.kpis.confirmedAssignments} · Reemplazos ${state.kpis.replacedAssignments}`} />
-            <AdminStatCard icon={<QueryStatsRoundedIcon />} label="Solicitudes" value={state.kpis.pendingRequests} helper={`Confirmadas ${state.kpis.confirmedRequests} · Rechazadas ${state.kpis.rejectedRequests} · Canceladas ${state.kpis.cancelledRequests}`} />
-            <AdminStatCard icon={<BarChartRoundedIcon />} label="Rango analizado" value={`${state.filters.from} a ${state.filters.to}`} helper="KPIs calculados sobre turnos y movimientos dentro del rango seleccionado." />
+            <AdminStatCard
+              icon={<BarChartRoundedIcon />}
+              label="Turnos totales"
+              value={state.kpis.totalShifts}
+              helper={`Abiertos ${state.kpis.openShifts} · Bloqueados ${state.kpis.blockedShifts} · Completos ${state.kpis.fullShifts}`}
+            />
+            <AdminStatCard
+              icon={<QueryStatsRoundedIcon />}
+              label="Cobertura"
+              value={`${state.kpis.coverageRate}%`}
+              helper={`Asignaciones confirmadas ${state.kpis.confirmedAssignments} · Reemplazos ${state.kpis.replacedAssignments}`}
+            />
+            <AdminStatCard
+              icon={<QueryStatsRoundedIcon />}
+              label="Solicitudes"
+              value={state.kpis.pendingRequests}
+              helper={`Confirmadas ${state.kpis.confirmedRequests} · Rechazadas ${state.kpis.rejectedRequests} · Canceladas ${state.kpis.cancelledRequests}`}
+            />
+            <AdminStatCard
+              icon={<BarChartRoundedIcon />}
+              label="Rango analizado"
+              value={`${state.filters.from} a ${state.filters.to}`}
+              helper="KPIs calculados sobre turnos y movimientos dentro del rango seleccionado."
+            />
           </Box>
 
           <Box
@@ -102,31 +144,60 @@ export default async function AdminStatsPage({ searchParams }: Props) {
               gap: 2.5,
             }}
           >
-            <FormCard title="Top participantes" description="Personas con mas participaciones confirmadas dentro del rango.">
+            <FormCard
+              title="Top participantes"
+              description="Personas con mas participaciones confirmadas dentro del rango."
+            >
               {state.topPeople.length === 0 ? (
-                <EmptyState title="Sin datos" body="Todavia no hay asignaciones confirmadas dentro del rango seleccionado." />
+                <EmptyState
+                  title="Sin datos"
+                  body="Todavia no hay asignaciones confirmadas dentro del rango seleccionado."
+                />
               ) : (
                 <Stack spacing={1.5}>
                   {state.topPeople.map((person) => (
-                    <Box key={person.label} sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+                    <Box
+                      key={person.label}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 2,
+                      }}
+                    >
                       <Typography>{person.label}</Typography>
-                      <Typography color="text.secondary">{person.count}</Typography>
+                      <Typography color="text.secondary">
+                        {person.count}
+                      </Typography>
                     </Box>
                   ))}
                 </Stack>
               )}
             </FormCard>
 
-            <FormCard title="Resumen por zona" description="Cobertura y carga pendiente agrupadas por zona.">
+            <FormCard
+              title="Resumen por lugar"
+              description="Cobertura y carga pendiente agrupadas por lugar."
+            >
               {state.zoneSummary.length === 0 ? (
-                <EmptyState title="Sin datos" body="No hay turnos en el rango seleccionado." />
+                <EmptyState
+                  title="Sin datos"
+                  body="No hay turnos en el rango seleccionado."
+                />
               ) : (
                 <Stack spacing={1.5}>
                   {state.zoneSummary.map((zone) => (
-                    <Box key={zone.label} sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                    <Box
+                      key={zone.label}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                      }}
+                    >
                       <Typography variant="h6">{zone.label}</Typography>
                       <Typography color="text.secondary">
-                        Total {zone.total} · cubiertos {zone.covered} · con pendientes {zone.pending}
+                        Total {zone.total} · cubiertos {zone.covered} · con
+                        pendientes {zone.pending}
                       </Typography>
                     </Box>
                   ))}
@@ -135,13 +206,28 @@ export default async function AdminStatsPage({ searchParams }: Props) {
             </FormCard>
           </Box>
 
-          <FormCard title="Reporte por turno" description="Vista compacta para lectura operativa del rango seleccionado.">
+          <FormCard
+            title="Reporte por turno"
+            description="Vista compacta para lectura operativa del rango seleccionado."
+          >
             {state.reportRows.length === 0 ? (
-              <EmptyState title="Sin turnos" body="No hay turnos en el rango seleccionado." />
+              <EmptyState
+                title="Sin turnos"
+                body="No hay turnos en el rango seleccionado."
+              />
             ) : (
               <Stack spacing={1.5}>
                 {state.reportRows.map((row) => (
-                  <Card key={row.id} elevation={0} sx={{ borderRadius: 4, border: "1px solid", borderColor: "divider", backgroundColor: "background.default" }}>
+                  <Card
+                    key={row.id}
+                    elevation={0}
+                    sx={{
+                      borderRadius: 4,
+                      border: "1px solid",
+                      borderColor: "divider",
+                      backgroundColor: "background.default",
+                    }}
+                  >
                     <CardContent>
                       <Stack spacing={0.5}>
                         <Typography variant="h6">{row.zoneName}</Typography>
@@ -149,7 +235,8 @@ export default async function AdminStatsPage({ searchParams }: Props) {
                           {row.dateLabel} · {row.timeLabel}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Estado {row.status} · pendientes {row.pendingCount} · confirmados {row.confirmedCount}
+                          Estado {row.status} · pendientes {row.pendingCount} ·
+                          confirmados {row.confirmedCount}
                         </Typography>
                       </Stack>
                     </CardContent>

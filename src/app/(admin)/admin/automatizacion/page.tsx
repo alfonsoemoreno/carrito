@@ -37,7 +37,11 @@ export default async function AdminAutomationPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(4, minmax(0, 1fr))",
+              },
               gap: 2.5,
             }}
           >
@@ -57,7 +61,7 @@ export default async function AdminAutomationPage() {
               icon={<WarningAmberRoundedIcon />}
               label="Bloqueados proximos"
               value={data.alerts.blockedUpcomingShifts}
-              helper="Turnos futuros bloqueados por reglas manuales de fecha, zona o turno."
+              helper="Turnos futuros bloqueados por reglas manuales de fecha, lugar o turno."
             />
             <AdminStatCard
               icon={<AutoModeRoundedIcon />}
@@ -80,11 +84,13 @@ export default async function AdminAutomationPage() {
             >
               <Stack spacing={2}>
                 <Typography color="text.secondary">
-                  Horizonte visible: {data.config?.visibleWeeks ?? 6} semanas. Horizonte de generacion:{" "}
+                  Horizonte visible: {data.config?.visibleWeeks ?? 6} semanas.
+                  Horizonte de generacion:{" "}
                   {data.config?.generateFutureWeeks ?? 8} semanas.
                 </Typography>
                 <Typography color="text.secondary">
-                  Modo mantenimiento: {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
+                  Modo mantenimiento:{" "}
+                  {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
                 </Typography>
                 <form action={generateMissingFutureShiftsAction}>
                   <Button type="submit" variant="contained">
@@ -104,13 +110,34 @@ export default async function AdminAutomationPage() {
               description="Estas reglas ya influyen en flujo publico y asignacion administrativa."
             >
               <Stack spacing={1}>
-                <Typography variant="body2">Maximo solicitudes por semana: {data.config?.maxRequestsPerWeek ?? 4}</Typography>
-                <Typography variant="body2">Maximo confirmados por semana: {data.config?.maxConfirmedPerWeek ?? 2}</Typography>
-                <Typography variant="body2">Maximo confirmados por mes: {data.config?.maxConfirmedPerMonth ?? 6}</Typography>
-                <Typography variant="body2">Permite dias consecutivos: {data.config?.allowConsecutiveDays ? "Si" : "No"}</Typography>
-                <Typography variant="body2">Permite multiples por dia: {data.config?.allowMultiplePerDay ? "Si" : "No"}</Typography>
-                <Typography variant="body2">Permite superposiciones: {data.config?.allowOverlapping ? "Si" : "No"}</Typography>
-                <Typography variant="body2">Permite pareja por mismo sexo: {data.config?.allowSameSexPairing ? "Si" : "No"}</Typography>
+                <Typography variant="body2">
+                  Maximo solicitudes por semana:{" "}
+                  {data.config?.maxRequestsPerWeek ?? 4}
+                </Typography>
+                <Typography variant="body2">
+                  Maximo confirmados por semana:{" "}
+                  {data.config?.maxConfirmedPerWeek ?? 2}
+                </Typography>
+                <Typography variant="body2">
+                  Maximo confirmados por mes:{" "}
+                  {data.config?.maxConfirmedPerMonth ?? 6}
+                </Typography>
+                <Typography variant="body2">
+                  Permite dias consecutivos:{" "}
+                  {data.config?.allowConsecutiveDays ? "Si" : "No"}
+                </Typography>
+                <Typography variant="body2">
+                  Permite multiples por dia:{" "}
+                  {data.config?.allowMultiplePerDay ? "Si" : "No"}
+                </Typography>
+                <Typography variant="body2">
+                  Permite superposiciones:{" "}
+                  {data.config?.allowOverlapping ? "Si" : "No"}
+                </Typography>
+                <Typography variant="body2">
+                  Permite pareja por mismo sexo:{" "}
+                  {data.config?.allowSameSexPairing ? "Si" : "No"}
+                </Typography>
               </Stack>
             </FormCard>
           </Box>
@@ -147,15 +174,29 @@ export default async function AdminAutomationPage() {
                       <CardContent>
                         <Stack spacing={1.5}>
                           <Box>
-                            <Typography variant="h6">{shift.zoneName}</Typography>
+                            <Typography variant="h6">
+                              {shift.zoneName}
+                            </Typography>
                             <Typography color="text.secondary">
                               {shift.dateLabel} · {shift.timeLabel}
                             </Typography>
                           </Box>
-                          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ flexWrap: "wrap" }}
+                          >
                             <Chip label={shift.status} size="small" />
-                            <Chip label={`${shift.pendingCount} pendientes`} size="small" variant="outlined" />
-                            <Chip label={`${shift.confirmedCount} confirmados`} size="small" variant="outlined" />
+                            <Chip
+                              label={`${shift.pendingCount} pendientes`}
+                              size="small"
+                              variant="outlined"
+                            />
+                            <Chip
+                              label={`${shift.confirmedCount} confirmados`}
+                              size="small"
+                              variant="outlined"
+                            />
                           </Stack>
                           <Link href={`/admin/turnos/${shift.id}`}>
                             <Button variant="outlined">Abrir turno</Button>
@@ -192,7 +233,9 @@ export default async function AdminAutomationPage() {
                       <Typography variant="h6">{gap.zoneName}</Typography>
                       <Typography color="text.secondary">
                         Faltan {gap.missingCount} fechas
-                        {gap.nextMissingDate ? ` · siguiente: ${formatDate(gap.nextMissingDate)}` : ""}
+                        {gap.nextMissingDate
+                          ? ` · siguiente: ${formatDate(gap.nextMissingDate)}`
+                          : ""}
                       </Typography>
                     </Box>
                   ))}

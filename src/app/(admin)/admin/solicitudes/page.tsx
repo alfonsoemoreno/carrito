@@ -92,12 +92,12 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                 <form action="/admin/solicitudes">
                   <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                     <FormControl fullWidth>
-                      <InputLabel id="zone-filter-label">Zona</InputLabel>
+                      <InputLabel id="zone-filter-label">Lugar</InputLabel>
                       <Select
                         labelId="zone-filter-label"
                         name="zoneId"
                         defaultValue={state.filters.zoneId}
-                        label="Zona"
+                        label="Lugar"
                       >
                         <MenuItem value="">Todas</MenuItem>
                         {state.zones.map((zone) => (

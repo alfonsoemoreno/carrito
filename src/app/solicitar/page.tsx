@@ -93,7 +93,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
             >
               <Typography variant="h3">Solicitar turnos</Typography>
               <Typography variant="body1" color="text.secondary">
-                Selecciona tu usuario, valida tu PIN, elige una zona y pide tus
+                Selecciona tu usuario, valida tu PIN, elige un lugar y pide tus
                 turnos en pocos pasos.
               </Typography>
             </Box>
@@ -243,7 +243,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                         >
                           <EventAvailableRoundedIcon color="primary" />
                           <Typography variant="h5">
-                            3. Selecciona la zona
+                            3. Selecciona el lugar
                           </Typography>
                         </Stack>
                         <form action="/solicitar">
@@ -265,16 +265,16 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             />
                             <FormControl fullWidth>
                               <InputLabel id="zone-filter-label">
-                                Zona
+                                Lugar
                               </InputLabel>
                               <Select
                                 labelId="zone-filter-label"
                                 name="zoneId"
                                 defaultValue={state.filters.zoneId}
-                                label="Zona"
+                                label="Lugar"
                               >
                                 <MenuItem value="">
-                                  Selecciona una zona
+                                  Selecciona un lugar
                                 </MenuItem>
                                 {state.zones.map((zone) => (
                                   <MenuItem key={zone.id} value={zone.id}>
@@ -343,7 +343,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             >
                               <Link href="/solicitar">
                                 <Button variant="outlined" fullWidth>
-                                  Cambiar zona
+                                  Cambiar lugar
                                 </Button>
                               </Link>
                             </Stack>
@@ -525,8 +525,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                               </Stack>
                             ) : (
                               <Alert severity="info">
-                                No hay turnos abiertos para la zona seleccionada
-                                en el rango activo.
+                                No hay turnos abiertos para el lugar
+                                seleccionado en el rango activo.
                               </Alert>
                             )}
 

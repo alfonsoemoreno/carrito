@@ -44,20 +44,34 @@ export default async function AdminExportsPage({ searchParams }: Props) {
           title="Exportaciones"
           description="Descarga datos operativos en CSV compatible con Excel y abre un calendario imprimible por rango."
         >
-          <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+          <Card
+            sx={{
+              borderRadius: 5,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
             <CardContent>
               <form action="/admin/exportaciones">
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      md: "repeat(4, minmax(0, 1fr))",
+                    },
                     gap: 2,
                     alignItems: { md: "end" },
                   }}
                 >
                   <FormControl fullWidth>
-                    <InputLabel id="exports-zone-label">Zona</InputLabel>
-                    <Select labelId="exports-zone-label" name="zoneId" defaultValue={state.filters.zoneId} label="Zona">
+                    <InputLabel id="exports-zone-label">Lugar</InputLabel>
+                    <Select
+                      labelId="exports-zone-label"
+                      name="zoneId"
+                      defaultValue={state.filters.zoneId}
+                      label="Lugar"
+                    >
                       <MenuItem value="">Todas</MenuItem>
                       {state.zones.map((zone) => (
                         <MenuItem key={zone.id} value={zone.id}>
@@ -82,7 +96,11 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                     slotProps={{ inputLabel: { shrink: true } }}
                     fullWidth
                   />
-                  <Button type="submit" variant="outlined" sx={{ minWidth: 140 }}>
+                  <Button
+                    type="submit"
+                    variant="outlined"
+                    sx={{ minWidth: 140 }}
+                  >
                     Aplicar
                   </Button>
                 </Box>
@@ -93,14 +111,38 @@ export default async function AdminExportsPage({ searchParams }: Props) {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(4, minmax(0, 1fr))",
+              },
               gap: 2.5,
             }}
           >
-            <AdminStatCard icon={<DownloadRoundedIcon />} label="Asignaciones" value={state.summary.assignmentCount} helper="Filas que saldrian en la exportacion de asignaciones." />
-            <AdminStatCard icon={<DownloadRoundedIcon />} label="Solicitudes" value={state.summary.requestCount} helper="Filas que saldrian en la exportacion de solicitudes." />
-            <AdminStatCard icon={<PrintRoundedIcon />} label="Pendientes" value={state.summary.pendingCount} helper="Solicitudes pendientes dentro del filtro actual." />
-            <AdminStatCard icon={<PrintRoundedIcon />} label="Confirmadas" value={state.summary.confirmedCount} helper="Asignaciones confirmadas dentro del filtro actual." />
+            <AdminStatCard
+              icon={<DownloadRoundedIcon />}
+              label="Asignaciones"
+              value={state.summary.assignmentCount}
+              helper="Filas que saldrian en la exportacion de asignaciones."
+            />
+            <AdminStatCard
+              icon={<DownloadRoundedIcon />}
+              label="Solicitudes"
+              value={state.summary.requestCount}
+              helper="Filas que saldrian en la exportacion de solicitudes."
+            />
+            <AdminStatCard
+              icon={<PrintRoundedIcon />}
+              label="Pendientes"
+              value={state.summary.pendingCount}
+              helper="Solicitudes pendientes dentro del filtro actual."
+            />
+            <AdminStatCard
+              icon={<PrintRoundedIcon />}
+              label="Confirmadas"
+              value={state.summary.confirmedCount}
+              helper="Asignaciones confirmadas dentro del filtro actual."
+            />
           </Box>
 
           <Box
@@ -110,21 +152,30 @@ export default async function AdminExportsPage({ searchParams }: Props) {
               gap: 2.5,
             }}
           >
-            <FormCard title="CSV de asignaciones" description="Archivo plano compatible con Excel, Numbers o Google Sheets.">
+            <FormCard
+              title="CSV de asignaciones"
+              description="Archivo plano compatible con Excel, Numbers o Google Sheets."
+            >
               <Link href={`/api/exports/assignments?${query}`}>
                 <Button variant="contained" startIcon={<DownloadRoundedIcon />}>
                   Descargar asignaciones.csv
                 </Button>
               </Link>
             </FormCard>
-            <FormCard title="CSV de solicitudes" description="Incluye estado, pareja sugerida y comentario cuando existe.">
+            <FormCard
+              title="CSV de solicitudes"
+              description="Incluye estado, pareja sugerida y comentario cuando existe."
+            >
               <Link href={`/api/exports/requests?${query}`}>
                 <Button variant="contained" startIcon={<DownloadRoundedIcon />}>
                   Descargar solicitudes.csv
                 </Button>
               </Link>
             </FormCard>
-            <FormCard title="Calendario imprimible" description="Vista HTML optimizada para imprimir desde el navegador.">
+            <FormCard
+              title="Calendario imprimible"
+              description="Vista HTML optimizada para imprimir desde el navegador."
+            >
               <Link href={`/admin/calendario?${query}`}>
                 <Button variant="outlined" startIcon={<PrintRoundedIcon />}>
                   Abrir calendario
@@ -133,18 +184,31 @@ export default async function AdminExportsPage({ searchParams }: Props) {
             </FormCard>
           </Box>
 
-          <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+          <Card
+            sx={{
+              borderRadius: 5,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
             <CardContent>
               <Stack spacing={2}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  <Typography variant="h5">Auditoria reciente de exportaciones</Typography>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
+                >
+                  <Typography variant="h5">
+                    Auditoria reciente de exportaciones
+                  </Typography>
                   <Typography color="text.secondary">
-                    Cada descarga CSV queda registrada con administrador, fecha, volumen y contexto basico.
+                    Cada descarga CSV queda registrada con administrador, fecha,
+                    volumen y contexto basico.
                   </Typography>
                 </Box>
 
                 {state.recentExports.length === 0 ? (
-                  <Alert severity="info">Aun no hay exportaciones registradas.</Alert>
+                  <Alert severity="info">
+                    Aun no hay exportaciones registradas.
+                  </Alert>
                 ) : (
                   <Stack spacing={1.5}>
                     {state.recentExports.map((entry) => (
@@ -161,15 +225,23 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                           <Stack
                             direction={{ xs: "column", md: "row" }}
                             spacing={1}
-                            sx={{ alignItems: { xs: "flex-start", md: "center" } }}
+                            sx={{
+                              alignItems: { xs: "flex-start", md: "center" },
+                            }}
                           >
-                            <Chip size="small" color="primary" label={entry.actionLabel} />
+                            <Chip
+                              size="small"
+                              color="primary"
+                              label={entry.actionLabel}
+                            />
                             <Typography variant="body2" color="text.secondary">
                               {entry.createdAtLabel}
                             </Typography>
                           </Stack>
                           <Typography variant="body1">
-                            {entry.actorLabel} descargo <strong>{entry.fileName}</strong> con {entry.rowCount} filas.
+                            {entry.actorLabel} descargo{" "}
+                            <strong>{entry.fileName}</strong> con{" "}
+                            {entry.rowCount} filas.
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {entry.filtersLabel}
