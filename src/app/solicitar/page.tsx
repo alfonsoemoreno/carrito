@@ -218,7 +218,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             !!person.pinLockedUntil &&
                             person.pinLockedUntil > new Date(),
                         }))}
-                        selectedPersonId={state.selectedPerson?.id ?? ""}
+                        selectedPersonId=""
                       />
                     </Stack>
                   </CardContent>

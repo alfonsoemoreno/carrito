@@ -199,7 +199,7 @@ export default async function AsignacionesCalendarioPage({
                         </Box>
                         <Stack direction="row" spacing={1}>
                           {previousDayKey ? (
-                            <Link href={buildDayHref(previousDayKey)}>
+                            <Link href={buildDayHref(previousDayKey) as never}>
                               <Button
                                 variant="outlined"
                                 startIcon={<ChevronLeftRoundedIcon />}
@@ -209,7 +209,7 @@ export default async function AsignacionesCalendarioPage({
                             </Link>
                           ) : null}
                           {nextDayKey ? (
-                            <Link href={buildDayHref(nextDayKey)}>
+                            <Link href={buildDayHref(nextDayKey) as never}>
                               <Button
                                 variant="outlined"
                                 endIcon={<ChevronRightRoundedIcon />}
@@ -360,7 +360,7 @@ export default async function AsignacionesCalendarioPage({
                       >
                         <CardContent>
                           <Stack spacing={1.5}>
-                            <Link href={buildDayHref(dayKey)}>
+                            <Link href={buildDayHref(dayKey) as never}>
                               <Box
                                 sx={{
                                   color: "inherit",
