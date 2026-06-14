@@ -1,46 +1,11 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import {
-  AppShellHeader,
-  type AppShellSection,
-} from "@/components/navigation/app-shell-header";
+import { AppShellHeader } from "@/components/navigation/app-shell-header";
+import { getCurrentPublicPerson } from "@/features/public/queries";
 
-const publicSections: AppShellSection[] = [
-  { label: "Inicio", href: "/" },
-  {
-    label: "Servicios",
-    items: [
-      {
-        href: "/solicitar",
-        label: "Solicitar turnos",
-        description: "Revise disponibilidad y envíe solicitudes.",
-      },
-      {
-        href: "/asignaciones",
-        label: "Asignaciones",
-        description: "Consulte asignaciones visibles e historial.",
-      },
-    ],
-  },
-  {
-    label: "Administración",
-    items: [
-      {
-        href: "/admin",
-        label: "Panel administrativo",
-        description: "Solo para administradores y superadministradores.",
-      },
-      {
-        href: "/auth/sign-in",
-        label: "Acceso administrativo",
-        description: "Entrada de coordinadores, encargados y superadmin.",
-      },
-    ],
-  },
-];
-
-export function PublicSiteShell({ children }: { children: ReactNode }) {
+export async function PublicSiteShell({ children }: { children: ReactNode }) {
   const congregationName = process.env.CONGREGATION_NAME ?? "Sin configurar";
+  const currentPerson = await getCurrentPublicPerson();
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -48,7 +13,15 @@ export function PublicSiteShell({ children }: { children: ReactNode }) {
         brandTitle="Predicación pública"
         brandSubtitle={`Congregación ${congregationName}`}
         homeHref="/"
-        sections={publicSections}
+        publicUser={
+          currentPerson
+            ? {
+                firstName: currentPerson.firstName,
+                lastName: currentPerson.lastName,
+              }
+            : null
+        }
+        sections={[]}
       />
 
       <Box

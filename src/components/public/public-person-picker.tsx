@@ -44,24 +44,28 @@ export function PublicPersonPicker({
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.label}
           noOptionsText="No hay personas activas disponibles"
-          renderOption={(props, option) => (
-            <Box component="li" {...props}>
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{
-                  width: "100%",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography>{option.label}</Typography>
-                {option.locked ? (
-                  <Chip size="small" color="warning" label="PIN bloqueado" />
-                ) : null}
-              </Stack>
-            </Box>
-          )}
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props;
+
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography>{option.label}</Typography>
+                  {option.locked ? (
+                    <Chip size="small" color="warning" label="PIN bloqueado" />
+                  ) : null}
+                </Stack>
+              </Box>
+            );
+          }}
           renderInput={(params) => (
             <TextField
               {...params}

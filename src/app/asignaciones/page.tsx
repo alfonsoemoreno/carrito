@@ -46,12 +46,7 @@ export default async function AsignacionesPage() {
                 primero valida tu PIN en{" "}
                 <Link href="/solicitar">/solicitar</Link>.
               </Alert>
-            ) : (
-              <Alert severity="success">
-                Sesion activa para {state.currentPerson.firstName}{" "}
-                {state.currentPerson.lastName}.
-              </Alert>
-            )}
+            ) : null}
 
             <Card
               elevation={0}

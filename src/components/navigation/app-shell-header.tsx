@@ -1,16 +1,21 @@
 "use client";
 
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import {
   Box,
+  Button,
   Collapse,
   Container,
   Divider,
   IconButton,
+  Menu,
+  MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
@@ -35,6 +40,10 @@ type AppShellHeaderProps = {
   brandTitle: string;
   brandSubtitle: string;
   homeHref: string;
+  publicUser?: {
+    firstName: string;
+    lastName: string;
+  } | null;
   sections: ReadonlyArray<AppShellSection>;
 };
 
@@ -375,12 +384,16 @@ export function AppShellHeader({
   brandTitle,
   brandSubtitle,
   homeHref,
+  publicUser,
   sections,
 }: AppShellHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpenLabel, setDesktopOpenLabel] = useState<string | null>(null);
   const [desktopPointerOffset, setDesktopPointerOffset] = useState(0);
+  const [publicUserAnchor, setPublicUserAnchor] = useState<HTMLElement | null>(
+    null,
+  );
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const desktopPanelRef = useRef<HTMLDivElement | null>(null);
   const desktopButtonRefs = useRef<Record<string, HTMLButtonElement | null>>(
@@ -403,6 +416,8 @@ export function AppShellHeader({
     }
     return section.items?.some((item) => isActiveHref(item.href)) ?? false;
   };
+  const hasSections = sections.length > 0;
+  const showPublicUserMenu = !hasSections && pathname !== "/" && !!publicUser;
 
   const desktopOpenSection = sections.find(
     (
@@ -550,52 +565,162 @@ export function AppShellHeader({
               </Box>
             </Link>
 
-            <IconButton
-              aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-              onClick={() => setMobileOpen((current) => !current)}
-              sx={{
-                display: { xs: "inline-flex", md: "none" },
-                color: "#4b4f55",
-                border: "1px solid #cfd4dc",
-                borderRadius: 0,
-              }}
-            >
-              {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
-            </IconButton>
+            {hasSections ? (
+              <IconButton
+                aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+                onClick={() => setMobileOpen((current) => !current)}
+                sx={{
+                  display: { xs: "inline-flex", md: "none" },
+                  color: "#4b4f55",
+                  border: "1px solid #cfd4dc",
+                  borderRadius: 0,
+                }}
+              >
+                {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
+              </IconButton>
+            ) : (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Link href={homeHref as never}>
+                  <Button
+                    variant="outlined"
+                    aria-label="Ir al inicio"
+                    sx={{ minWidth: 0, width: 44, height: 44, px: 0 }}
+                  >
+                    <HomeRoundedIcon fontSize="small" />
+                  </Button>
+                </Link>
+                {showPublicUserMenu ? (
+                  <>
+                    <Button
+                      variant="outlined"
+                      aria-label="Abrir menú de usuario"
+                      onClick={(event) =>
+                        setPublicUserAnchor(event.currentTarget)
+                      }
+                      sx={{ minWidth: 0, width: 44, height: 44, px: 0 }}
+                    >
+                      <AccountCircleRoundedIcon fontSize="small" />
+                    </Button>
+                    <Menu
+                      anchorEl={publicUserAnchor}
+                      open={Boolean(publicUserAnchor)}
+                      onClose={() => setPublicUserAnchor(null)}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      transformOrigin={{ vertical: "top", horizontal: "right" }}
+                    >
+                      <MenuItem disabled>
+                        {publicUser?.firstName} {publicUser?.lastName}
+                      </MenuItem>
+                      <Box
+                        component="form"
+                        action="/public/logout"
+                        method="post"
+                      >
+                        <MenuItem component="button" type="submit">
+                          Cerrar sesión
+                        </MenuItem>
+                      </Box>
+                    </Menu>
+                  </>
+                ) : null}
+              </Stack>
+            )}
           </Box>
         </Container>
       </Box>
 
-      <Box
-        sx={{
-          position: "relative",
-          backgroundColor: "var(--app-nav)",
-          boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.08)",
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box
-            ref={desktopNavRef}
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "stretch",
-              minHeight: 58,
-              position: "relative",
-            }}
-          >
-            {sections.map((section, index) => {
-              const active =
-                isSectionActive(section) ||
-                (desktopOpenLabel !== null &&
-                  desktopOpenLabel === section.label);
+      {hasSections ? (
+        <Box
+          sx={{
+            position: "relative",
+            backgroundColor: "var(--app-nav)",
+            boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.08)",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              ref={desktopNavRef}
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "stretch",
+                minHeight: 58,
+                position: "relative",
+              }}
+            >
+              {sections.map((section, index) => {
+                const active =
+                  isSectionActive(section) ||
+                  (desktopOpenLabel !== null &&
+                    desktopOpenLabel === section.label);
 
-              if (section.href) {
+                if (section.href) {
+                  return (
+                    <Link key={section.label} href={section.href as never}>
+                      <Box
+                        style={{
+                          paddingLeft: "22px",
+                          paddingRight: "22px",
+                          marginLeft: index === 0 ? "0px" : "8px",
+                        }}
+                        sx={{
+                          height: 58,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 1.1,
+                          flexWrap: "nowrap",
+                          color: "#ffffff",
+                          backgroundColor: active ? "#353535" : "transparent",
+                          "& .MuiTypography-root, & .MuiSvgIcon-root": {
+                            color: "#ffffff",
+                          },
+                          "&:hover": {
+                            backgroundColor: "#343434",
+                          },
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: "1rem",
+                            letterSpacing: "0.02em",
+                            textTransform: "uppercase",
+                            fontWeight: 700,
+                            lineHeight: 1.1,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {section.label}
+                        </Typography>
+                      </Box>
+                    </Link>
+                  );
+                }
+
+                if (!isDropdownSection(section)) {
+                  return null;
+                }
+
                 return (
-                  <Link key={section.label} href={section.href as never}>
+                  <Box
+                    key={section.label}
+                    sx={{
+                      display: "flex",
+                    }}
+                  >
                     <Box
+                      component="button"
+                      type="button"
+                      ref={(node: HTMLButtonElement | null) => {
+                        desktopButtonRefs.current[section.label] = node;
+                      }}
+                      onClick={() =>
+                        setDesktopOpenLabel((current) =>
+                          current === section.label ? null : section.label,
+                        )
+                      }
                       style={{
-                        paddingLeft: "22px",
-                        paddingRight: "22px",
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
                         marginLeft: index === 0 ? "0px" : "8px",
                       }}
                       sx={{
@@ -603,12 +728,18 @@ export function AppShellHeader({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 1.1,
+                        gap: 1.05,
                         flexWrap: "nowrap",
+                        cursor: "pointer",
                         color: "#ffffff",
+                        border: 0,
+                        outline: 0,
                         backgroundColor: active ? "#353535" : "transparent",
                         "& .MuiTypography-root, & .MuiSvgIcon-root": {
                           color: "#ffffff",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          flexShrink: 0,
                         },
                         "&:hover": {
                           backgroundColor: "#343434",
@@ -627,195 +758,129 @@ export function AppShellHeader({
                       >
                         {section.label}
                       </Typography>
+                      <ExpandMoreRoundedIcon
+                        sx={{
+                          fontSize: 19,
+                          transform:
+                            desktopOpenLabel === section.label
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                          transition: "transform 160ms ease",
+                        }}
+                      />
                     </Box>
-                  </Link>
-                );
-              }
-
-              if (!isDropdownSection(section)) {
-                return null;
-              }
-
-              return (
-                <Box
-                  key={section.label}
-                  sx={{
-                    display: "flex",
-                  }}
-                >
-                  <Box
-                    component="button"
-                    type="button"
-                    ref={(node: HTMLButtonElement | null) => {
-                      desktopButtonRefs.current[section.label] = node;
-                    }}
-                    onClick={() =>
-                      setDesktopOpenLabel((current) =>
-                        current === section.label ? null : section.label,
-                      )
-                    }
-                    style={{
-                      paddingLeft: "24px",
-                      paddingRight: "24px",
-                      marginLeft: index === 0 ? "0px" : "8px",
-                    }}
-                    sx={{
-                      height: 58,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1.05,
-                      flexWrap: "nowrap",
-                      cursor: "pointer",
-                      color: "#ffffff",
-                      border: 0,
-                      outline: 0,
-                      backgroundColor: active ? "#353535" : "transparent",
-                      "& .MuiTypography-root, & .MuiSvgIcon-root": {
-                        color: "#ffffff",
-                      },
-                      "& .MuiSvgIcon-root": {
-                        flexShrink: 0,
-                      },
-                      "&:hover": {
-                        backgroundColor: "#343434",
-                      },
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "1rem",
-                        letterSpacing: "0.02em",
-                        textTransform: "uppercase",
-                        fontWeight: 700,
-                        lineHeight: 1.1,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {section.label}
-                    </Typography>
-                    <ExpandMoreRoundedIcon
-                      sx={{
-                        fontSize: 19,
-                        transform:
-                          desktopOpenLabel === section.label
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                        transition: "transform 160ms ease",
-                      }}
-                    />
                   </Box>
-                </Box>
-              );
-            })}
-          </Box>
-        </Container>
+                );
+              })}
+            </Box>
+          </Container>
 
-        {desktopOpenSection ? (
-          <DesktopDropdownPanel
-            label={desktopOpenSection.label}
-            items={desktopOpenSection.items}
-            pointerOffset={desktopPointerOffset}
-            onClose={() => setDesktopOpenLabel(null)}
-            panelRef={desktopPanelRef}
-          />
-        ) : null}
+          {desktopOpenSection ? (
+            <DesktopDropdownPanel
+              label={desktopOpenSection.label}
+              items={desktopOpenSection.items}
+              pointerOffset={desktopPointerOffset}
+              onClose={() => setDesktopOpenLabel(null)}
+              panelRef={desktopPanelRef}
+            />
+          ) : null}
 
-        <Box
-          style={{
-            paddingLeft: "16px",
-            paddingRight: "16px",
-            paddingTop: "10px",
-            paddingBottom: "10px",
-          }}
-          sx={{
-            display: { xs: "flex", md: "none" },
-            px: 0,
-            py: 0,
-          }}
-        >
           <Box
-            component="button"
-            type="button"
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-navigation-menu"
-            aria-label={mobileOpen ? "Cerrar navegación" : "Abrir navegación"}
-            onClick={() => setMobileOpen((current) => !current)}
             style={{
-              width: "100%",
-              minHeight: "54px",
-              paddingLeft: "22px",
-              paddingRight: "22px",
-              border: "1px solid rgba(255,255,255,0.16)",
-              borderRadius: "10px",
-              color: "#ffffff",
-              background: mobileOpen
-                ? "rgba(255,255,255,0.1)"
-                : "rgba(255,255,255,0.04)",
+              paddingLeft: "16px",
+              paddingRight: "16px",
+              paddingTop: "10px",
+              paddingBottom: "10px",
             }}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              cursor: "pointer",
-              transition:
-                "background-color 180ms ease, border-color 180ms ease, transform 180ms ease",
-              "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderColor: "rgba(255,255,255,0.2)",
-              },
+              display: { xs: "flex", md: "none" },
+              px: 0,
+              py: 0,
             }}
           >
-            <Typography
-              sx={{
+            <Box
+              component="button"
+              type="button"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation-menu"
+              aria-label={mobileOpen ? "Cerrar navegación" : "Abrir navegación"}
+              onClick={() => setMobileOpen((current) => !current)}
+              style={{
+                width: "100%",
+                minHeight: "54px",
+                paddingLeft: "22px",
+                paddingRight: "22px",
+                border: "1px solid rgba(255,255,255,0.16)",
+                borderRadius: "10px",
                 color: "#ffffff",
-                fontSize: "0.93rem",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                fontWeight: 700,
-                pl: 0.9,
+                background: mobileOpen
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(255,255,255,0.04)",
+              }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                transition:
+                  "background-color 180ms ease, border-color 180ms ease, transform 180ms ease",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.08)",
+                  borderColor: "rgba(255,255,255,0.2)",
+                },
               }}
             >
-              Navegación
-            </Typography>
-            <ExpandMoreRoundedIcon
-              sx={{
-                color: "#ffffff",
-                fontSize: 22,
-                mr: 0.25,
-                transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-              }}
-            />
+              <Typography
+                sx={{
+                  color: "#ffffff",
+                  fontSize: "0.93rem",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  pl: 0.9,
+                }}
+              >
+                Navegación
+              </Typography>
+              <ExpandMoreRoundedIcon
+                sx={{
+                  color: "#ffffff",
+                  fontSize: 22,
+                  mr: 0.25,
+                  transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
 
-        <Collapse
-          in={mobileOpen}
-          timeout={220}
-          unmountOnExit
-          easing={{
-            enter: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-            exit: "cubic-bezier(0.4, 0, 1, 1)",
-          }}
-        >
-          <Box
-            id="mobile-navigation-menu"
-            sx={{
-              transformOrigin: "top center",
-              animation: mobileOpen
-                ? "mobileMenuFadeIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
-                : "none",
+          <Collapse
+            in={mobileOpen}
+            timeout={220}
+            unmountOnExit
+            easing={{
+              enter: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+              exit: "cubic-bezier(0.4, 0, 1, 1)",
             }}
           >
-            <MobileMenu
-              sections={sections}
-              onNavigate={closeAll}
-              pathname={pathname}
-            />
-          </Box>
-        </Collapse>
-      </Box>
+            <Box
+              id="mobile-navigation-menu"
+              sx={{
+                transformOrigin: "top center",
+                animation: mobileOpen
+                  ? "mobileMenuFadeIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+                  : "none",
+              }}
+            >
+              <MobileMenu
+                sections={sections}
+                onNavigate={closeAll}
+                pathname={pathname}
+              />
+            </Box>
+          </Collapse>
+        </Box>
+      ) : null}
     </Box>
   );
 }

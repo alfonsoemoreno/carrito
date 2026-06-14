@@ -1,6 +1,5 @@
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonSearchRoundedIcon from "@mui/icons-material/PersonSearchRounded";
 import {
   Alert,
@@ -226,50 +225,6 @@ export default async function SolicitarPage({ searchParams }: Props) {
               )
             ) : (
               <Stack spacing={3}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <CardContent>
-                    <Stack
-                      direction={{ xs: "column", md: "row" }}
-                      spacing={2}
-                      sx={{
-                        justifyContent: "space-between",
-                        alignItems: { xs: "flex-start", md: "center" },
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h5">
-                          Sesión activa para {state.currentPerson.firstName}{" "}
-                          {state.currentPerson.lastName}
-                        </Typography>
-                      </Box>
-                      <form action="/public/logout" method="post">
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          spacing={1}
-                        >
-                          <Link href="/asignaciones">
-                            <Button variant="outlined">Ver seguimiento</Button>
-                          </Link>
-                          <Button
-                            type="submit"
-                            variant="outlined"
-                            startIcon={<LogoutRoundedIcon />}
-                          >
-                            Cerrar sesion
-                          </Button>
-                        </Stack>
-                      </form>
-                    </Stack>
-                  </CardContent>
-                </Card>
-
                 {!selectedZone ? (
                   <Card
                     elevation={0}
