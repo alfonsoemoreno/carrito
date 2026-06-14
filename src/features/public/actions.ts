@@ -219,20 +219,6 @@ export async function authenticatePublicPersonAction(formData: FormData) {
 }
 
 export async function logoutPublicPersonAction() {
-  const session = await getPublicSession();
-
-  if (session?.personId) {
-    await prisma.auditLog.create({
-      data: {
-        actorType: "PUBLIC_PERSON",
-        entityType: "public_session",
-        entityId: session.personId,
-        actorPersonId: session.personId,
-        action: "PUBLIC_SESSION_CLOSED",
-      },
-    });
-  }
-
   await clearPublicSession();
   redirectTo("/solicitar?notice=Sesion%20cerrada.");
 }

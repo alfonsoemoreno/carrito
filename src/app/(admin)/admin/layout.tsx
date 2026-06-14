@@ -1,9 +1,10 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import {
   AppShellHeader,
   type AppShellSection,
 } from "@/components/navigation/app-shell-header";
+import { AppShellFooter } from "@/components/navigation/app-shell-footer";
 
 const adminSections: AppShellSection[] = [
   { label: "Resumen", href: "/admin" },
@@ -44,13 +45,14 @@ const adminSections: AppShellSection[] = [
 export const dynamic = "force-dynamic";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const congregationName = process.env.CONGREGATION_NAME ?? "Sin configurar";
+
   return (
-    <>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Box sx={{ position: "sticky", top: 0, zIndex: 1100 }}>
         <AppShellHeader
-          brandMark="CA"
-          brandTitle="Carrito Admin"
-          brandSubtitle="Panel administrativo"
+          brandTitle="Predicación pública"
+          brandSubtitle={`Congregación ${congregationName}`}
           homeHref="/admin"
           sections={adminSections}
           utilityLinks={[
@@ -60,14 +62,63 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           utilityNote="Gestión centralizada de solicitudes, turnos y reportes"
         />
       </Box>
-      <Box component="main">{children}</Box>
-      <Box component="footer" sx={{ py: 4, mt: 4, backgroundColor: "#1a1a1a", color: "#fff" }}>
-        <Container maxWidth="lg">
-          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.72)" }}>
-            Acceso protegido para administración de personas, zonas, solicitudes y exportaciones.
-          </Typography>
-        </Container>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          "& > main": {
+            flex: 1,
+          },
+        }}
+      >
+        <Box component="main">{children}</Box>
       </Box>
-    </>
+      <AppShellFooter
+        eyebrow="Carrito Admin / Operación interna"
+        title="Accesos administrativos y atajos operativos."
+        columns={[
+          {
+            title: "Maestros",
+            links: [
+              { href: "/admin/personas", label: "Personas" },
+              { href: "/admin/zonas", label: "Zonas" },
+              { href: "/admin/plantillas", label: "Plantillas" },
+            ],
+          },
+          {
+            title: "Operación",
+            links: [
+              { href: "/admin/solicitudes", label: "Solicitudes" },
+              { href: "/admin/estadisticas", label: "Estadísticas" },
+              { href: "/admin/exportaciones", label: "Exportaciones" },
+            ],
+          },
+          {
+            title: "Restricciones",
+            links: [
+              { href: "/admin/bloqueos", label: "Bloqueos" },
+              { href: "/admin/disponibilidad", label: "Disponibilidad" },
+            ],
+          },
+          {
+            title: "Cuenta",
+            links: [
+              { href: "/admin/cuenta", label: "Sesión" },
+              { href: "/account/settings", label: "Cuenta" },
+            ],
+          },
+        ]}
+        productLinks={[
+          { href: "/admin", label: "Carrito Admin" },
+          { href: "/admin/exportaciones", label: "Reportes" },
+        ]}
+        legalLinks={[
+          { href: "/admin/cuenta", label: "Sesión" },
+          { href: "/account/settings", label: "Cuenta" },
+        ]}
+        copyright="© 2026 Carrito."
+      />
+    </Box>
   );
 }

@@ -26,9 +26,7 @@ import {
 import Link from "next/link";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
 import {
-  authenticatePublicPersonAction,
   cancelOwnPendingRequestAction,
-  logoutPublicPersonAction,
   submitShiftRequestsAction,
 } from "@/features/public/actions";
 import { getSolicitarPageState } from "@/features/public/queries";
@@ -44,7 +42,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
     <PublicSiteShell>
       <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
         <Container maxWidth="lg">
-        <Stack spacing={3}>
+        <Stack spacing={4}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, borderLeft: "4px solid", borderColor: "primary.main", pl: 2 }}>
             <Typography variant="h3">Solicitar turnos</Typography>
             <Typography variant="body1" color="text.secondary">
@@ -63,15 +61,22 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
           {!state.currentPerson ? (
             <Stack spacing={3}>
-              <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
-                  <Stack spacing={2.5}>
+                  <Stack spacing={3}>
                     <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                       <PersonSearchRoundedIcon color="primary" />
-                        <Typography variant="h5">1. Busque su nombre</Typography>
+                      <Typography variant="h5">1. Busque su nombre</Typography>
                     </Stack>
                     <form action="/solicitar">
-                      <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) auto" },
+                          gap: 2,
+                          alignItems: { md: "end" },
+                        }}
+                      >
                         <TextField
                           name="personQuery"
                           label="Nombre o apellido"
@@ -79,14 +84,19 @@ export default async function SolicitarPage({ searchParams }: Props) {
                           helperText="Ingresa al menos 2 letras."
                           fullWidth
                         />
-                        <Button type="submit" variant="contained" size="large">
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          size="large"
+                          sx={{ minWidth: 148, alignSelf: { xs: "stretch", md: "end" } }}
+                        >
                           Buscar
                         </Button>
-                      </Stack>
+                      </Box>
                     </form>
 
                     {state.people.length > 0 ? (
-                      <List sx={{ border: "1px solid", borderColor: "divider", borderRadius: 3 }}>
+                      <List sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, backgroundColor: "#fff" }}>
                         {state.people.map((person) => (
                           <ListItem
                             key={person.id}
@@ -119,9 +129,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
               </Card>
 
               {state.selectedPerson ? (
-                <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+                <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                   <CardContent>
-                    <Stack spacing={2.5}>
+                    <Stack spacing={3}>
                       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                         <LockOpenRoundedIcon color="primary" />
                         <Typography variant="h5">2. Confirme su PIN</Typography>
@@ -129,8 +139,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                       <Typography color="text.secondary">
                         Persona seleccionada: <strong>{state.selectedPerson.firstName} {state.selectedPerson.lastName}</strong>
                       </Typography>
-                      <form action={authenticatePublicPersonAction}>
-                        <Stack spacing={2}>
+                      <form action="/public/authenticate" method="post">
+                        <Stack spacing={2.25}>
                           <input type="hidden" name="personId" value={state.selectedPerson.id} />
                           <input type="hidden" name="returnTo" value="/solicitar" />
                           <TextField
@@ -147,7 +157,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             helperText={`Debe tener entre ${state.config.pinMinLength} y ${state.config.pinMaxLength} digitos.`}
                             fullWidth
                           />
-                          <Button type="submit" variant="contained" size="large">
+                          <Button type="submit" variant="contained" size="large" sx={{ alignSelf: "flex-start", minWidth: 170 }}>
                             Continuar
                           </Button>
                         </Stack>
@@ -159,7 +169,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
             </Stack>
           ) : (
             <Stack spacing={3}>
-              <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
                   <Stack
                     direction={{ xs: "column", md: "row" }}
@@ -177,7 +187,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                         Puedes registrar solicitudes pendientes y cancelar las que aun no hayan sido revisadas.
                       </Typography>
                     </Box>
-                    <form action={logoutPublicPersonAction}>
+                    <form action="/public/logout" method="post">
                       <Button type="submit" variant="outlined" startIcon={<LogoutRoundedIcon />}>
                         Cerrar sesion
                       </Button>
@@ -186,12 +196,19 @@ export default async function SolicitarPage({ searchParams }: Props) {
                 </CardContent>
               </Card>
 
-              <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
-                  <Stack spacing={2.5}>
-                        <Typography variant="h5">Filtrar turnos</Typography>
+                  <Stack spacing={3}>
+                    <Typography variant="h5">Filtrar turnos</Typography>
                     <form action="/solicitar">
-                      <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+                          gap: 2,
+                          alignItems: { md: "end" },
+                        }}
+                      >
                         <FormControl fullWidth>
                           <InputLabel id="zone-filter-label">Zona</InputLabel>
                           <Select
@@ -210,10 +227,10 @@ export default async function SolicitarPage({ searchParams }: Props) {
                         </FormControl>
                         <TextField name="from" type="date" label="Desde" defaultValue={state.filters.from} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
                         <TextField name="to" type="date" label="Hasta" defaultValue={state.filters.to} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
-                        <Button type="submit" variant="outlined" size="large">
+                        <Button type="submit" variant="outlined" size="large" sx={{ minWidth: 140 }}>
                           Aplicar
                         </Button>
-                      </Stack>
+                      </Box>
                     </form>
                   </Stack>
                 </CardContent>
@@ -221,9 +238,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
               <form action={submitShiftRequestsAction}>
                 <Stack spacing={3}>
-                  <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+                  <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                     <CardContent>
-                      <Stack spacing={2.5}>
+                      <Stack spacing={3}>
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                           <EventAvailableRoundedIcon color="primary" />
                           <Typography variant="h5">Turnos disponibles</Typography>
@@ -232,7 +249,13 @@ export default async function SolicitarPage({ searchParams }: Props) {
                           Seleccione uno o varios turnos abiertos. La sugerencia de pareja es opcional y se aplica a esta solicitud.
                         </Typography>
 
-                        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+                            gap: 2,
+                          }}
+                        >
                           <FormControl fullWidth>
                             <InputLabel id="partner-label">Pareja sugerida opcional</InputLabel>
                             <Select labelId="partner-label" name="suggestedPartnerId" defaultValue="" label="Pareja sugerida opcional">
@@ -250,7 +273,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             placeholder="Observacion opcional para estas solicitudes"
                             fullWidth
                           />
-                        </Stack>
+                        </Box>
 
                         <Divider />
 
@@ -340,9 +363,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
                 </Stack>
               </form>
 
-              <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
-                  <Stack spacing={2.5}>
+                  <Stack spacing={3}>
                     <Typography variant="h5">Mis solicitudes pendientes</Typography>
                     {state.ownPendingRequests.length > 0 ? (
                       <Stack spacing={2}>

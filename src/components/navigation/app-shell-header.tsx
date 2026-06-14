@@ -4,8 +4,10 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { Box, Container, Divider, IconButton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
@@ -27,8 +29,10 @@ type UtilityLink = {
   href: string;
 };
 
+type BrandMarkVariant = "literature";
+
 type AppShellHeaderProps = {
-  brandMark: string;
+  brandMarkVariant?: BrandMarkVariant;
   brandTitle: string;
   brandSubtitle: string;
   homeHref: string;
@@ -296,7 +300,7 @@ function MobileMenu({
 }
 
 export function AppShellHeader({
-  brandMark,
+  brandMarkVariant = "literature",
   brandTitle,
   brandSubtitle,
   homeHref,
@@ -405,13 +409,52 @@ export function AppShellHeader({
             }}
           >
             <Link href={homeHref as never}>
-              <Stack direction="row" spacing={2.25} sx={{ alignItems: "center", minWidth: 0 }}>
-                <Box className="app-brand-mark">{brandMark}</Box>
-                <Box sx={{ minWidth: 0 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  minWidth: 0,
+                  columnGap: "8px",
+                }}
+              >
+                <Box className="app-brand-mark">
+                  {brandMarkVariant === "literature" ? (
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: 34,
+                        height: 34,
+                      }}
+                    >
+                      <LibraryBooksOutlinedIcon
+                        sx={{
+                          position: "absolute",
+                          top: 6,
+                          left: 7,
+                          fontSize: 24,
+                          color: "#ffffff",
+                        }}
+                      />
+                      <MenuBookOutlinedIcon
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          fontSize: 28,
+                          color: "#ffffff",
+                        }}
+                      />
+                    </Box>
+                  ) : null}
+                </Box>
+                <Box
+                  style={{ marginLeft: "0px" }}
+                  sx={{ minWidth: 0 }}
+                >
                   <Typography
                     sx={{
                       color: "#3f3f3f",
-                      fontSize: { xs: "1.35rem", md: "1.15rem", lg: "1.4rem" },
+                      fontSize: { xs: "1.3rem", md: "1.14rem", lg: "1.34rem" },
                       lineHeight: 1.08,
                       fontWeight: 400,
                       whiteSpace: "nowrap",
@@ -431,7 +474,7 @@ export function AppShellHeader({
                     {brandSubtitle}
                   </Typography>
                 </Box>
-              </Stack>
+              </Box>
             </Link>
 
             <Stack

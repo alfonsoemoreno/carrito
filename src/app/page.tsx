@@ -37,8 +37,8 @@ const entryPoints = [
   {
     href: "/admin",
     icon: <AdminPanelSettingsRoundedIcon />,
-    title: "Panel administrativo",
-    body: "Administre personas, zonas, solicitudes y reportes desde el panel.",
+    title: "Acceso administrativo",
+    body: "Entrada exclusiva para administradores, coordinadores y superadministradores.",
   },
 ] as const;
 
@@ -99,7 +99,7 @@ export default function HomePage() {
                     </Link>
                     <Link href="/admin">
                       <Button size="large" variant="outlined">
-                        Abrir administración
+                        Acceso administrativo
                       </Button>
                     </Link>
                   </Box>

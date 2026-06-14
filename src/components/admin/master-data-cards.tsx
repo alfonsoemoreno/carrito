@@ -6,10 +6,12 @@ import {
   CardHeader,
   Chip,
   Divider,
+  FormControl,
+  InputLabel,
   MenuItem,
+  Select,
   Stack,
   Switch,
-  TextField,
   Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
@@ -25,16 +27,31 @@ export function FormCard({
 }) {
   return (
     <Card sx={{ height: "100%" }}>
-      <CardHeader title={title} subheader={description} />
+      <CardHeader
+        title={title}
+        subheader={description}
+        slotProps={{
+          title: {
+            variant: "h5",
+          },
+          subheader: {
+            sx: {
+              color: "text.secondary",
+              lineHeight: 1.55,
+              mt: 0.75,
+            },
+          },
+        }}
+      />
       <Divider />
-      <CardContent sx={{ p: 3 }}>{children}</CardContent>
+      <CardContent sx={{ p: { xs: 3, md: 4 } }}>{children}</CardContent>
     </Card>
   );
 }
 
 export function SubmitButton({ label }: { label: string }) {
   return (
-    <Button type="submit" variant="contained">
+    <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", minWidth: 200, px: 3 }}>
       {label}
     </Button>
   );
@@ -46,7 +63,7 @@ export function FieldGrid({ children }: { children: ReactNode }) {
       sx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-        gap: 2,
+        gap: 3,
       }}
     >
       {children}
@@ -64,9 +81,11 @@ export function SwitchField({
   defaultChecked?: boolean;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minHeight: 52 }}>
       <Switch name={name} defaultChecked={defaultChecked} />
-      <Typography variant="body2">{label}</Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        {label}
+      </Typography>
     </Box>
   );
 }
@@ -106,7 +125,7 @@ export function ModuleLinkCard({
   badge: string;
 }) {
   return (
-    <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider", height: "100%" }}>
+    <Card sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider", height: "100%" }}>
       <CardContent>
         <Stack spacing={2}>
           <Chip label={badge} size="small" color="primary" sx={{ alignSelf: "flex-start" }} />
@@ -133,12 +152,20 @@ export function SelectField({
   options: Array<{ value: string | number; label: string }>;
 }) {
   return (
-    <TextField select fullWidth name={name} label={label} defaultValue={defaultValue}>
+    <FormControl fullWidth>
+      <InputLabel id={`${name}-label`}>{label}</InputLabel>
+      <Select
+        labelId={`${name}-label`}
+        name={name}
+        label={label}
+        defaultValue={defaultValue ?? ""}
+      >
       {options.map((option) => (
         <MenuItem key={option.value} value={option.value}>
           {option.label}
         </MenuItem>
       ))}
-    </TextField>
+      </Select>
+    </FormControl>
   );
 }

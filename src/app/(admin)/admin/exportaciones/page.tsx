@@ -13,6 +13,7 @@ import {
   MenuItem,
   Select,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
@@ -46,7 +47,14 @@ export default async function AdminExportsPage({ searchParams }: Props) {
           <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
             <CardContent>
               <form action="/admin/exportaciones">
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+                    gap: 2,
+                    alignItems: { md: "end" },
+                  }}
+                >
                   <FormControl fullWidth>
                     <InputLabel id="exports-zone-label">Zona</InputLabel>
                     <Select labelId="exports-zone-label" name="zoneId" defaultValue={state.filters.zoneId} label="Zona">
@@ -58,12 +66,26 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                       ))}
                     </Select>
                   </FormControl>
-                  <input type="date" name="from" defaultValue={state.filters.from} />
-                  <input type="date" name="to" defaultValue={state.filters.to} />
-                  <Button type="submit" variant="outlined">
+                  <TextField
+                    name="from"
+                    type="date"
+                    label="Desde"
+                    defaultValue={state.filters.from}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    fullWidth
+                  />
+                  <TextField
+                    name="to"
+                    type="date"
+                    label="Hasta"
+                    defaultValue={state.filters.to}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    fullWidth
+                  />
+                  <Button type="submit" variant="outlined" sx={{ minWidth: 140 }}>
                     Aplicar
                   </Button>
-                </Stack>
+                </Box>
               </form>
             </CardContent>
           </Card>

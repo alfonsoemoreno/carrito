@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
-const PUBLIC_SESSION_COOKIE = "carrito_public_session";
-const PUBLIC_SESSION_MAX_AGE = 60 * 60 * 12;
+export const PUBLIC_SESSION_COOKIE = "carrito_public_session";
+export const PUBLIC_SESSION_MAX_AGE = 60 * 60 * 12;
 
 type PublicSessionPayload = {
   personId: string;
@@ -30,6 +30,27 @@ function encode(payload: PublicSessionPayload) {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = sign(body);
   return `${body}.${signature}`;
+}
+
+export function buildPublicSessionCookie(personId: string) {
+  const now = Date.now();
+  const payload: PublicSessionPayload = {
+    personId,
+    issuedAt: now,
+    expiresAt: now + PUBLIC_SESSION_MAX_AGE * 1000,
+  };
+
+  return {
+    name: PUBLIC_SESSION_COOKIE,
+    value: encode(payload),
+    options: {
+      httpOnly: true,
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: PUBLIC_SESSION_MAX_AGE,
+    },
+  };
 }
 
 function decode(rawCookie: string): PublicSessionPayload | null {
@@ -77,21 +98,9 @@ export async function getPublicSession() {
 }
 
 export async function createPublicSession(personId: string) {
-  const now = Date.now();
-  const payload: PublicSessionPayload = {
-    personId,
-    issuedAt: now,
-    expiresAt: now + PUBLIC_SESSION_MAX_AGE * 1000,
-  };
-
+  const cookie = buildPublicSessionCookie(personId);
   const store = await cookies();
-  store.set(PUBLIC_SESSION_COOKIE, encode(payload), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: PUBLIC_SESSION_MAX_AGE,
-  });
+  store.set(cookie.name, cookie.value, cookie.options);
 }
 
 export async function clearPublicSession() {
