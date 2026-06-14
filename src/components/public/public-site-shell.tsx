@@ -4,7 +4,6 @@ import {
   AppShellHeader,
   type AppShellSection,
 } from "@/components/navigation/app-shell-header";
-import { AppShellFooter as Footer } from "@/components/navigation/app-shell-footer";
 
 const publicSections: AppShellSection[] = [
   { label: "Inicio", href: "/" },
@@ -40,11 +39,6 @@ const publicSections: AppShellSection[] = [
   },
 ];
 
-const publicUtilityLinks = [
-  { label: "español", href: "/" },
-  { label: "Acceso admin", href: "/auth/sign-in" },
-];
-
 export function PublicSiteShell({ children }: { children: ReactNode }) {
   const congregationName = process.env.CONGREGATION_NAME ?? "Sin configurar";
 
@@ -55,8 +49,6 @@ export function PublicSiteShell({ children }: { children: ReactNode }) {
         brandSubtitle={`Congregación ${congregationName}`}
         homeHref="/"
         sections={publicSections}
-        utilityLinks={publicUtilityLinks}
-        searchPlaceholder="Buscar"
       />
 
       <Box
@@ -71,51 +63,6 @@ export function PublicSiteShell({ children }: { children: ReactNode }) {
       >
         {children}
       </Box>
-
-      <Footer
-        eyebrow="Carrito / Plataforma de turnos"
-        title="Accesos, ayuda y operaciones principales."
-        columns={[
-          {
-            title: "Servicios",
-            links: [
-              { href: "/solicitar", label: "Solicitar turnos" },
-              { href: "/asignaciones", label: "Consultar asignaciones" },
-            ],
-          },
-          {
-            title: "Administración",
-            links: [
-              { href: "/admin", label: "Panel administrativo" },
-              { href: "/auth/sign-in", label: "Acceso administrativo" },
-            ],
-          },
-          {
-            title: "Soporte",
-            links: [
-              { href: "/auth/sign-in", label: "Acceso administrativo" },
-              { href: "/asignaciones", label: "Ver estado de asignaciones" },
-            ],
-          },
-          {
-            title: "Enlaces directos",
-            links: [
-              { href: "/", label: "Inicio" },
-              { href: "/solicitar", label: "Flujo público" },
-              { href: "/admin/cuenta", label: "Estado de sesión" },
-            ],
-          },
-        ]}
-        productLinks={[
-          { href: "/", label: "Carrito" },
-          { href: "/admin", label: "Panel" },
-        ]}
-        legalLinks={[
-          { href: "/", label: "Condiciones de uso" },
-          { href: "/", label: "Privacidad" },
-        ]}
-        copyright="© 2026 Carrito."
-      />
     </Box>
   );
 }

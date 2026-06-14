@@ -2,14 +2,18 @@
 
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
-import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import { Box, Container, Divider, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Collapse,
+  Container,
+  Divider,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -24,11 +28,6 @@ export type AppShellSection = {
   }>;
 };
 
-type UtilityLink = {
-  label: string;
-  href: string;
-};
-
 type BrandMarkVariant = "literature";
 
 type AppShellHeaderProps = {
@@ -37,14 +36,13 @@ type AppShellHeaderProps = {
   brandSubtitle: string;
   homeHref: string;
   sections: ReadonlyArray<AppShellSection>;
-  utilityLinks?: ReadonlyArray<UtilityLink>;
-  utilityNote?: string;
-  searchPlaceholder?: string;
 };
 
 function isDropdownSection(
   section: AppShellSection,
-): section is AppShellSection & { items: NonNullable<AppShellSection["items"]> } {
+): section is AppShellSection & {
+  items: NonNullable<AppShellSection["items"]>;
+} {
   return Array.isArray(section.items) && section.items.length > 0;
 }
 
@@ -212,10 +210,16 @@ function DesktopDropdownPanel({
                         >
                           {item.label}
                         </Typography>
-                          <Typography sx={{ mt: 0.35, color: "#6c7682", fontSize: "0.95rem" }}>
+                        <Typography
+                          sx={{
+                            mt: 0.35,
+                            color: "#6c7682",
+                            fontSize: "0.95rem",
+                          }}
+                        >
                           {item.description}
-                          </Typography>
-                        </Box>
+                        </Typography>
+                      </Box>
                     </Box>
                   ))}
                 </Stack>
@@ -231,58 +235,125 @@ function DesktopDropdownPanel({
 function MobileMenu({
   sections,
   onNavigate,
+  pathname,
 }: {
   sections: ReadonlyArray<AppShellSection>;
   onNavigate: () => void;
+  pathname: string;
 }) {
+  const isActiveHref = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <Box
+      style={{
+        paddingLeft: "16px",
+        paddingRight: "16px",
+        paddingBottom: "12px",
+      }}
       sx={{
         position: "absolute",
         top: "100%",
         left: 0,
         right: 0,
         zIndex: 60,
-        backgroundColor: "#ffffff",
+        backgroundColor: "rgba(255,255,255,0.98)",
         borderTop: "1px solid #d7dbe2",
         borderBottom: "1px solid #d7dbe2",
         boxShadow: "0 16px 40px rgba(15, 22, 36, 0.18)",
+        backdropFilter: "blur(8px)",
       }}
     >
-      <Container maxWidth="lg">
-        <Stack divider={<Divider sx={{ borderColor: "#dde2e8" }} />}>
+      <Container maxWidth="lg" sx={{ px: "0 !important" }}>
+        <Stack spacing={1.5} sx={{ py: 2.25 }}>
           {sections.map((section) => (
-            <Box key={section.label} sx={{ py: 2.5 }}>
+            <Box
+              key={section.label}
+              sx={{
+                border: "1px solid #dde2e8",
+                borderRadius: "10px",
+                backgroundColor: "#ffffff",
+                overflow: "hidden",
+              }}
+            >
               {section.href ? (
                 <Link href={section.href as never} onClick={onNavigate}>
-                  <Typography sx={{ fontWeight: 700, color: "#1d1d1d", fontSize: "1rem" }}>
+                  <Typography
+                    sx={{
+                      display: "block",
+                      px: 2.5,
+                      py: 2,
+                      fontWeight: 700,
+                      color: isActiveHref(section.href)
+                        ? "var(--app-accent-deep)"
+                        : "#1d1d1d",
+                      fontSize: "1rem",
+                      backgroundColor: isActiveHref(section.href)
+                        ? "rgba(74, 109, 167, 0.08)"
+                        : "transparent",
+                    }}
+                  >
                     {section.label}
                   </Typography>
                 </Link>
               ) : null}
 
               {isDropdownSection(section) ? (
-                <Box>
+                <Box sx={{ p: 1.25 }}>
                   <Typography
                     sx={{
                       fontWeight: 700,
-                      color: "#1d1d1d",
-                      fontSize: "0.9rem",
+                      color: "#495463",
+                      fontSize: "0.78rem",
                       textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      mb: 1.4,
+                      letterSpacing: "0.08em",
+                      px: 1.25,
+                      pt: 0.5,
+                      pb: 1,
                     }}
                   >
                     {section.label}
                   </Typography>
-                  <Stack spacing={1.5}>
+                  <Stack spacing={1}>
                     {section.items.map((item) => (
-                      <Link key={item.href} href={item.href as never} onClick={onNavigate}>
-                        <Box sx={{ px: 0.4, py: 0.2 }}>
-                          <Typography sx={{ color: "var(--app-accent)", fontWeight: 600 }}>
+                      <Link
+                        key={item.href}
+                        href={item.href as never}
+                        onClick={onNavigate}
+                      >
+                        <Box
+                          sx={{
+                            px: 1.25,
+                            py: 1.4,
+                            borderRadius: "8px",
+                            backgroundColor: isActiveHref(item.href)
+                              ? "rgba(74, 109, 167, 0.1)"
+                              : "#f7f9fc",
+                            border: isActiveHref(item.href)
+                              ? "1px solid rgba(74, 109, 167, 0.22)"
+                              : "1px solid transparent",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: isActiveHref(item.href)
+                                ? "var(--app-accent-deep)"
+                                : "var(--app-accent)",
+                              fontWeight: 700,
+                            }}
+                          >
                             {item.label}
                           </Typography>
-                          <Typography sx={{ color: "#6c7682", fontSize: "0.94rem", mt: 0.3 }}>
+                          <Typography
+                            sx={{
+                              color: "#6c7682",
+                              fontSize: "0.94rem",
+                              mt: 0.45,
+                              lineHeight: 1.5,
+                            }}
+                          >
                             {item.description}
                           </Typography>
                         </Box>
@@ -305,9 +376,6 @@ export function AppShellHeader({
   brandSubtitle,
   homeHref,
   sections,
-  utilityLinks = [],
-  utilityNote,
-  searchPlaceholder,
 }: AppShellHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -315,7 +383,9 @@ export function AppShellHeader({
   const [desktopPointerOffset, setDesktopPointerOffset] = useState(0);
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const desktopPanelRef = useRef<HTMLDivElement | null>(null);
-  const desktopButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const desktopButtonRefs = useRef<Record<string, HTMLButtonElement | null>>(
+    {},
+  );
 
   const closeAll = () => {
     setMobileOpen(false);
@@ -335,8 +405,11 @@ export function AppShellHeader({
   };
 
   const desktopOpenSection = sections.find(
-    (section): section is AppShellSection & { items: NonNullable<AppShellSection["items"]> } =>
-      section.label === desktopOpenLabel && isDropdownSection(section),
+    (
+      section,
+    ): section is AppShellSection & {
+      items: NonNullable<AppShellSection["items"]>;
+    } => section.label === desktopOpenLabel && isDropdownSection(section),
   );
 
   useEffect(() => {
@@ -375,7 +448,10 @@ export function AppShellHeader({
       const nav = desktopNavRef.current;
       const panel = desktopPanelRef.current;
 
-      if (nav?.contains(event.target as Node) || panel?.contains(event.target as Node)) {
+      if (
+        nav?.contains(event.target as Node) ||
+        panel?.contains(event.target as Node)
+      ) {
         return;
       }
 
@@ -447,10 +523,7 @@ export function AppShellHeader({
                     </Box>
                   ) : null}
                 </Box>
-                <Box
-                  style={{ marginLeft: "0px" }}
-                  sx={{ minWidth: 0 }}
-                >
+                <Box style={{ marginLeft: "0px" }} sx={{ minWidth: 0 }}>
                   <Typography
                     sx={{
                       color: "#3f3f3f",
@@ -476,87 +549,6 @@ export function AppShellHeader({
                 </Box>
               </Box>
             </Link>
-
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: "center",
-                display: { xs: "none", md: "flex" },
-                color: "#5e6d82",
-                columnGap: 1.4,
-                justifyContent: "flex-end",
-                rowGap: 1,
-              }}
-            >
-              {utilityNote ? (
-                <Typography
-                  sx={{
-                    color: "#6f7782",
-                    fontSize: "0.95rem",
-                    mr: 1.5,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {utilityNote}
-                </Typography>
-              ) : null}
-
-              {utilityLinks.map((link) => (
-                <Link key={link.label} href={link.href as never}>
-                  <Stack
-                    direction="row"
-                    spacing={0.8}
-                    sx={{
-                      alignItems: "center",
-                      color: "var(--app-accent)",
-                      px: 0.85,
-                      py: 0.35,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {link.label === "español" ? (
-                      <LanguageOutlinedIcon sx={{ fontSize: 20, color: "#7f8790" }} />
-                    ) : null}
-                    {link.label === "Iniciar sesión" ? (
-                      <LoginOutlinedIcon sx={{ fontSize: 20, color: "#7f8790" }} />
-                    ) : null}
-                    <Typography sx={{ fontSize: "0.95rem", fontWeight: 500 }}>
-                      {link.label}
-                    </Typography>
-                  </Stack>
-                </Link>
-              ))}
-
-              {searchPlaceholder ? (
-                <Box
-                  sx={{
-                    minWidth: 270,
-                    height: 42,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    border: "1px solid #bfc7d2",
-                    color: "#666a70",
-                    backgroundColor: "#ffffff",
-                    pl: 1.35,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "0.95rem" }}>{searchPlaceholder}</Typography>
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 40,
-                      borderLeft: "1px solid #bfc7d2",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <SearchRoundedIcon sx={{ color: "#6d737b" }} />
-                  </Box>
-                </Box>
-              ) : null}
-            </Stack>
 
             <IconButton
               aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
@@ -593,7 +585,9 @@ export function AppShellHeader({
           >
             {sections.map((section, index) => {
               const active =
-                isSectionActive(section) || (desktopOpenLabel !== null && desktopOpenLabel === section.label);
+                isSectionActive(section) ||
+                (desktopOpenLabel !== null &&
+                  desktopOpenLabel === section.label);
 
               if (section.href) {
                 return (
@@ -621,9 +615,6 @@ export function AppShellHeader({
                         },
                       }}
                     >
-                      {section.label === "Inicio" ? (
-                        <HomeOutlinedIcon sx={{ fontSize: 22 }} />
-                      ) : null}
                       <Typography
                         sx={{
                           fontSize: "1rem",
@@ -707,7 +698,9 @@ export function AppShellHeader({
                       sx={{
                         fontSize: 19,
                         transform:
-                          desktopOpenLabel === section.label ? "rotate(180deg)" : "rotate(0deg)",
+                          desktopOpenLabel === section.label
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
                         transition: "transform 160ms ease",
                       }}
                     />
@@ -729,35 +722,99 @@ export function AppShellHeader({
         ) : null}
 
         <Box
+          style={{
+            paddingLeft: "16px",
+            paddingRight: "16px",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+          }}
           sx={{
             display: { xs: "flex", md: "none" },
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: 52,
-            px: 2,
-            color: "#ffffff",
+            px: 0,
+            py: 0,
           }}
         >
-          <Typography
+          <Box
+            component="button"
+            type="button"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation-menu"
+            aria-label={mobileOpen ? "Cerrar navegación" : "Abrir navegación"}
+            onClick={() => setMobileOpen((current) => !current)}
+            style={{
+              width: "100%",
+              minHeight: "54px",
+              paddingLeft: "22px",
+              paddingRight: "22px",
+              border: "1px solid rgba(255,255,255,0.16)",
+              borderRadius: "10px",
+              color: "#ffffff",
+              background: mobileOpen
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(255,255,255,0.04)",
+            }}
             sx={{
-              fontSize: "0.93rem",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              cursor: "pointer",
+              transition:
+                "background-color 180ms ease, border-color 180ms ease, transform 180ms ease",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.08)",
+                borderColor: "rgba(255,255,255,0.2)",
+              },
             }}
           >
-            Navegación
-          </Typography>
-          <ExpandMoreRoundedIcon
-            sx={{
-              fontSize: 20,
-              transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 160ms ease",
-            }}
-          />
+            <Typography
+              sx={{
+                color: "#ffffff",
+                fontSize: "0.93rem",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontWeight: 700,
+                pl: 0.9,
+              }}
+            >
+              Navegación
+            </Typography>
+            <ExpandMoreRoundedIcon
+              sx={{
+                color: "#ffffff",
+                fontSize: 22,
+                mr: 0.25,
+                transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}
+            />
+          </Box>
         </Box>
 
-        {mobileOpen ? <MobileMenu sections={sections} onNavigate={closeAll} /> : null}
+        <Collapse
+          in={mobileOpen}
+          timeout={220}
+          unmountOnExit
+          easing={{
+            enter: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+            exit: "cubic-bezier(0.4, 0, 1, 1)",
+          }}
+        >
+          <Box
+            id="mobile-navigation-menu"
+            sx={{
+              transformOrigin: "top center",
+              animation: mobileOpen
+                ? "mobileMenuFadeIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+                : "none",
+            }}
+          >
+            <MobileMenu
+              sections={sections}
+              onNavigate={closeAll}
+              pathname={pathname}
+            />
+          </Box>
+        </Collapse>
       </Box>
     </Box>
   );

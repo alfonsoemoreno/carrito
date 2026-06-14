@@ -4,40 +4,87 @@ import {
   AppShellHeader,
   type AppShellSection,
 } from "@/components/navigation/app-shell-header";
-import { AppShellFooter } from "@/components/navigation/app-shell-footer";
 
 const adminSections: AppShellSection[] = [
   { label: "Resumen", href: "/admin" },
   {
     label: "Maestros",
     items: [
-      { href: "/admin/personas", label: "Personas", description: "Publicadores, estado y PIN." },
-      { href: "/admin/relaciones", label: "Relaciones", description: "Parejas permitidas y excepciones." },
-      { href: "/admin/zonas", label: "Zonas", description: "Zonas visibles y operativas." },
-      { href: "/admin/plantillas", label: "Plantillas", description: "Horarios base para turnos futuros." },
+      {
+        href: "/admin/personas",
+        label: "Personas",
+        description: "Publicadores, estado y PIN.",
+      },
+      {
+        href: "/admin/relaciones",
+        label: "Relaciones",
+        description: "Parejas permitidas y excepciones.",
+      },
+      {
+        href: "/admin/zonas",
+        label: "Zonas",
+        description: "Zonas visibles y operativas.",
+      },
+      {
+        href: "/admin/plantillas",
+        label: "Plantillas",
+        description: "Horarios base para turnos futuros.",
+      },
     ],
   },
   {
     label: "Restricciones",
     items: [
-      { href: "/admin/bloqueos", label: "Bloqueos", description: "Fechas, zonas y turnos bloqueados." },
-      { href: "/admin/disponibilidad", label: "Disponibilidad", description: "Ausencias e indisponibilidades." },
+      {
+        href: "/admin/bloqueos",
+        label: "Bloqueos",
+        description: "Fechas, zonas y turnos bloqueados.",
+      },
+      {
+        href: "/admin/disponibilidad",
+        label: "Disponibilidad",
+        description: "Ausencias e indisponibilidades.",
+      },
     ],
   },
   {
     label: "Operación",
     items: [
-      { href: "/admin/solicitudes", label: "Solicitudes", description: "Revisión diaria de pendientes." },
-      { href: "/admin/automatizacion", label: "Automatización", description: "Generación y alertas." },
-      { href: "/admin/estadisticas", label: "Estadísticas", description: "KPIs y seguimiento." },
-      { href: "/admin/exportaciones", label: "Exportaciones", description: "CSV y calendario imprimible." },
+      {
+        href: "/admin/solicitudes",
+        label: "Solicitudes",
+        description: "Revisión diaria de pendientes.",
+      },
+      {
+        href: "/admin/automatizacion",
+        label: "Automatización",
+        description: "Generación y alertas.",
+      },
+      {
+        href: "/admin/estadisticas",
+        label: "Estadísticas",
+        description: "KPIs y seguimiento.",
+      },
+      {
+        href: "/admin/exportaciones",
+        label: "Exportaciones",
+        description: "CSV y calendario imprimible.",
+      },
     ],
   },
   {
     label: "Cuenta",
     items: [
-      { href: "/admin/cuenta", label: "Sesión", description: "Estado del acceso administrativo." },
-      { href: "/account/settings", label: "Cuenta", description: "Ajustes del usuario autenticado." },
+      {
+        href: "/admin/cuenta",
+        label: "Sesión",
+        description: "Estado del acceso administrativo.",
+      },
+      {
+        href: "/account/settings",
+        label: "Cuenta",
+        description: "Ajustes del usuario autenticado.",
+      },
     ],
   },
 ];
@@ -55,11 +102,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           brandSubtitle={`Congregación ${congregationName}`}
           homeHref="/admin"
           sections={adminSections}
-          utilityLinks={[
-            { label: "Cuenta", href: "/admin/cuenta" },
-            { label: "Acceso", href: "/account/settings" },
-          ]}
-          utilityNote="Gestión centralizada de solicitudes, turnos y reportes"
         />
       </Box>
       <Box
@@ -74,51 +116,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       >
         <Box component="main">{children}</Box>
       </Box>
-      <AppShellFooter
-        eyebrow="Carrito Admin / Operación interna"
-        title="Accesos administrativos y atajos operativos."
-        columns={[
-          {
-            title: "Maestros",
-            links: [
-              { href: "/admin/personas", label: "Personas" },
-              { href: "/admin/zonas", label: "Zonas" },
-              { href: "/admin/plantillas", label: "Plantillas" },
-            ],
-          },
-          {
-            title: "Operación",
-            links: [
-              { href: "/admin/solicitudes", label: "Solicitudes" },
-              { href: "/admin/estadisticas", label: "Estadísticas" },
-              { href: "/admin/exportaciones", label: "Exportaciones" },
-            ],
-          },
-          {
-            title: "Restricciones",
-            links: [
-              { href: "/admin/bloqueos", label: "Bloqueos" },
-              { href: "/admin/disponibilidad", label: "Disponibilidad" },
-            ],
-          },
-          {
-            title: "Cuenta",
-            links: [
-              { href: "/admin/cuenta", label: "Sesión" },
-              { href: "/account/settings", label: "Cuenta" },
-            ],
-          },
-        ]}
-        productLinks={[
-          { href: "/admin", label: "Carrito Admin" },
-          { href: "/admin/exportaciones", label: "Reportes" },
-        ]}
-        legalLinks={[
-          { href: "/admin/cuenta", label: "Sesión" },
-          { href: "/account/settings", label: "Cuenta" },
-        ]}
-        copyright="© 2026 Carrito."
-      />
     </Box>
   );
 }

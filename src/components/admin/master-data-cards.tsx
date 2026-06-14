@@ -6,12 +6,9 @@ import {
   CardHeader,
   Chip,
   Divider,
-  FormControl,
-  InputLabel,
   MenuItem,
-  Select,
   Stack,
-  Switch,
+  TextField,
   Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
@@ -51,7 +48,11 @@ export function FormCard({
 
 export function SubmitButton({ label }: { label: string }) {
   return (
-    <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start", minWidth: 200, px: 3 }}>
+    <Button
+      type="submit"
+      variant="contained"
+      sx={{ alignSelf: "flex-start", minWidth: 200, px: 3 }}
+    >
       {label}
     </Button>
   );
@@ -81,22 +82,128 @@ export function SwitchField({
   defaultChecked?: boolean;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minHeight: 52 }}>
-      <Switch name={name} defaultChecked={defaultChecked} />
-      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        {label}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        gap: 1,
+        minHeight: 72,
+        px: 2,
+        py: 1.5,
+        border: "1px solid",
+        borderColor: "var(--app-form-border)",
+        borderRadius: "4px",
+        backgroundColor: "#ffffff",
+        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          color: "var(--app-form-label)",
+          fontWeight: 700,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+        }}
+      >
+        Ajuste
       </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          width: "100%",
+        }}
+      >
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{ color: "#233043", fontWeight: 700 }}
+          >
+            {label}
+          </Typography>
+          <Typography variant="caption" sx={{ color: "var(--app-form-muted)" }}>
+            Activa o desactiva este comportamiento.
+          </Typography>
+        </Box>
+        <Box
+          component="label"
+          sx={{
+            position: "relative",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            cursor: "pointer",
+          }}
+        >
+          <Box
+            component="input"
+            type="checkbox"
+            name={name}
+            defaultChecked={defaultChecked}
+            aria-label={label}
+            sx={{
+              position: "absolute",
+              width: 1,
+              height: 1,
+              p: 0,
+              m: -1,
+              overflow: "hidden",
+              clip: "rect(0 0 0 0)",
+              whiteSpace: "nowrap",
+              border: 0,
+              "&:focus-visible + .switch-track": {
+                outline: "3px solid rgba(74, 109, 167, 0.28)",
+                outlineOffset: 2,
+              },
+              "&:checked + .switch-track": {
+                backgroundColor: "var(--app-accent)",
+                borderColor: "var(--app-accent)",
+              },
+              "&:checked + .switch-track .switch-thumb": {
+                transform: "translateX(20px)",
+              },
+            }}
+          />
+          <Box
+            className="switch-track"
+            sx={{
+              width: 48,
+              height: 28,
+              borderRadius: 999,
+              border: "1px solid #b7c0cb",
+              backgroundColor: "#cfd6de",
+              p: "2px",
+              display: "flex",
+              alignItems: "center",
+              boxSizing: "border-box",
+              transition:
+                "background-color 160ms ease, border-color 160ms ease",
+            }}
+          >
+            <Box
+              className="switch-thumb"
+              sx={{
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                backgroundColor: "#ffffff",
+                boxShadow: "0 2px 6px rgba(17, 17, 17, 0.24)",
+                transition: "transform 160ms ease",
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }
 
-export function EmptyState({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+export function EmptyState({ title, body }: { title: string; body: string }) {
   return (
     <Box
       sx={{
@@ -125,10 +232,22 @@ export function ModuleLinkCard({
   badge: string;
 }) {
   return (
-    <Card sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider", height: "100%" }}>
+    <Card
+      sx={{
+        borderRadius: 1,
+        border: "1px solid",
+        borderColor: "divider",
+        height: "100%",
+      }}
+    >
       <CardContent>
         <Stack spacing={2}>
-          <Chip label={badge} size="small" color="primary" sx={{ alignSelf: "flex-start" }} />
+          <Chip
+            label={badge}
+            size="small"
+            color="primary"
+            sx={{ alignSelf: "flex-start" }}
+          />
           <Typography variant="h5">{title}</Typography>
           <Typography color="text.secondary">{description}</Typography>
           <a href={href}>
@@ -152,20 +271,18 @@ export function SelectField({
   options: Array<{ value: string | number; label: string }>;
 }) {
   return (
-    <FormControl fullWidth>
-      <InputLabel id={`${name}-label`}>{label}</InputLabel>
-      <Select
-        labelId={`${name}-label`}
-        name={name}
-        label={label}
-        defaultValue={defaultValue ?? ""}
-      >
+    <TextField
+      select
+      name={name}
+      label={label}
+      defaultValue={defaultValue ?? ""}
+      fullWidth
+    >
       {options.map((option) => (
         <MenuItem key={option.value} value={option.value}>
           {option.label}
         </MenuItem>
       ))}
-      </Select>
-    </FormControl>
+    </TextField>
   );
 }

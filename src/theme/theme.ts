@@ -110,6 +110,21 @@ const theme = createTheme({
         },
       },
     },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          padding: 6,
+          color: "#95a1af",
+          borderRadius: 4,
+          "&.Mui-checked": {
+            color: "#4a6da7",
+          },
+          "&.Mui-disabled": {
+            color: "#c2c9d1",
+          },
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {

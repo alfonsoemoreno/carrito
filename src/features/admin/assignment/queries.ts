@@ -1,6 +1,10 @@
 import { AssignmentStatus, ShiftRequestStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatTime, readFirstSearchParam } from "@/features/public/utils";
+import {
+  formatDate,
+  formatTime,
+  readFirstSearchParam,
+} from "@/features/public/utils";
 
 function buildRequestPairHint(request: {
   person: { firstName: string; lastName: string };
@@ -14,27 +18,28 @@ function buildRequestPairHint(request: {
 }
 
 export async function getAdminAssignmentOverview() {
-  const [pendingShifts, pendingRequests, confirmedAssignments] = await Promise.all([
-    prisma.shift.count({
-      where: {
-        requests: {
-          some: {
-            status: ShiftRequestStatus.PENDING,
+  const [pendingShifts, pendingRequests, confirmedAssignments] =
+    await Promise.all([
+      prisma.shift.count({
+        where: {
+          requests: {
+            some: {
+              status: ShiftRequestStatus.PENDING,
+            },
           },
         },
-      },
-    }),
-    prisma.shiftRequest.count({
-      where: {
-        status: ShiftRequestStatus.PENDING,
-      },
-    }),
-    prisma.assignment.count({
-      where: {
-        status: AssignmentStatus.CONFIRMED,
-      },
-    }),
-  ]);
+      }),
+      prisma.shiftRequest.count({
+        where: {
+          status: ShiftRequestStatus.PENDING,
+        },
+      }),
+      prisma.assignment.count({
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+        },
+      }),
+    ]);
 
   return {
     pendingShifts,
@@ -133,8 +138,12 @@ export async function getAdminRequestsPageState(
     error: readFirstSearchParam(searchParams.error),
     zones,
     shifts: shifts.map((shift) => {
-      const pending = shift.requests.filter((request) => request.status === ShiftRequestStatus.PENDING);
-      const resolved = shift.requests.filter((request) => request.status !== ShiftRequestStatus.PENDING);
+      const pending = shift.requests.filter(
+        (request) => request.status === ShiftRequestStatus.PENDING,
+      );
+      const resolved = shift.requests.filter(
+        (request) => request.status !== ShiftRequestStatus.PENDING,
+      );
 
       return {
         id: shift.id,
@@ -144,11 +153,13 @@ export async function getAdminRequestsPageState(
         pendingCount: pending.length,
         resolvedCount: resolved.length,
         pending,
-        currentAssignmentLabel:
-          shift.assignments[0]
-            ? `${shift.assignments[0].person1.firstName} ${shift.assignments[0].person1.lastName} + ${shift.assignments[0].person2.firstName} ${shift.assignments[0].person2.lastName}`
-            : null,
-        pairHints: pending.map(buildRequestPairHint),
+        currentAssignmentLabel: shift.assignments[0]
+          ? `${shift.assignments[0].person1.firstName} ${shift.assignments[0].person1.lastName} + ${shift.assignments[0].person2.firstName} ${shift.assignments[0].person2.lastName}`
+          : null,
+        pairHints: pending.map((request) => ({
+          id: request.id,
+          label: buildRequestPairHint(request),
+        })),
       };
     }),
   };
@@ -248,9 +259,15 @@ export async function getShiftAssignmentPageState(
     }),
   ]);
 
-  const pendingRequests = shift.requests.filter((request) => request.status === ShiftRequestStatus.PENDING);
-  const selectedPendingIds = pendingRequests.map((request) => request.person.id);
-  const suggestedDefaults = pendingRequests.slice(0, 2).map((request) => request.person.id);
+  const pendingRequests = shift.requests.filter(
+    (request) => request.status === ShiftRequestStatus.PENDING,
+  );
+  const selectedPendingIds = pendingRequests.map(
+    (request) => request.person.id,
+  );
+  const suggestedDefaults = pendingRequests
+    .slice(0, 2)
+    .map((request) => request.person.id);
 
   return {
     notice: readFirstSearchParam(searchParams.notice),
@@ -298,7 +315,8 @@ export async function getShiftAssignmentPageState(
     defaults: {
       person1Id: suggestedDefaults[0] ?? "",
       person2Id:
-        pendingRequests.find((request) => request.suggestedPartnerId)?.suggestedPartnerId ??
+        pendingRequests.find((request) => request.suggestedPartnerId)
+          ?.suggestedPartnerId ??
         suggestedDefaults[1] ??
         "",
     },

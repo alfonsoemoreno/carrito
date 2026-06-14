@@ -118,6 +118,21 @@ export async function searchActivePeople(query: string) {
   });
 }
 
+export async function listActivePeople() {
+  return prisma.person.findMany({
+    where: {
+      status: PersonStatus.ACTIVE,
+    },
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      pinLockedUntil: true,
+    },
+  });
+}
+
 export async function getSelectedPerson(personId: string) {
   if (!personId) {
     return null;
@@ -179,8 +194,10 @@ export async function getSuggestedPartners(personId: string) {
         config.allowSameSexPairing && candidate.gender === currentPerson.gender;
       const hasRelationship = relationships.some((relationship) => {
         const matchesPair =
-          (relationship.personAId === currentPerson.id && relationship.personBId === candidate.id) ||
-          (relationship.personBId === currentPerson.id && relationship.personAId === candidate.id);
+          (relationship.personAId === currentPerson.id &&
+            relationship.personBId === candidate.id) ||
+          (relationship.personBId === currentPerson.id &&
+            relationship.personAId === candidate.id);
 
         return (
           matchesPair &&
@@ -226,7 +243,11 @@ export async function getPublicShiftBoard(input: {
         in: [ShiftStatus.OPEN, ShiftStatus.FULL, ShiftStatus.BLOCKED],
       },
     },
-    orderBy: [{ shiftDate: "asc" }, { startTime: "asc" }, { zone: { name: "asc" } }],
+    orderBy: [
+      { shiftDate: "asc" },
+      { startTime: "asc" },
+      { zone: { name: "asc" } },
+    ],
     include: {
       zone: {
         select: {
@@ -281,15 +302,21 @@ export async function getPublicShiftBoard(input: {
 
   return shifts
     .map((shift) => {
-      const blocked = shift.status === ShiftStatus.BLOCKED || isShiftBlocked({
-        shiftDate: shift.shiftDate,
-        shiftBlocks: shift.blocks,
-        zoneBlocks: shift.zone.blocks,
-      });
+      const blocked =
+        shift.status === ShiftStatus.BLOCKED ||
+        isShiftBlocked({
+          shiftDate: shift.shiftDate,
+          shiftBlocks: shift.blocks,
+          zoneBlocks: shift.zone.blocks,
+        });
       const ownLatestRequest = input.currentPersonId
-        ? shift.requests.find((request) => request.personId === input.currentPersonId) ?? null
+        ? (shift.requests.find(
+            (request) => request.personId === input.currentPersonId,
+          ) ?? null)
         : null;
-      const pendingCount = shift.requests.filter((request) => request.status === ShiftRequestStatus.PENDING).length;
+      const pendingCount = shift.requests.filter(
+        (request) => request.status === ShiftRequestStatus.PENDING,
+      ).length;
 
       return {
         id: shift.id,
@@ -360,160 +387,226 @@ export async function getOwnPendingRequests(personId: string) {
   });
 }
 
-export async function getPublicAssignmentsSnapshot(currentPersonId?: string | null) {
+export async function getOwnConfirmedAssignments(
+  personId: string,
+  from: Date,
+  to: Date,
+) {
+  return prisma.assignment.findMany({
+    where: {
+      status: AssignmentStatus.CONFIRMED,
+      shift: {
+        shiftDate: {
+          gte: from,
+          lte: to,
+        },
+      },
+      OR: [{ person1Id: personId }, { person2Id: personId }],
+    },
+    orderBy: [{ shift: { shiftDate: "asc" } }, { shift: { startTime: "asc" } }],
+    select: {
+      id: true,
+      shift: {
+        select: {
+          id: true,
+          shiftDate: true,
+          startTime: true,
+          endTime: true,
+          zone: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      person1: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+      person2: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getPublicAssignmentsSnapshot(
+  currentPersonId?: string | null,
+) {
   const config = await getPublicConfig();
   const { from, to } = buildVisibleDateRange(config.visibleWeeks);
   const historyCutoff = getHistoryCutoffDate(config.historyVisibility);
 
-  const [publicAssignments, publicRequests, ownAssignments, ownRequests] = await Promise.all([
-    prisma.assignment.findMany({
-      where: {
-        status: AssignmentStatus.CONFIRMED,
-        shift: {
-          shiftDate: {
-            gte: config.showHistoryPublicly && historyCutoff ? historyCutoff : from,
-            lte: to,
-          },
-          zone: {
-            status: "ACTIVE",
-            publicVisible: true,
-          },
-        },
-      },
-      orderBy: [{ shift: { shiftDate: "asc" } }, { shift: { startTime: "asc" } }],
-      select: {
-        id: true,
-        shift: {
-          select: {
-            shiftDate: true,
-            startTime: true,
-            endTime: true,
+  const [publicAssignments, publicRequests, ownAssignments, ownRequests] =
+    await Promise.all([
+      prisma.assignment.findMany({
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+          shift: {
+            shiftDate: {
+              gte:
+                config.showHistoryPublicly && historyCutoff
+                  ? historyCutoff
+                  : from,
+              lte: to,
+            },
             zone: {
-              select: {
-                name: true,
-              },
+              status: "ACTIVE",
+              publicVisible: true,
             },
           },
         },
-        person1: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
-        person2: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
-    }),
-    config.showPendingRequestsPublicly
-      ? prisma.shiftRequest.groupBy({
-          by: ["shiftId"],
-          where: {
-            status: ShiftRequestStatus.PENDING,
-            shift: {
-              shiftDate: {
-                gte: from,
-                lte: to,
-              },
+        orderBy: [
+          { shift: { shiftDate: "asc" } },
+          { shift: { startTime: "asc" } },
+        ],
+        select: {
+          id: true,
+          shift: {
+            select: {
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
               zone: {
-                status: "ACTIVE",
-                publicVisible: true,
+                select: {
+                  name: true,
+                },
               },
             },
           },
-          _count: {
-            _all: true,
+          person1: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
           },
-        })
-      : Promise.resolve([]),
-    currentPersonId
-      ? prisma.assignment.findMany({
-          where: {
-            status: AssignmentStatus.CONFIRMED,
-            OR: [{ person1Id: currentPersonId }, { person2Id: currentPersonId }],
-            ...(historyCutoff
-              ? {
-                  shift: {
-                    shiftDate: {
-                      gte: historyCutoff,
+          person2: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      }),
+      config.showPendingRequestsPublicly
+        ? prisma.shiftRequest.groupBy({
+            by: ["shiftId"],
+            where: {
+              status: ShiftRequestStatus.PENDING,
+              shift: {
+                shiftDate: {
+                  gte: from,
+                  lte: to,
+                },
+                zone: {
+                  status: "ACTIVE",
+                  publicVisible: true,
+                },
+              },
+            },
+            _count: {
+              _all: true,
+            },
+          })
+        : Promise.resolve([]),
+      currentPersonId
+        ? prisma.assignment.findMany({
+            where: {
+              status: AssignmentStatus.CONFIRMED,
+              OR: [
+                { person1Id: currentPersonId },
+                { person2Id: currentPersonId },
+              ],
+              ...(historyCutoff
+                ? {
+                    shift: {
+                      shiftDate: {
+                        gte: historyCutoff,
+                      },
+                    },
+                  }
+                : {}),
+            },
+            orderBy: [
+              { shift: { shiftDate: "desc" } },
+              { shift: { startTime: "desc" } },
+            ],
+            select: {
+              id: true,
+              shift: {
+                select: {
+                  shiftDate: true,
+                  startTime: true,
+                  endTime: true,
+                  zone: {
+                    select: {
+                      name: true,
                     },
                   },
-                }
-              : {}),
-          },
-          orderBy: [{ shift: { shiftDate: "desc" } }, { shift: { startTime: "desc" } }],
-          select: {
-            id: true,
-            shift: {
-              select: {
-                shiftDate: true,
-                startTime: true,
-                endTime: true,
-                zone: {
-                  select: {
-                    name: true,
-                  },
+                },
+              },
+              person1: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+              person2: {
+                select: {
+                  firstName: true,
+                  lastName: true,
                 },
               },
             },
-            person1: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
+          })
+        : Promise.resolve([]),
+      currentPersonId
+        ? prisma.shiftRequest.findMany({
+            where: {
+              personId: currentPersonId,
+              ...(historyCutoff
+                ? {
+                    createdAt: {
+                      gte: historyCutoff,
+                    },
+                  }
+                : {}),
             },
-            person2: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        })
-      : Promise.resolve([]),
-    currentPersonId
-      ? prisma.shiftRequest.findMany({
-          where: {
-            personId: currentPersonId,
-            ...(historyCutoff
-              ? {
-                  createdAt: {
-                    gte: historyCutoff,
-                  },
-                }
-              : {}),
-          },
-          orderBy: [{ shift: { shiftDate: "desc" } }, { shift: { startTime: "desc" } }],
-          select: {
-            id: true,
-            status: true,
-            comments: true,
-            shift: {
-              select: {
-                shiftDate: true,
-                startTime: true,
-                endTime: true,
-                zone: {
-                  select: {
-                    name: true,
+            orderBy: [
+              { shift: { shiftDate: "desc" } },
+              { shift: { startTime: "desc" } },
+            ],
+            select: {
+              id: true,
+              status: true,
+              comments: true,
+              shift: {
+                select: {
+                  shiftDate: true,
+                  startTime: true,
+                  endTime: true,
+                  zone: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            suggestedPartner: {
-              select: {
-                firstName: true,
-                lastName: true,
+              suggestedPartner: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
-          },
-        })
-      : Promise.resolve([]),
-  ]);
+          })
+        : Promise.resolve([]),
+    ]);
 
   return {
     config,
@@ -557,15 +650,34 @@ export async function getSolicitarPageState(
   const zoneId = readFirstSearchParam(searchParams.zoneId);
   const from = readFirstSearchParam(searchParams.from);
   const to = readFirstSearchParam(searchParams.to);
+  const requestedScheduleView = readFirstSearchParam(searchParams.scheduleView);
+  const requestedSelectedDate = readFirstSearchParam(searchParams.selectedDate);
 
   const [config, currentPerson, people, selectedPerson] = await Promise.all([
     getPublicConfig(),
     getCurrentPublicPerson(),
-    searchActivePeople(personQuery),
+    listActivePeople(),
     getSelectedPerson(selectedPersonId),
   ]);
 
-  const [shiftBoard, partnerOptions, ownPendingRequests] = currentPerson
+  const defaultRange = buildVisibleDateRange(config.visibleWeeks);
+  const resolvedFrom = parseDateInput(from) ?? defaultRange.from;
+  const resolvedTo = parseDateInput(to) ?? defaultRange.to;
+  const scheduleView =
+    requestedScheduleView === "confirmed" ||
+    requestedScheduleView === "calendar"
+      ? requestedScheduleView
+      : "available";
+  const selectedDate = parseDateInput(requestedSelectedDate)
+    ? requestedSelectedDate
+    : "";
+
+  const [
+    shiftBoard,
+    partnerOptions,
+    ownPendingRequests,
+    ownConfirmedAssignments,
+  ] = currentPerson
     ? await Promise.all([
         getPublicShiftBoard({
           currentPersonId: currentPerson.id,
@@ -575,8 +687,9 @@ export async function getSolicitarPageState(
         }),
         getSuggestedPartners(currentPerson.id),
         getOwnPendingRequests(currentPerson.id),
+        getOwnConfirmedAssignments(currentPerson.id, resolvedFrom, resolvedTo),
       ])
-    : [[], [], []];
+    : [[], [], [], []];
 
   const zones = await prisma.zone.findMany({
     where: {
@@ -589,9 +702,6 @@ export async function getSolicitarPageState(
       name: true,
     },
   });
-
-  const defaultRange = buildVisibleDateRange(config.visibleWeeks);
-
   return {
     config,
     currentPerson,
@@ -601,12 +711,25 @@ export async function getSolicitarPageState(
     shiftBoard,
     partnerOptions,
     ownPendingRequests,
+    ownConfirmedAssignments: ownConfirmedAssignments.map((assignment) => ({
+      id: assignment.id,
+      shiftId: assignment.shift.id,
+      zoneName: assignment.shift.zone.name,
+      shiftDate: assignment.shift.shiftDate,
+      startTime: assignment.shift.startTime,
+      endTime: assignment.shift.endTime,
+      dateLabel: formatDate(assignment.shift.shiftDate),
+      timeLabel: `${formatTime(assignment.shift.startTime)} - ${formatTime(assignment.shift.endTime)}`,
+      pairLabel: `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
+    })),
     filters: {
       personQuery,
       zoneId,
       from: from || toDateOnlyString(defaultRange.from),
       to: to || toDateOnlyString(defaultRange.to),
+      selectedDate,
     },
+    scheduleView,
     authError: readFirstSearchParam(searchParams.authError),
     notice: readFirstSearchParam(searchParams.notice),
     requestError: readFirstSearchParam(searchParams.requestError),

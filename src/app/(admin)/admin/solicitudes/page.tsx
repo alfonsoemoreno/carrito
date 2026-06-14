@@ -42,28 +42,50 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
           title="Bandeja de solicitudes"
           description="Prioriza turnos con pendientes y entra a la vista centrada en resolver cada asignacion."
         >
-          {state.notice ? <Alert severity="success">{state.notice}</Alert> : null}
+          {state.notice ? (
+            <Alert severity="success">{state.notice}</Alert>
+          ) : null}
           {state.error ? <Alert severity="error">{state.error}</Alert> : null}
 
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(3, minmax(0, 1fr))",
+              },
               gap: 2.5,
             }}
           >
-            <FormCard title="Turnos con pendientes" description="Cantidad de turnos que requieren decision administrativa.">
+            <FormCard
+              title="Turnos con pendientes"
+              description="Cantidad de turnos que requieren decision administrativa."
+            >
               <Typography variant="h3">{overview.pendingShifts}</Typography>
             </FormCard>
-            <FormCard title="Solicitudes pendientes" description="Intenciones todavia no confirmadas ni rechazadas.">
+            <FormCard
+              title="Solicitudes pendientes"
+              description="Intenciones todavia no confirmadas ni rechazadas."
+            >
               <Typography variant="h3">{overview.pendingRequests}</Typography>
             </FormCard>
-            <FormCard title="Asignaciones confirmadas" description="Turnos ya cubiertos con pareja confirmada.">
-              <Typography variant="h3">{overview.confirmedAssignments}</Typography>
+            <FormCard
+              title="Asignaciones confirmadas"
+              description="Turnos ya cubiertos con pareja confirmada."
+            >
+              <Typography variant="h3">
+                {overview.confirmedAssignments}
+              </Typography>
             </FormCard>
           </Box>
 
-          <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+          <Card
+            sx={{
+              borderRadius: 5,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
             <CardContent>
               <Stack spacing={2.5}>
                 <Typography variant="h5">Filtrar bandeja</Typography>
@@ -71,7 +93,12 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                   <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                     <FormControl fullWidth>
                       <InputLabel id="zone-filter-label">Zona</InputLabel>
-                      <Select labelId="zone-filter-label" name="zoneId" defaultValue={state.filters.zoneId} label="Zona">
+                      <Select
+                        labelId="zone-filter-label"
+                        name="zoneId"
+                        defaultValue={state.filters.zoneId}
+                        label="Zona"
+                      >
                         <MenuItem value="">Todas</MenuItem>
                         {state.zones.map((zone) => (
                           <MenuItem key={zone.id} value={zone.id}>
@@ -88,8 +115,12 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                         defaultValue={state.filters.onlyPending}
                         label="Filtro"
                       >
-                        <MenuItem value="true">Solo turnos con pendientes</MenuItem>
-                        <MenuItem value="false">Todos los turnos filtrados</MenuItem>
+                        <MenuItem value="true">
+                          Solo turnos con pendientes
+                        </MenuItem>
+                        <MenuItem value="false">
+                          Todos los turnos filtrados
+                        </MenuItem>
                       </Select>
                     </FormControl>
                     <Button type="submit" variant="outlined">
@@ -109,13 +140,23 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
           ) : (
             <Stack spacing={2.5}>
               {state.shifts.map((shift) => (
-                <Card key={shift.id} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+                <Card
+                  key={shift.id}
+                  sx={{
+                    borderRadius: 5,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
                   <CardContent>
                     <Stack spacing={2}>
                       <Stack
                         direction={{ xs: "column", md: "row" }}
                         spacing={1.5}
-                        sx={{ justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" } }}
+                        sx={{
+                          justifyContent: "space-between",
+                          alignItems: { xs: "flex-start", md: "center" },
+                        }}
                       >
                         <Box>
                           <Typography variant="h5">{shift.zoneName}</Typography>
@@ -123,11 +164,25 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                             {shift.dateLabel} · {shift.timeLabel}
                           </Typography>
                         </Box>
-                        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                          <Chip label={`${shift.pendingCount} pendientes`} color="warning" />
-                          <Chip label={`${shift.resolvedCount} resueltas`} variant="outlined" />
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ flexWrap: "wrap" }}
+                        >
+                          <Chip
+                            label={`${shift.pendingCount} pendientes`}
+                            color="warning"
+                          />
+                          <Chip
+                            label={`${shift.resolvedCount} resueltas`}
+                            variant="outlined"
+                          />
                           {shift.currentAssignmentLabel ? (
-                            <Chip label="Ya asignado" color="success" variant="outlined" />
+                            <Chip
+                              label="Ya asignado"
+                              color="success"
+                              variant="outlined"
+                            />
                           ) : null}
                         </Stack>
                       </Stack>
@@ -141,15 +196,22 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                       {shift.pairHints.length > 0 ? (
                         <Stack spacing={0.5}>
                           {shift.pairHints.map((hint) => (
-                            <Typography key={hint} variant="body2" color="text.secondary">
-                              {hint}
+                            <Typography
+                              key={hint.id}
+                              variant="body2"
+                              color="text.secondary"
+                            >
+                              {hint.label}
                             </Typography>
                           ))}
                         </Stack>
                       ) : null}
 
                       <Link href={`/admin/turnos/${shift.id}`}>
-                        <Button variant="contained" startIcon={<AssignmentTurnedInRoundedIcon />}>
+                        <Button
+                          variant="contained"
+                          startIcon={<AssignmentTurnedInRoundedIcon />}
+                        >
                           Resolver turno
                         </Button>
                       </Link>

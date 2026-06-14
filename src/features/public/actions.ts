@@ -11,7 +11,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { verifyPin } from "@/lib/pin";
-import { clearPublicSession, createPublicSession, getPublicSession } from "@/features/public/session";
+import {
+  clearPublicSession,
+  createPublicSession,
+  getPublicSession,
+} from "@/features/public/session";
 import {
   getWeekKey,
   isConsecutiveUtcDate,
@@ -20,7 +24,10 @@ import {
   toDateOnlyString,
 } from "@/features/public/utils";
 
-function buildRedirect(path: string, params: Record<string, string | null | undefined>) {
+function buildRedirect(
+  path: string,
+  params: Record<string, string | null | undefined>,
+) {
   const url = new URL(path, "http://localhost");
 
   for (const [key, value] of Object.entries(params)) {
@@ -64,7 +71,11 @@ async function requireSessionPerson() {
   return person;
 }
 
-async function isValidSuggestedPartner(personId: string, partnerId: string, allowSameSexPairing: boolean) {
+async function isValidSuggestedPartner(
+  personId: string,
+  partnerId: string,
+  allowSameSexPairing: boolean,
+) {
   const [person, partner, relationships] = await Promise.all([
     prisma.person.findUnique({
       where: { id: personId },
@@ -87,7 +98,12 @@ async function isValidSuggestedPartner(personId: string, partnerId: string, allo
     }),
   ]);
 
-  if (!person || !partner || partner.status !== PersonStatus.ACTIVE || person.id === partner.id) {
+  if (
+    !person ||
+    !partner ||
+    partner.status !== PersonStatus.ACTIVE ||
+    person.id === partner.id
+  ) {
     return false;
   }
 
@@ -215,7 +231,9 @@ export async function authenticatePublicPersonAction(formData: FormData) {
   });
 
   await createPublicSession(person.id);
-  redirectTo(buildRedirect(returnTo, { notice: "PIN validado correctamente." }));
+  redirectTo(
+    buildRedirect(returnTo, { notice: "PIN validado correctamente." }),
+  );
 }
 
 export async function logoutPublicPersonAction() {
@@ -225,15 +243,18 @@ export async function logoutPublicPersonAction() {
 
 export async function submitShiftRequestsAction(formData: FormData) {
   const currentPerson = await requireSessionPerson();
+  const returnTo = String(formData.get("returnTo") ?? "/solicitar");
   const selectedShiftIds = formData
     .getAll("shiftIds")
     .map((value) => String(value))
     .filter(Boolean);
   const suggestedPartnerId = String(formData.get("suggestedPartnerId") ?? "");
   const comments = String(formData.get("comments") ?? "").trim();
+  const redirectWithRequestError = (message: string): never =>
+    redirectTo(buildRedirect(returnTo, { requestError: message }));
 
   if (selectedShiftIds.length === 0) {
-    redirectTo("/solicitar?requestError=Selecciona%20al%20menos%20un%20turno.");
+    redirectWithRequestError("Selecciona al menos un turno.");
   }
 
   const config = await prisma.systemConfig.findFirst({
@@ -263,7 +284,9 @@ export async function submitShiftRequestsAction(formData: FormData) {
       policy.allowSameSexPairing,
     ))
   ) {
-    redirectTo("/solicitar?requestError=La%20pareja%20sugerida%20no%20cumple%20las%20reglas%20vigentes.");
+    redirectWithRequestError(
+      "La pareja sugerida no cumple las reglas vigentes.",
+    );
   }
 
   const shifts = await prisma.shift.findMany({
@@ -309,7 +332,10 @@ export async function submitShiftRequestsAction(formData: FormData) {
       assignments: {
         where: {
           status: AssignmentStatus.CONFIRMED,
-          OR: [{ person1Id: currentPerson.id }, { person2Id: currentPerson.id }],
+          OR: [
+            { person1Id: currentPerson.id },
+            { person2Id: currentPerson.id },
+          ],
         },
         select: {
           id: true,
@@ -319,67 +345,71 @@ export async function submitShiftRequestsAction(formData: FormData) {
   });
 
   if (shifts.length !== selectedShiftIds.length) {
-    redirectTo("/solicitar?requestError=Uno%20o%20mas%20turnos%20ya%20no%20estan%20disponibles.");
+    redirectWithRequestError("Uno o mas turnos ya no estan disponibles.");
   }
 
   const rangeStart = new Date();
   rangeStart.setUTCDate(rangeStart.getUTCDate() - 1);
 
-  const [availabilityBlocks, existingRequests, existingAssignments] = await Promise.all([
-    prisma.availabilityException.findMany({
-      where: {
-        personId: currentPerson.id,
-      },
-      select: {
-        startDate: true,
-        endDate: true,
-      },
-    }),
-    prisma.shiftRequest.findMany({
-      where: {
-        personId: currentPerson.id,
-        status: {
-          in: [ShiftRequestStatus.PENDING, ShiftRequestStatus.CONFIRMED],
+  const [availabilityBlocks, existingRequests, existingAssignments] =
+    await Promise.all([
+      prisma.availabilityException.findMany({
+        where: {
+          personId: currentPerson.id,
         },
-        shift: {
-          shiftDate: {
-            gte: rangeStart,
+        select: {
+          startDate: true,
+          endDate: true,
+        },
+      }),
+      prisma.shiftRequest.findMany({
+        where: {
+          personId: currentPerson.id,
+          status: {
+            in: [ShiftRequestStatus.PENDING, ShiftRequestStatus.CONFIRMED],
+          },
+          shift: {
+            shiftDate: {
+              gte: rangeStart,
+            },
           },
         },
-      },
-      select: {
-        shiftId: true,
-        shift: {
-          select: {
-            shiftDate: true,
-            startTime: true,
-            endTime: true,
+        select: {
+          shiftId: true,
+          shift: {
+            select: {
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
+            },
           },
         },
-      },
-    }),
-    prisma.assignment.findMany({
-      where: {
-        status: AssignmentStatus.CONFIRMED,
-        OR: [{ person1Id: currentPerson.id }, { person2Id: currentPerson.id }],
-        shift: {
-          shiftDate: {
-            gte: rangeStart,
+      }),
+      prisma.assignment.findMany({
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+          OR: [
+            { person1Id: currentPerson.id },
+            { person2Id: currentPerson.id },
+          ],
+          shift: {
+            shiftDate: {
+              gte: rangeStart,
+            },
           },
         },
-      },
-      select: {
-        shiftId: true,
-        shift: {
-          select: {
-            shiftDate: true,
-            startTime: true,
-            endTime: true,
+        select: {
+          shiftId: true,
+          shift: {
+            select: {
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
+            },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
   const weeklyCounts = new Map<string, number>();
   for (const request of existingRequests) {
@@ -387,7 +417,10 @@ export async function submitShiftRequestsAction(formData: FormData) {
     weeklyCounts.set(key, (weeklyCounts.get(key) ?? 0) + 1);
   }
 
-  const selectedDates = new Map<string, { shiftDate: Date; startTime: Date; endTime: Date }[]>();
+  const selectedDates = new Map<
+    string,
+    { shiftDate: Date; startTime: Date; endTime: Date }[]
+  >();
 
   for (const shift of shifts) {
     if (
@@ -395,36 +428,54 @@ export async function submitShiftRequestsAction(formData: FormData) {
       shift.zone.status !== "ACTIVE" ||
       !shift.zone.publicVisible
     ) {
-      redirectTo("/solicitar?requestError=Solo%20puedes%20solicitar%20turnos%20publicos%20y%20abiertos.");
+      redirectWithRequestError(
+        "Solo puedes solicitar turnos publicos y abiertos.",
+      );
     }
 
     const blockedByAvailability = availabilityBlocks.some((block) => {
       const target = toDateOnlyString(shift.shiftDate);
-      return target >= toDateOnlyString(block.startDate) && target <= toDateOnlyString(block.endDate);
+      return (
+        target >= toDateOnlyString(block.startDate) &&
+        target <= toDateOnlyString(block.endDate)
+      );
     });
 
     if (blockedByAvailability) {
-      redirectTo("/solicitar?requestError=Tienes%20una%20indisponibilidad%20registrada%20para%20uno%20de%20los%20turnos%20seleccionados.");
+      redirectWithRequestError(
+        "Tienes una indisponibilidad registrada para uno de los turnos seleccionados.",
+      );
     }
 
-    const blockedByShift = [...shift.blocks, ...shift.zone.blocks].some((block) => {
-      const target = toDateOnlyString(shift.shiftDate);
-      return target >= toDateOnlyString(block.startDate) && target <= toDateOnlyString(block.endDate);
-    });
+    const blockedByShift = [...shift.blocks, ...shift.zone.blocks].some(
+      (block) => {
+        const target = toDateOnlyString(shift.shiftDate);
+        return (
+          target >= toDateOnlyString(block.startDate) &&
+          target <= toDateOnlyString(block.endDate)
+        );
+      },
+    );
 
     if (blockedByShift) {
-      redirectTo("/solicitar?requestError=Uno%20de%20los%20turnos%20seleccionados%20quedo%20bloqueado.");
+      redirectWithRequestError(
+        "Uno de los turnos seleccionados quedo bloqueado.",
+      );
     }
 
     if (shift.requests.length > 0 || shift.assignments.length > 0) {
-      redirectTo("/solicitar?requestError=Ya%20existe%20una%20solicitud%20activa%20o%20asignacion%20para%20ese%20turno.");
+      redirectWithRequestError(
+        "Ya existe una solicitud activa o asignacion para ese turno.",
+      );
     }
 
     const weekKey = getWeekKey(shift.shiftDate);
     const nextWeeklyCount = (weeklyCounts.get(weekKey) ?? 0) + 1;
 
     if (nextWeeklyCount > policy.maxRequestsPerWeek) {
-      redirectTo("/solicitar?requestError=La%20seleccion%20supera%20el%20maximo%20de%20solicitudes%20por%20semana.");
+      redirectWithRequestError(
+        "La seleccion supera el maximo de solicitudes por semana.",
+      );
     }
 
     weeklyCounts.set(weekKey, nextWeeklyCount);
@@ -433,7 +484,9 @@ export async function submitShiftRequestsAction(formData: FormData) {
     const sameDaySelected = selectedDates.get(currentDateKey) ?? [];
 
     if (!policy.allowMultiplePerDay && sameDaySelected.length > 0) {
-      redirectTo("/solicitar?requestError=La%20configuracion%20actual%20no%20permite%20mas%20de%20un%20turno%20por%20dia.");
+      redirectWithRequestError(
+        "La configuracion actual no permite mas de un turno por dia.",
+      );
     }
 
     for (const request of existingRequests) {
@@ -441,14 +494,18 @@ export async function submitShiftRequestsAction(formData: FormData) {
         !policy.allowMultiplePerDay &&
         isSameUtcDate(request.shift.shiftDate, shift.shiftDate)
       ) {
-        redirectTo("/solicitar?requestError=Ya%20tienes%20una%20solicitud%20activa%20para%20ese%20dia.");
+        redirectWithRequestError(
+          "Ya tienes una solicitud activa para ese dia.",
+        );
       }
 
       if (
         !policy.allowConsecutiveDays &&
         isConsecutiveUtcDate(request.shift.shiftDate, shift.shiftDate)
       ) {
-        redirectTo("/solicitar?requestError=La%20configuracion%20actual%20bloquea%20dias%20consecutivos.");
+        redirectWithRequestError(
+          "La configuracion actual bloquea dias consecutivos.",
+        );
       }
 
       if (
@@ -461,7 +518,9 @@ export async function submitShiftRequestsAction(formData: FormData) {
           shift.endTime,
         )
       ) {
-        redirectTo("/solicitar?requestError=Uno%20de%20los%20turnos%20se%20superpone%20con%20otra%20solicitud%20tuya.");
+        redirectWithRequestError(
+          "Uno de los turnos se superpone con otra solicitud tuya.",
+        );
       }
     }
 
@@ -470,14 +529,18 @@ export async function submitShiftRequestsAction(formData: FormData) {
         !policy.allowMultiplePerDay &&
         isSameUtcDate(assignment.shift.shiftDate, shift.shiftDate)
       ) {
-        redirectTo("/solicitar?requestError=Ya%20tienes%20una%20asignacion%20confirmada%20para%20ese%20dia.");
+        redirectWithRequestError(
+          "Ya tienes una asignacion confirmada para ese dia.",
+        );
       }
 
       if (
         !policy.allowConsecutiveDays &&
         isConsecutiveUtcDate(assignment.shift.shiftDate, shift.shiftDate)
       ) {
-        redirectTo("/solicitar?requestError=La%20configuracion%20actual%20bloquea%20dias%20consecutivos.");
+        redirectWithRequestError(
+          "La configuracion actual bloquea dias consecutivos.",
+        );
       }
 
       if (
@@ -490,22 +553,34 @@ export async function submitShiftRequestsAction(formData: FormData) {
           shift.endTime,
         )
       ) {
-        redirectTo("/solicitar?requestError=Uno%20de%20los%20turnos%20se%20superpone%20con%20otra%20asignacion%20tuya.");
+        redirectWithRequestError(
+          "Uno de los turnos se superpone con otra asignacion tuya.",
+        );
       }
     }
 
     for (const otherDay of selectedDates.values()) {
       for (const other of otherDay) {
-        if (!policy.allowConsecutiveDays && isConsecutiveUtcDate(other.shiftDate, shift.shiftDate)) {
-          redirectTo("/solicitar?requestError=La%20seleccion%20incluye%20dias%20consecutivos%20no%20permitidos.");
+        if (
+          !policy.allowConsecutiveDays &&
+          isConsecutiveUtcDate(other.shiftDate, shift.shiftDate)
+        ) {
+          redirectWithRequestError(
+            "La seleccion incluye dias consecutivos no permitidos.",
+          );
         }
 
         if (
           !policy.allowOverlapping &&
           isSameUtcDate(other.shiftDate, shift.shiftDate) &&
-          overlapsTimeRange(other.startTime, other.endTime, shift.startTime, shift.endTime)
+          overlapsTimeRange(
+            other.startTime,
+            other.endTime,
+            shift.startTime,
+            shift.endTime,
+          )
         ) {
-          redirectTo("/solicitar?requestError=La%20seleccion%20incluye%20turnos%20superpuestos.");
+          redirectWithRequestError("La seleccion incluye turnos superpuestos.");
         }
       }
     }
@@ -548,7 +623,11 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
   revalidatePath("/solicitar");
   revalidatePath("/asignaciones");
-  redirectTo(`/solicitar?notice=Se%20registraron%20${selectedShiftIds.length}%20solicitudes%20pendientes.`);
+  redirectTo(
+    buildRedirect(returnTo, {
+      notice: `Se registraron ${selectedShiftIds.length} solicitudes pendientes.`,
+    }),
+  );
 }
 
 export async function cancelOwnPendingRequestAction(formData: FormData) {
@@ -556,7 +635,9 @@ export async function cancelOwnPendingRequestAction(formData: FormData) {
   const requestId = String(formData.get("requestId") ?? "");
 
   if (!requestId) {
-    redirectTo("/solicitar?requestError=No%20se%20indico%20la%20solicitud%20a%20cancelar.");
+    redirectTo(
+      "/solicitar?requestError=No%20se%20indico%20la%20solicitud%20a%20cancelar.",
+    );
   }
 
   const request = await prisma.shiftRequest.findFirst({
@@ -571,7 +652,9 @@ export async function cancelOwnPendingRequestAction(formData: FormData) {
   });
 
   if (!request) {
-    redirectTo("/solicitar?requestError=La%20solicitud%20ya%20no%20puede%20cancelarse.");
+    redirectTo(
+      "/solicitar?requestError=La%20solicitud%20ya%20no%20puede%20cancelarse.",
+    );
   }
 
   await prisma.$transaction([
