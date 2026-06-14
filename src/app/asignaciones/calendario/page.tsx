@@ -122,8 +122,8 @@ export default async function AsignacionesCalendarioPage({
 
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-        <Container maxWidth="xl">
+      <Box component="main" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="lg">
           <Stack spacing={3}>
             <Stack spacing={2}>
               <Link href="/asignaciones">

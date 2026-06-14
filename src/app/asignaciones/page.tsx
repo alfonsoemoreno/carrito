@@ -51,8 +51,8 @@ export default async function AsignacionesPage() {
 
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-        <Container maxWidth="lg">
+      <Box component="main" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="md">
           <Stack spacing={3}>
             <Box
               sx={{

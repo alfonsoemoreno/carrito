@@ -29,9 +29,9 @@ const entryPoints = [
 export default function HomePage() {
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 4, md: 8 } }}>
-        <Container maxWidth="md">
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box component="main" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="sm">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
             <Card
               elevation={0}
               sx={{
@@ -39,16 +39,16 @@ export default function HomePage() {
                   "linear-gradient(135deg, rgba(91,120,182,0.14), rgba(255,255,255,0.98) 65%)",
               }}
             >
-              <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Box
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: 2.25,
+                    gap: 1.75,
                     alignItems: "flex-start",
                   }}
                 >
-                  <Typography variant="h2" sx={{ maxWidth: 680 }}>
+                  <Typography variant="h3" sx={{ maxWidth: 520 }}>
                     Elige lo que necesitas hacer
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
@@ -77,12 +77,16 @@ export default function HomePage() {
                     backgroundColor: "#f7f7f7",
                   }}
                 >
-                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                  <CardContent sx={{ p: { xs: 3, md: 3.5 } }}>
                     <Box
-                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1.5,
+                      }}
                     >
                       <Box sx={{ color: "primary.main" }}>{item.icon}</Box>
-                      <Typography variant="h4">{item.title}</Typography>
+                      <Typography variant="h5">{item.title}</Typography>
                       <Typography variant="body2" color="text.secondary">
                         {item.body}
                       </Typography>

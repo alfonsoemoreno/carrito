@@ -488,7 +488,16 @@ export function AppShellHeader({
           borderBottom: "1px solid #d8dce2",
         }}
       >
-        <Container maxWidth="lg">
+        <Container
+          maxWidth={hasSections ? "lg" : false}
+          sx={
+            hasSections
+              ? undefined
+              : {
+                  px: { xs: 2, sm: 3, md: 4, lg: 6 },
+                }
+          }
+        >
           <Box
             sx={{
               minHeight: { xs: 72, md: 74 },

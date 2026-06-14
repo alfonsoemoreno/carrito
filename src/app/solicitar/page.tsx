@@ -79,9 +79,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-        <Container maxWidth="lg">
-          <Stack spacing={4}>
+      <Box component="main" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="md">
+          <Stack spacing={3}>
             <Box
               sx={{
                 display: "flex",
