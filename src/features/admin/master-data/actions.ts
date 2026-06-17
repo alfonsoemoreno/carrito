@@ -12,6 +12,7 @@ import {
   createShiftBlockSchema,
   createTemplateSchema,
   createZoneSchema,
+  deleteZoneSchema,
   updatePersonStatusSchema,
   updateZoneVisibilitySchema,
 } from "./validations";
@@ -127,6 +128,138 @@ export async function updateZoneVisibilityAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/zonas");
+}
+
+export async function deleteZoneAction(formData: FormData) {
+  const parsed = deleteZoneSchema.parse({
+    id: formData.get("id"),
+  });
+  await requireCurrentAdminActor();
+
+  await prisma.$transaction(async (tx) => {
+    const zone = await tx.zone.findUnique({
+      where: { id: parsed.id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        publicVisible: true,
+        shifts: {
+          select: {
+            id: true,
+            requests: {
+              select: { id: true },
+            },
+            assignments: {
+              select: { id: true },
+            },
+          },
+        },
+        templates: {
+          select: { id: true },
+        },
+        blocks: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!zone) {
+      return;
+    }
+
+    const shiftIds = zone.shifts.map((shift) => shift.id);
+    const requestIds = zone.shifts.flatMap((shift) =>
+      shift.requests.map((request) => request.id),
+    );
+    const assignmentIds = zone.shifts.flatMap((shift) =>
+      shift.assignments.map((assignment) => assignment.id),
+    );
+    const templateIds = zone.templates.map((template) => template.id);
+    const directBlockIds = zone.blocks.map((block) => block.id);
+    const shiftBlockIds =
+      shiftIds.length > 0
+        ? await tx.shiftBlock.findMany({
+            where: {
+              shiftId: { in: shiftIds },
+            },
+            select: { id: true },
+          })
+        : [];
+    const allBlockIds = [
+      ...directBlockIds,
+      ...shiftBlockIds.map((block) => block.id),
+    ];
+
+    await tx.auditLog.deleteMany({
+      where: {
+        entityType: "zone",
+        entityId: zone.id,
+      },
+    });
+
+    if (requestIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "shift_request",
+          entityId: { in: requestIds },
+        },
+      });
+    }
+
+    if (assignmentIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "assignment",
+          entityId: { in: assignmentIds },
+        },
+      });
+    }
+
+    if (allBlockIds.length > 0) {
+      await tx.shiftBlock.deleteMany({
+        where: {
+          id: { in: allBlockIds },
+        },
+      });
+    }
+
+    if (shiftIds.length > 0) {
+      await tx.shiftBlock.deleteMany({
+        where: {
+          shiftId: { in: shiftIds },
+        },
+      });
+
+      await tx.shift.deleteMany({
+        where: {
+          id: { in: shiftIds },
+        },
+      });
+    }
+
+    if (templateIds.length > 0) {
+      await tx.shiftTemplate.deleteMany({
+        where: {
+          id: { in: templateIds },
+        },
+      });
+    }
+
+    await tx.zone.delete({
+      where: { id: zone.id },
+    });
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/zonas");
+  revalidatePath("/admin/plantillas");
+  revalidatePath("/admin/bloqueos");
+  revalidatePath("/admin/solicitudes");
+  revalidatePath("/admin/estadisticas");
+  revalidatePath("/admin/exportaciones");
+  revalidatePath("/solicitar");
 }
 
 export async function createTemplateAction(formData: FormData) {

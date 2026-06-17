@@ -1,5 +1,6 @@
 import {
   createZoneAction,
+  deleteZoneAction,
   updateZoneVisibilityAction,
 } from "@/features/admin/master-data/actions";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
@@ -133,20 +134,28 @@ export default async function AdminZonesPage() {
                       turnos · {zone._count.blocks} bloqueos
                     </Typography>
                     <form action={updateZoneVisibilityAction}>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+                        <input type="hidden" name="id" value={zone.id} />
+                        <input
+                          type="hidden"
+                          name="status"
+                          value={zone.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"}
+                        />
+                        <input
+                          type="hidden"
+                          name="publicVisible"
+                          value={zone.publicVisible ? "false" : "true"}
+                        />
+                        <Button type="submit" variant="outlined">
+                          {zone.status === "ACTIVE" ? "Desactivar" : "Activar"} y{" "}
+                          {zone.publicVisible ? "ocultar" : "mostrar"}
+                        </Button>
+                      </Box>
+                    </form>
+                    <form action={deleteZoneAction}>
                       <input type="hidden" name="id" value={zone.id} />
-                      <input
-                        type="hidden"
-                        name="status"
-                        value={zone.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"}
-                      />
-                      <input
-                        type="hidden"
-                        name="publicVisible"
-                        value={zone.publicVisible ? "false" : "true"}
-                      />
-                      <Button type="submit" variant="outlined">
-                        {zone.status === "ACTIVE" ? "Desactivar" : "Activar"} y{" "}
-                        {zone.publicVisible ? "ocultar" : "mostrar"}
+                      <Button type="submit" variant="contained" color="error">
+                        Eliminar lugar y registros asociados
                       </Button>
                     </form>
                   </Box>

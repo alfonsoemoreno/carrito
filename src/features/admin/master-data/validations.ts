@@ -61,6 +61,10 @@ export const updateZoneVisibilitySchema = z.object({
   status: z.nativeEnum(ZoneStatus),
 });
 
+export const deleteZoneSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export const createTemplateSchema = z
   .object({
     zoneId: z.string().uuid(),
