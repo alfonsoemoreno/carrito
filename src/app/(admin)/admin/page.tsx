@@ -16,7 +16,7 @@ const modules = [
   {
     href: "/admin/personas",
     title: "Personas",
-    description: "Alta de publicadores, cambios de estado y reseteo de PIN.",
+    description: "Alta de publicadores y cambios de estado.",
     badge: "Maestro",
   },
   {

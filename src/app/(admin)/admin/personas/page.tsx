@@ -1,4 +1,4 @@
-import { createPersonAction, resetPersonPinAction, updatePersonStatusAction } from "@/features/admin/master-data/actions";
+import { createPersonAction, updatePersonStatusAction } from "@/features/admin/master-data/actions";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
@@ -15,13 +15,13 @@ export default async function AdminPeoplePage() {
     <Container sx={{ py: { xs: 4, md: 6 } }}>
       <AdminPageShell
         eyebrow="Personas"
-        title="Gestion de personas y PIN"
-        description="Alta de personas, cambios de estado y reseteo de PIN administrativo."
+        title="Gestion de personas"
+        description="Alta de personas y cambios de estado para solicitudes y asignaciones."
       >
         <form action={createPersonAction}>
           <FormCard
             title="Nueva persona"
-            description="Crea una persona activa o inactiva con PIN inicial protegido por hash."
+            description="Crea una persona activa o inactiva con sus datos base."
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <FieldGrid>
@@ -49,7 +49,6 @@ export default async function AdminPeoplePage() {
                 <TextField name="email" label="Correo" type="email" />
               </FieldGrid>
               <TextField name="notes" label="Observaciones" multiline minRows={2} />
-              <TextField name="pin" label="PIN inicial" type="password" required />
               <SubmitButton label="Crear persona" />
             </Box>
           </FormCard>
@@ -58,7 +57,7 @@ export default async function AdminPeoplePage() {
         {people.length === 0 ? (
           <EmptyState
             title="Sin personas"
-            body="Cuando agregues personas apareceran aqui con acciones de estado y PIN."
+            body="Cuando agregues personas apareceran aqui con acciones de estado."
           />
         ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
@@ -96,21 +95,6 @@ export default async function AdminPeoplePage() {
                         <Button type="submit" variant="outlined">
                           {person.status === "ACTIVE" ? "Desactivar" : "Activar"}
                         </Button>
-                      </form>
-                      <form action={resetPersonPinAction}>
-                        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                        <input type="hidden" name="id" value={person.id} />
-                        <TextField
-                          name="pin"
-                          type="password"
-                          size="small"
-                          label="Nuevo PIN"
-                          required
-                        />
-                        <Button type="submit" variant="contained">
-                          Resetear PIN
-                        </Button>
-                        </Box>
                       </form>
                     </Box>
                   </Box>

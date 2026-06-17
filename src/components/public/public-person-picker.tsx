@@ -3,18 +3,14 @@
 import { useState } from "react";
 import {
   Autocomplete,
-  Box,
   Button,
-  Chip,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 
 type PersonOption = {
   id: string;
   label: string;
-  locked: boolean;
 };
 
 type PublicPersonPickerProps = {
@@ -33,7 +29,7 @@ export function PublicPersonPicker({
   );
 
   return (
-    <form action="/solicitar">
+    <form action="/public/authenticate" method="post">
       <Stack spacing={2}>
         <Autocomplete
           options={people}
@@ -44,28 +40,6 @@ export function PublicPersonPicker({
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.label}
           noOptionsText="No hay personas activas disponibles"
-          renderOption={(props, option) => {
-            const { key, ...optionProps } = props;
-
-            return (
-              <Box key={key} component="li" {...optionProps}>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{
-                    width: "100%",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography>{option.label}</Typography>
-                  {option.locked ? (
-                    <Chip size="small" color="warning" label="PIN bloqueado" />
-                  ) : null}
-                </Stack>
-              </Box>
-            );
-          }}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -77,9 +51,10 @@ export function PublicPersonPicker({
         />
         <input
           type="hidden"
-          name="selectedPersonId"
+          name="personId"
           value={selectedPerson?.id ?? ""}
         />
+        <input type="hidden" name="returnTo" value="/solicitar" />
         <Button
           type="submit"
           variant="contained"
@@ -87,7 +62,7 @@ export function PublicPersonPicker({
           disabled={!selectedPerson}
           sx={{ alignSelf: { xs: "stretch", md: "flex-start" }, minWidth: 180 }}
         >
-          Continuar con PIN
+          Continuar
         </Button>
       </Stack>
     </form>

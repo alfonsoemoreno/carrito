@@ -88,8 +88,6 @@ export async function getCurrentPublicPerson() {
       status: true,
       phone: true,
       email: true,
-      failedPinAttempts: true,
-      pinLockedUntil: true,
     },
   });
 }
@@ -128,26 +126,6 @@ export async function listActivePeople() {
       id: true,
       firstName: true,
       lastName: true,
-      pinLockedUntil: true,
-    },
-  });
-}
-
-export async function getSelectedPerson(personId: string) {
-  if (!personId) {
-    return null;
-  }
-
-  return prisma.person.findFirst({
-    where: {
-      id: personId,
-      status: PersonStatus.ACTIVE,
-    },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      pinLockedUntil: true,
     },
   });
 }
@@ -646,18 +624,16 @@ export async function getSolicitarPageState(
 ) {
   const searchParams = await rawSearchParams;
   const personQuery = readFirstSearchParam(searchParams.personQuery).trim();
-  const selectedPersonId = readFirstSearchParam(searchParams.selectedPersonId);
   const zoneId = readFirstSearchParam(searchParams.zoneId);
   const from = readFirstSearchParam(searchParams.from);
   const to = readFirstSearchParam(searchParams.to);
   const requestedScheduleView = readFirstSearchParam(searchParams.scheduleView);
   const requestedSelectedDate = readFirstSearchParam(searchParams.selectedDate);
 
-  const [config, currentPerson, people, selectedPerson] = await Promise.all([
+  const [config, currentPerson, people] = await Promise.all([
     getPublicConfig(),
     getCurrentPublicPerson(),
     listActivePeople(),
-    getSelectedPerson(selectedPersonId),
   ]);
 
   const defaultRange = buildVisibleDateRange(config.visibleWeeks);
@@ -706,7 +682,6 @@ export async function getSolicitarPageState(
     config,
     currentPerson,
     people,
-    selectedPerson,
     zones,
     shiftBoard,
     partnerOptions,

@@ -13,7 +13,7 @@ const adminSections: AppShellSection[] = [
       {
         href: "/admin/personas",
         label: "Personas",
-        description: "Publicadores, estado y PIN.",
+        description: "Publicadores y estado.",
       },
       {
         href: "/admin/relaciones",

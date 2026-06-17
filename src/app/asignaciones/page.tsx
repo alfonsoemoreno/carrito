@@ -74,7 +74,7 @@ export default async function AsignacionesPage() {
             {!state.currentPerson ? (
               <Alert severity="info">
                 Si quieres ver tus solicitudes y asignaciones personales,
-                primero valida tu PIN en{" "}
+                primero selecciona tu nombre en{" "}
                 <Link href="/solicitar">/solicitar</Link>.
               </Alert>
             ) : null}

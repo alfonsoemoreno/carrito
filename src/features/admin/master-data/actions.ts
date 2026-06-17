@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { hashPin } from "@/lib/pin";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -11,7 +12,6 @@ import {
   createShiftBlockSchema,
   createTemplateSchema,
   createZoneSchema,
-  resetPersonPinSchema,
   updatePersonStatusSchema,
   updateZoneVisibilitySchema,
 } from "./validations";
@@ -19,6 +19,10 @@ import { parseDateOnly, parseTimeOnly } from "./utils";
 
 function booleanFromFormData(value: FormDataEntryValue | null) {
   return value === "on" || value === "true";
+}
+
+function createPlaceholderPinHash() {
+  return hashPin(randomUUID());
 }
 
 export async function createPersonAction(formData: FormData) {
@@ -30,7 +34,6 @@ export async function createPersonAction(formData: FormData) {
     phone: formData.get("phone"),
     email: formData.get("email"),
     notes: formData.get("notes"),
-    pin: formData.get("pin"),
   });
 
   await prisma.person.create({
@@ -42,7 +45,7 @@ export async function createPersonAction(formData: FormData) {
       phone: parsed.phone,
       email: parsed.email,
       notes: parsed.notes,
-      pinHash: hashPin(parsed.pin),
+      pinHash: createPlaceholderPinHash(),
       pinUpdatedAt: new Date(),
     },
   });
@@ -63,25 +66,6 @@ export async function updatePersonStatusAction(formData: FormData) {
   });
 
   revalidatePath("/admin");
-  revalidatePath("/admin/personas");
-}
-
-export async function resetPersonPinAction(formData: FormData) {
-  const parsed = resetPersonPinSchema.parse({
-    id: formData.get("id"),
-    pin: formData.get("pin"),
-  });
-
-  await prisma.person.update({
-    where: { id: parsed.id },
-    data: {
-      pinHash: hashPin(parsed.pin),
-      failedPinAttempts: 0,
-      pinLockedUntil: null,
-      pinUpdatedAt: new Date(),
-    },
-  });
-
   revalidatePath("/admin/personas");
 }
 

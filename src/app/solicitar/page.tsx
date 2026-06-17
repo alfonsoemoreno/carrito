@@ -1,5 +1,4 @@
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
-import LockOpenRoundedIcon from "@mui/icons-material/LockOpenRounded";
 import PersonSearchRoundedIcon from "@mui/icons-material/PersonSearchRounded";
 import {
   Alert,
@@ -94,8 +93,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
             >
               <Typography variant="h3">Solicitar turnos</Typography>
               <Typography variant="body1" color="text.secondary">
-                Selecciona tu usuario, valida tu PIN, elige un lugar y pide tus
-                turnos en pocos pasos.
+                Selecciona tu usuario, elige un lugar y pide tus turnos en
+                pocos pasos.
               </Typography>
             </Box>
 
@@ -117,113 +116,36 @@ export default async function SolicitarPage({ searchParams }: Props) {
             ) : null}
 
             {!state.currentPerson ? (
-              state.selectedPerson ? (
-                <Card
-                  elevation={0}
-                  sx={{
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <Stack
-                        direction="row"
-                        spacing={1.5}
-                        sx={{ alignItems: "center" }}
-                      >
-                        <LockOpenRoundedIcon color="primary" />
-                        <Typography variant="h5">2. Ingresa tu PIN</Typography>
-                      </Stack>
-                      <Typography color="text.secondary">
-                        {state.selectedPerson.firstName}{" "}
-                        {state.selectedPerson.lastName}
+              <Card
+                elevation={0}
+                sx={{
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <CardContent>
+                  <Stack spacing={3}>
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{ alignItems: "center" }}
+                    >
+                      <PersonSearchRoundedIcon color="primary" />
+                      <Typography variant="h5">
+                        1. Selecciona tu nombre
                       </Typography>
-                      <form action="/public/authenticate" method="post">
-                        <Stack spacing={2.25}>
-                          <input
-                            type="hidden"
-                            name="personId"
-                            value={state.selectedPerson.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="returnTo"
-                            value="/solicitar"
-                          />
-                          <TextField
-                            name="pin"
-                            label="PIN personal"
-                            type="password"
-                            autoFocus
-                            slotProps={{
-                              htmlInput: {
-                                inputMode: "numeric",
-                                minLength: state.config.pinMinLength,
-                                maxLength: state.config.pinMaxLength,
-                              },
-                            }}
-                            fullWidth
-                          />
-                          <Stack
-                            direction={{ xs: "column", sm: "row" }}
-                            spacing={1.25}
-                          >
-                            <Link href="/solicitar">
-                              <Button variant="outlined" fullWidth>
-                                Cambiar usuario
-                              </Button>
-                            </Link>
-                            <Button
-                              type="submit"
-                              variant="contained"
-                              size="large"
-                              fullWidth
-                            >
-                              Continuar
-                            </Button>
-                          </Stack>
-                        </Stack>
-                      </form>
                     </Stack>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card
-                  elevation={0}
-                  sx={{
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <CardContent>
-                    <Stack spacing={3}>
-                      <Stack
-                        direction="row"
-                        spacing={1.5}
-                        sx={{ alignItems: "center" }}
-                      >
-                        <PersonSearchRoundedIcon color="primary" />
-                        <Typography variant="h5">
-                          1. Selecciona tu nombre
-                        </Typography>
-                      </Stack>
-                      <PublicPersonPicker
-                        people={state.people.map((person) => ({
-                          id: person.id,
-                          label: `${person.firstName} ${person.lastName}`,
-                          locked:
-                            !!person.pinLockedUntil &&
-                            person.pinLockedUntil > new Date(),
-                        }))}
-                        selectedPersonId=""
-                      />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              )
+                    <PublicPersonPicker
+                      people={state.people.map((person) => ({
+                        id: person.id,
+                        label: `${person.firstName} ${person.lastName}`,
+                      }))}
+                      selectedPersonId=""
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
             ) : (
               <Stack spacing={3}>
                 {!selectedZone ? (

@@ -33,17 +33,11 @@ export const createPersonSchema = z.object({
     .or(z.literal(""))
     .transform((value) => value || undefined),
   notes: optionalText,
-  pin: z.string().trim().min(4).max(12),
 });
 
 export const updatePersonStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.nativeEnum(PersonStatus),
-});
-
-export const resetPersonPinSchema = z.object({
-  id: z.string().uuid(),
-  pin: z.string().trim().min(4).max(12),
 });
 
 export const createRelationshipSchema = z.object({

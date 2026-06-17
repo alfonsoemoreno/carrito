@@ -160,8 +160,9 @@ export default async function AsignacionesCalendarioPage({
 
             {!state.currentPerson ? (
               <Alert severity="info">
-                Para ver los nombres y el calendario general, primero valida tu
-                PIN en <Link href="/solicitar">/solicitar</Link>.
+                Para ver los nombres y el calendario general, primero
+                selecciona tu nombre en{" "}
+                <Link href="/solicitar">/solicitar</Link>.
               </Alert>
             ) : state.assignments.length === 0 ? (
               <Alert severity="info">

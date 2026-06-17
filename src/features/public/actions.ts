@@ -10,10 +10,8 @@ import {
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { verifyPin } from "@/lib/pin";
 import {
   clearPublicSession,
-  createPublicSession,
   getPublicSession,
 } from "@/features/public/session";
 import {
@@ -47,7 +45,7 @@ async function requireSessionPerson() {
   const session = await getPublicSession();
 
   if (!session?.personId) {
-    throw new Error("Debes validar tu PIN para continuar.");
+    throw new Error("Debes seleccionar tu nombre para continuar.");
   }
 
   const person = await prisma.person.findFirst({
@@ -117,122 +115,6 @@ async function isValidSuggestedPartner(
       RelationshipType.PARENT_CHILD,
       RelationshipType.ADMIN_EXCEPTION,
     ].includes(relationship.type),
-  );
-}
-
-export async function authenticatePublicPersonAction(formData: FormData) {
-  const personId = String(formData.get("personId") ?? "");
-  const pin = String(formData.get("pin") ?? "").trim();
-  const returnTo = String(formData.get("returnTo") ?? "/solicitar");
-
-  if (!personId) {
-    redirectTo(
-      buildRedirect(returnTo, {
-        authError: "Selecciona una persona antes de ingresar el PIN.",
-      }),
-    );
-  }
-
-  const config = await prisma.systemConfig.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: {
-      pinMinLength: true,
-      pinMaxLength: true,
-      pinMaxAttempts: true,
-      pinLockMinutes: true,
-    },
-  });
-
-  const policy = {
-    pinMinLength: config?.pinMinLength ?? 4,
-    pinMaxLength: config?.pinMaxLength ?? 8,
-    pinMaxAttempts: config?.pinMaxAttempts ?? 5,
-    pinLockMinutes: config?.pinLockMinutes ?? 15,
-  };
-
-  const person = await prisma.person.findFirst({
-    where: {
-      id: personId,
-      status: PersonStatus.ACTIVE,
-    },
-  });
-
-  if (!person) {
-    redirectTo(
-      buildRedirect(returnTo, {
-        authError: "La persona seleccionada ya no esta disponible.",
-      }),
-    );
-  }
-
-  if (pin.length < policy.pinMinLength || pin.length > policy.pinMaxLength) {
-    redirectTo(
-      buildRedirect(returnTo, {
-        selectedPersonId: personId,
-        authError: `El PIN debe tener entre ${policy.pinMinLength} y ${policy.pinMaxLength} digitos.`,
-      }),
-    );
-  }
-
-  if (person.pinLockedUntil && person.pinLockedUntil > new Date()) {
-    redirectTo(
-      buildRedirect(returnTo, {
-        selectedPersonId: personId,
-        authError: "El PIN esta bloqueado temporalmente. Intenta mas tarde.",
-      }),
-    );
-  }
-
-  const validPin = verifyPin(pin, person.pinHash);
-
-  if (!validPin) {
-    const nextAttempts = person.failedPinAttempts + 1;
-    const shouldLock = nextAttempts >= policy.pinMaxAttempts;
-
-    await prisma.person.update({
-      where: { id: person.id },
-      data: {
-        failedPinAttempts: shouldLock ? 0 : nextAttempts,
-        pinLockedUntil: shouldLock
-          ? new Date(Date.now() + policy.pinLockMinutes * 60 * 1000)
-          : null,
-      },
-    });
-
-    redirectTo(
-      buildRedirect(returnTo, {
-        selectedPersonId: personId,
-        authError: shouldLock
-          ? "Se alcanzo el maximo de intentos. El PIN quedo bloqueado temporalmente."
-          : "El PIN ingresado no coincide.",
-      }),
-    );
-  }
-
-  await prisma.person.update({
-    where: { id: person.id },
-    data: {
-      failedPinAttempts: 0,
-      pinLockedUntil: null,
-    },
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      actorType: "PUBLIC_PERSON",
-      entityType: "public_session",
-      entityId: person.id,
-      actorPersonId: person.id,
-      action: "PIN_AUTHENTICATED",
-      afterData: {
-        at: new Date().toISOString(),
-      },
-    },
-  });
-
-  await createPublicSession(person.id);
-  redirectTo(
-    buildRedirect(returnTo, { notice: "PIN validado correctamente." }),
   );
 }
 
