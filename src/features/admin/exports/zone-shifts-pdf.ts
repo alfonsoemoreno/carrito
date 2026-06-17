@@ -417,8 +417,10 @@ function buildPdfDocument(pages: PageState[]) {
   const pagesId = 3;
   let nextObjectId = 4;
 
-  objects[fontRegularId] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`;
-  objects[fontBoldId] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>`;
+  objects[fontRegularId] =
+    `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objects[fontBoldId] =
+    `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
 
   const pageObjectIds: number[] = [];
 
