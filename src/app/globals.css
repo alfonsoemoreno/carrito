@@ -67,6 +67,20 @@
   }
 }
 
+@keyframes actionSlide {
+  0% {
+    transform: translateX(-115%);
+  }
+
+  55% {
+    transform: translateX(180%);
+  }
+
+  100% {
+    transform: translateX(180%);
+  }
+}
+
 html {
   height: 100%;
 }

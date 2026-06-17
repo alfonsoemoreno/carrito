@@ -28,6 +28,7 @@ const ActionFeedbackContext = createContext<ActionFeedbackContextValue | null>(
 );
 
 const DEFAULT_MESSAGE = "Estamos procesando tu solicitud.";
+const DEFAULT_TITLE = "Procesando";
 
 export function ActionFeedbackProvider({
   children,
@@ -124,31 +125,30 @@ export function ActionFeedbackProvider({
           >
             <Box
               sx={{
-                width: "min(100%, 420px)",
-                borderRadius: 6,
+                width: "min(100%, 440px)",
+                borderRadius: 5,
                 overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.42)",
-                background:
-                  "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(244,247,252,0.92))",
+                border: "1px solid rgba(22, 34, 54, 0.14)",
+                background: "#ffffff",
                 boxShadow:
-                  "0 28px 80px rgba(10, 16, 28, 0.34), inset 0 1px 0 rgba(255,255,255,0.75)",
+                  "0 28px 80px rgba(10, 16, 28, 0.34), 0 8px 24px rgba(10, 16, 28, 0.14)",
               }}
             >
               <Box
                 sx={{
-                  px: 3,
-                  pt: 3,
-                  pb: 1.5,
-                  background:
-                    "linear-gradient(180deg, rgba(74,109,167,0.12), rgba(74,109,167,0))",
+                  px: 3.5,
+                  pt: 3.5,
+                  pb: 2,
+                  borderBottom: "1px solid #e4e9f1",
+                  background: "linear-gradient(180deg, #f7faff, #ffffff)",
                 }}
               >
                 <Stack spacing={2.5} sx={{ alignItems: "center" }}>
                   <Box
                     sx={{
                       position: "relative",
-                      width: 96,
-                      height: 96,
+                      width: 112,
+                      height: 112,
                       display: "grid",
                       placeItems: "center",
                     }}
@@ -159,45 +159,76 @@ export function ActionFeedbackProvider({
                         inset: 0,
                         borderRadius: "50%",
                         background:
-                          "radial-gradient(circle, rgba(74,109,167,0.28), rgba(74,109,167,0.02) 68%)",
+                          "radial-gradient(circle, rgba(74,109,167,0.22), rgba(74,109,167,0.03) 66%, rgba(74,109,167,0) 72%)",
                         animation: "actionHalo 1800ms ease-in-out infinite",
                       }}
                     />
                     <Box
                       sx={{
                         position: "absolute",
-                        inset: 10,
+                        inset: 12,
                         borderRadius: "50%",
-                        border: "3px solid rgba(74,109,167,0.18)",
+                        border: "6px solid rgba(74,109,167,0.14)",
                         borderTopColor: "var(--app-accent)",
+                        borderRightColor: "var(--app-accent-strong)",
                         animation: "actionSpin 980ms linear infinite",
                       }}
                     />
                     <Box
                       sx={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: "50%",
+                        width: 52,
+                        height: 52,
+                        borderRadius: 3,
                         background:
-                          "linear-gradient(145deg, var(--app-accent), var(--app-accent-deep))",
+                        "linear-gradient(145deg, var(--app-accent), var(--app-accent-deep))",
                         boxShadow: "0 14px 30px rgba(74,109,167,0.34)",
+                        display: "grid",
+                        placeItems: "center",
+                        color: "#ffffff",
+                        fontSize: "1.3rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.04em",
                       }}
-                    />
+                    >
+                      ...
+                    </Box>
                   </Box>
 
                   <Stack spacing={1} sx={{ alignItems: "center" }}>
                     <Typography
-                      variant="h5"
-                      sx={{ textAlign: "center", color: "#1f2a3d" }}
+                      component="div"
+                      sx={{
+                        fontSize: "0.72rem",
+                        lineHeight: 1,
+                        fontWeight: 800,
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "var(--app-accent-deep)",
+                      }}
                     >
-                      Procesando acción
+                      Acción en curso
                     </Typography>
                     <Typography
-                      variant="body2"
+                      component="h2"
                       sx={{
                         textAlign: "center",
-                        color: "#5f6c80",
-                        maxWidth: 300,
+                        color: "#142033",
+                        fontSize: "1.45rem",
+                        lineHeight: 1.15,
+                        fontWeight: 800,
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      {DEFAULT_TITLE}
+                    </Typography>
+                    <Typography
+                      component="p"
+                      sx={{
+                        textAlign: "center",
+                        color: "#445268",
+                        fontSize: "0.98rem",
+                        lineHeight: 1.5,
+                        maxWidth: 320,
                       }}
                     >
                       {message}
@@ -206,26 +237,38 @@ export function ActionFeedbackProvider({
                 </Stack>
               </Box>
 
-              <Box sx={{ px: 3, pb: 3 }}>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  {[0, 1, 2].map((index) => (
+              <Box sx={{ px: 3.5, py: 2.25, backgroundColor: "#fbfcff" }}>
+                <Stack spacing={1.25}>
+                  <Box
+                    sx={{
+                      height: 8,
+                      borderRadius: 999,
+                      overflow: "hidden",
+                      backgroundColor: "#dce5f2",
+                    }}
+                  >
                     <Box
-                      key={index}
                       sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        backgroundColor: "var(--app-accent)",
-                        opacity: 0.9,
-                        animation: "actionPulse 900ms ease-in-out infinite",
-                        animationDelay: `${index * 140}ms`,
+                        width: "42%",
+                        height: "100%",
+                        borderRadius: 999,
+                        background:
+                          "linear-gradient(90deg, var(--app-accent), #7ea2dc)",
+                        animation: "actionSlide 1200ms ease-in-out infinite",
                       }}
                     />
-                  ))}
+                  </Box>
+                  <Typography
+                    component="p"
+                    sx={{
+                      textAlign: "center",
+                      color: "#607086",
+                      fontSize: "0.84rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    No cierres esta ventana mientras terminamos.
+                  </Typography>
                 </Stack>
               </Box>
             </Box>
