@@ -33,9 +33,9 @@ export function AppShellFooter({
       component="footer"
       sx={{
         mt: "auto",
-        borderTop: "1px solid #d7dde6",
-        backgroundColor: "#edf1f5",
-        color: "#1f2a37",
+        borderTop: "1px solid var(--app-border)",
+        backgroundColor: "var(--app-surface-muted)",
+        color: "var(--app-ink)",
       }}
     >
       <Container maxWidth="lg">
@@ -49,7 +49,7 @@ export function AppShellFooter({
             <Box>
               <Typography
                 sx={{
-                  color: "#566270",
+                  color: "var(--app-form-label)",
                   fontSize: "0.76rem",
                   fontWeight: 700,
                   letterSpacing: "0.08em",
@@ -61,7 +61,7 @@ export function AppShellFooter({
               <Typography
                 sx={{
                   mt: 0.75,
-                  color: "#22314a",
+                  color: "var(--app-ink)",
                   fontSize: { xs: "1.35rem", md: "1.55rem" },
                   fontWeight: 500,
                   lineHeight: 1.2,
@@ -74,7 +74,10 @@ export function AppShellFooter({
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "repeat(4, minmax(0, 1fr))" },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(4, minmax(0, 1fr))",
+                },
                 gap: { xs: 3, md: 4.5 },
               }}
             >
@@ -82,7 +85,7 @@ export function AppShellFooter({
                 <Stack key={column.title} spacing={1.1}>
                   <Typography
                     sx={{
-                      color: "#34445e",
+                      color: "var(--app-ink)",
                       fontSize: "0.97rem",
                       fontWeight: 700,
                     }}
@@ -90,14 +93,17 @@ export function AppShellFooter({
                     {column.title}
                   </Typography>
                   {column.links.map((link) => (
-                    <Link key={`${column.title}-${link.href}-${link.label}`} href={link.href as never}>
+                    <Link
+                      key={`${column.title}-${link.href}-${link.label}`}
+                      href={link.href as never}
+                    >
                       <Typography
                         sx={{
-                          color: "#4a6da7",
+                          color: "var(--app-accent)",
                           fontSize: "0.95rem",
                           lineHeight: 1.45,
                           "&:hover": {
-                            color: "#36588f",
+                            color: "var(--app-accent-strong)",
                           },
                         }}
                       >
@@ -109,7 +115,7 @@ export function AppShellFooter({
               ))}
             </Box>
 
-            <Divider sx={{ borderColor: "#d6dce4" }} />
+            <Divider sx={{ borderColor: "var(--app-border)" }} />
 
             <Box
               sx={{
@@ -128,10 +134,13 @@ export function AppShellFooter({
                 }}
               >
                 {productLinks.map((link) => (
-                  <Link key={`product-${link.href}-${link.label}`} href={link.href as never}>
+                  <Link
+                    key={`product-${link.href}-${link.label}`}
+                    href={link.href as never}
+                  >
                     <Typography
                       sx={{
-                        color: "#34445e",
+                        color: "var(--app-ink)",
                         fontSize: "0.9rem",
                         fontWeight: 500,
                         textTransform: "uppercase",
@@ -151,16 +160,23 @@ export function AppShellFooter({
                   alignItems: "center",
                 }}
               >
-                <Typography sx={{ color: "#596678", fontSize: "0.86rem" }}>{copyright}</Typography>
+                <Typography
+                  sx={{ color: "var(--app-muted)", fontSize: "0.86rem" }}
+                >
+                  {copyright}
+                </Typography>
                 {legalLinks.map((link) => (
-                  <Link key={`legal-${link.href}-${link.label}`} href={link.href as never}>
+                  <Link
+                    key={`legal-${link.href}-${link.label}`}
+                    href={link.href as never}
+                  >
                     <Typography
                       sx={{
-                        color: "#596678",
+                        color: "var(--app-muted)",
                         fontSize: "0.86rem",
                         fontWeight: 500,
                         "&:hover": {
-                          color: "#34445e",
+                          color: "var(--app-ink)",
                         },
                       }}
                     >

@@ -99,8 +99,8 @@ function DesktopDropdownPanel({
           }}
           sx={{
             position: "relative",
-            backgroundColor: "#ffffff",
-            border: "1px solid #d7dbe2",
+            backgroundColor: "var(--app-surface)",
+            border: "1px solid var(--app-border)",
             borderTop: "none",
             boxShadow: "0 24px 54px rgba(15, 22, 36, 0.18)",
             overflow: "visible",
@@ -113,9 +113,9 @@ function DesktopDropdownPanel({
               left: `${Math.max(panelInset + 18, pointerOffset - panelInset)}px`,
               width: 18,
               height: 18,
-              backgroundColor: "#ffffff",
-              borderLeft: "1px solid #d7dbe2",
-              borderTop: "1px solid #d7dbe2",
+              backgroundColor: "var(--app-surface)",
+              borderLeft: "1px solid var(--app-border)",
+              borderTop: "1px solid var(--app-border)",
               transform: "translateX(-50%) rotate(45deg)",
             }}
           />
@@ -127,7 +127,7 @@ function DesktopDropdownPanel({
               position: "absolute",
               top: 20,
               right: 22,
-              color: "#5f6670",
+              color: "var(--app-muted)",
             }}
           >
             <CloseRoundedIcon />
@@ -159,7 +159,7 @@ function DesktopDropdownPanel({
 
             <Divider
               sx={{
-                borderColor: "#dde2e8",
+                borderColor: "var(--app-border)",
                 mb: 4.5,
                 marginLeft: "12px",
                 marginRight: "12px",
@@ -203,7 +203,7 @@ function DesktopDropdownPanel({
                         sx={{
                           borderRadius: "2px",
                           "&:hover": {
-                            backgroundColor: "#f5f7fb",
+                            backgroundColor: "var(--app-surface-muted)",
                           },
                         }}
                       >
@@ -220,7 +220,7 @@ function DesktopDropdownPanel({
                         <Typography
                           sx={{
                             mt: 0.35,
-                            color: "#6c7682",
+                            color: "var(--app-muted)",
                             fontSize: "0.95rem",
                           }}
                         >
@@ -266,9 +266,9 @@ function MobileMenu({
         left: 0,
         right: 0,
         zIndex: 60,
-        backgroundColor: "rgba(255,255,255,0.98)",
-        borderTop: "1px solid #d7dbe2",
-        borderBottom: "1px solid #d7dbe2",
+        backgroundColor: "var(--app-surface)",
+        borderTop: "1px solid var(--app-border)",
+        borderBottom: "1px solid var(--app-border)",
         boxShadow: "0 16px 40px rgba(15, 22, 36, 0.18)",
         backdropFilter: "blur(8px)",
       }}
@@ -279,9 +279,9 @@ function MobileMenu({
             <Box
               key={section.label}
               sx={{
-                border: "1px solid #dde2e8",
+                border: "1px solid var(--app-border)",
                 borderRadius: "10px",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--app-surface)",
                 overflow: "hidden",
               }}
             >
@@ -295,7 +295,7 @@ function MobileMenu({
                       fontWeight: 700,
                       color: isActiveHref(section.href)
                         ? "var(--app-accent-deep)"
-                        : "#1d1d1d",
+                        : "var(--app-ink)",
                       fontSize: "1rem",
                       backgroundColor: isActiveHref(section.href)
                         ? "rgba(74, 109, 167, 0.08)"
@@ -312,7 +312,7 @@ function MobileMenu({
                   <Typography
                     sx={{
                       fontWeight: 700,
-                      color: "#495463",
+                      color: "var(--app-form-label)",
                       fontSize: "0.78rem",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
@@ -337,7 +337,7 @@ function MobileMenu({
                             borderRadius: "8px",
                             backgroundColor: isActiveHref(item.href)
                               ? "rgba(74, 109, 167, 0.1)"
-                              : "#f7f9fc",
+                              : "var(--app-surface-muted)",
                             border: isActiveHref(item.href)
                               ? "1px solid rgba(74, 109, 167, 0.22)"
                               : "1px solid transparent",
@@ -355,7 +355,7 @@ function MobileMenu({
                           </Typography>
                           <Typography
                             sx={{
-                              color: "#6c7682",
+                              color: "var(--app-muted)",
                               fontSize: "0.94rem",
                               mt: 0.45,
                               lineHeight: 1.5,
@@ -516,8 +516,8 @@ export function AppShellHeader({
     <Box component="header" sx={{ position: "relative", zIndex: 30 }}>
       <Box
         sx={{
-          backgroundColor: "#ffffff",
-          borderBottom: "1px solid #d8dce2",
+          backgroundColor: "var(--app-header)",
+          borderBottom: "1px solid var(--app-border)",
         }}
       >
         <Container
@@ -561,14 +561,14 @@ export function AppShellHeader({
                       borderRadius: "11px",
                       boxShadow:
                         "0 10px 24px rgba(19, 33, 63, 0.12), 0 1px 0 rgba(255,255,255,0.85) inset",
-                      backgroundColor: "#ffffff",
+                      backgroundColor: "var(--app-surface)",
                     }}
                   />
                 </Box>
                 <Box style={{ marginLeft: "0px" }} sx={{ minWidth: 0 }}>
                   <Typography
                     sx={{
-                      color: "#3f3f3f",
+                      color: "var(--app-ink)",
                       fontSize: { xs: "1.3rem", md: "1.14rem", lg: "1.34rem" },
                       lineHeight: 1.08,
                       fontWeight: 400,
@@ -579,7 +579,7 @@ export function AppShellHeader({
                   </Typography>
                   <Typography
                     sx={{
-                      color: "#666a70",
+                      color: "var(--app-muted)",
                       fontSize: "0.82rem",
                       lineHeight: 1.2,
                       mt: 0.2,
@@ -600,8 +600,8 @@ export function AppShellHeader({
                   onClick={() => setMobileOpen((current) => !current)}
                   sx={{
                     display: { xs: "inline-flex", md: "none" },
-                    color: "#4b4f55",
-                    border: "1px solid #cfd4dc",
+                    color: "var(--app-muted)",
+                    border: "1px solid var(--app-border)",
                     borderRadius: 0,
                   }}
                 >

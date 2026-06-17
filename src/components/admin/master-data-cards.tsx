@@ -95,7 +95,7 @@ export function SwitchField({
         border: "1px solid",
         borderColor: "var(--app-form-border)",
         borderRadius: "4px",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--app-form-fill)",
         boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
       }}
     >
@@ -122,7 +122,7 @@ export function SwitchField({
         <Box>
           <Typography
             variant="body2"
-            sx={{ color: "#233043", fontWeight: 700 }}
+            sx={{ color: "var(--app-ink)", fontWeight: 700 }}
           >
             {label}
           </Typography>
@@ -176,8 +176,8 @@ export function SwitchField({
               width: 48,
               height: 28,
               borderRadius: 999,
-              border: "1px solid #b7c0cb",
-              backgroundColor: "#cfd6de",
+              border: "1px solid var(--app-form-border)",
+              backgroundColor: "var(--app-form-border-strong)",
               p: "2px",
               display: "flex",
               alignItems: "center",
@@ -192,7 +192,7 @@ export function SwitchField({
                 width: 22,
                 height: 22,
                 borderRadius: "50%",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--app-surface)",
                 boxShadow: "0 2px 6px rgba(17, 17, 17, 0.24)",
                 transition: "transform 160ms ease",
               }}
@@ -212,7 +212,7 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
         border: "1px dashed",
         borderColor: "divider",
         p: 3,
-        backgroundColor: "rgba(255,255,255,0.55)",
+        backgroundColor: "var(--app-surface-muted)",
       }}
     >
       <Typography variant="h6">{title}</Typography>

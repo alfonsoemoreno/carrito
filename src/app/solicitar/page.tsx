@@ -96,8 +96,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
             >
               <Typography variant="h3">Solicitar turnos</Typography>
               <Typography variant="body1" color="text.secondary">
-                Selecciona tu usuario, elige un lugar y pide tus turnos en
-                pocos pasos.
+                Selecciona tu usuario, elige un lugar y pide tus turnos en pocos
+                pasos.
               </Typography>
             </Box>
 
@@ -318,7 +318,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                           borderRadius: 3,
                                           border: "1px solid",
                                           borderColor: "divider",
-                                          backgroundColor: "#ffffff",
+                                          backgroundColor: "var(--app-surface)",
                                         }}
                                       >
                                         <CardContent
@@ -455,7 +455,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                     icon={
                                                       <CheckBoxOutlineBlankRoundedIcon
                                                         sx={{
-                                                          color: "#ffffff",
+                                                          color:
+                                                            "var(--app-form-border-strong)",
                                                           fontSize: 22,
                                                           filter:
                                                             "drop-shadow(0 0 0.6px rgba(109, 123, 145, 0.95))",
@@ -479,7 +480,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                       flexShrink: 0,
                                                       ml: 0.5,
                                                       p: 0.5,
-                                                      color: "#ffffff",
+                                                      color:
+                                                        "var(--app-form-border-strong)",
                                                       "&:hover": {
                                                         backgroundColor:
                                                           "rgba(74, 109, 167, 0.08)",

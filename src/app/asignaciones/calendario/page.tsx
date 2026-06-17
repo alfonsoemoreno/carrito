@@ -160,9 +160,8 @@ export default async function AsignacionesCalendarioPage({
 
             {!state.currentPerson ? (
               <Alert severity="info">
-                Para ver los nombres y el calendario general, primero
-                selecciona tu nombre en{" "}
-                <Link href="/solicitar">/solicitar</Link>.
+                Para ver los nombres y el calendario general, primero selecciona
+                tu nombre en <Link href="/solicitar">/solicitar</Link>.
               </Alert>
             ) : state.assignments.length === 0 ? (
               <Alert severity="info">
@@ -177,7 +176,7 @@ export default async function AsignacionesCalendarioPage({
                     border: "1px solid",
                     borderColor: "divider",
                     background:
-                      "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(244,239,230,0.96))",
+                      "linear-gradient(135deg, color-mix(in srgb, var(--app-surface) 92%, var(--app-accent) 8%), var(--app-surface-muted))",
                   }}
                 >
                   <CardContent>
@@ -276,7 +275,7 @@ export default async function AsignacionesCalendarioPage({
                     border: "1px solid",
                     borderColor: "divider",
                     background:
-                      "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,245,240,0.96))",
+                      "linear-gradient(135deg, color-mix(in srgb, var(--app-surface) 94%, var(--app-accent) 6%), var(--app-surface-muted))",
                   }}
                 >
                   <CardContent>
@@ -348,14 +347,14 @@ export default async function AsignacionesCalendarioPage({
                               ? "primary.main"
                               : isWithinVisibleRange
                                 ? "divider"
-                                : "rgba(29, 36, 32, 0.08)",
+                                : "var(--app-border)",
                           backgroundColor: isWithinVisibleRange
-                            ? "#fffdf9"
-                            : "#f6f2ea",
+                            ? "var(--app-surface)"
+                            : "var(--app-surface-muted)",
                           opacity: isWithinVisibleRange ? 1 : 0.72,
                           boxShadow:
                             dayKey === selectedDayKey
-                              ? "0 0 0 2px rgba(20, 99, 86, 0.14)"
+                              ? "0 0 0 2px rgba(134, 169, 235, 0.2)"
                               : "none",
                         }}
                       >

@@ -7,6 +7,7 @@ import {
   Modal,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import {
   createContext,
@@ -30,11 +31,9 @@ const ActionFeedbackContext = createContext<ActionFeedbackContextValue | null>(
 const DEFAULT_MESSAGE = "Estamos procesando tu solicitud.";
 const DEFAULT_TITLE = "Procesando";
 
-export function ActionFeedbackProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ActionFeedbackProvider({ children }: { children: ReactNode }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
 
@@ -106,7 +105,9 @@ export function ActionFeedbackProvider({
           backdrop: {
             timeout: 260,
             sx: {
-              background: "rgba(255,255,255,0.98)",
+              background: isDarkMode
+                ? "rgba(6, 10, 16, 0.76)"
+                : "rgba(255,255,255,0.98)",
               backdropFilter: "blur(4px)",
             },
           },
@@ -121,7 +122,7 @@ export function ActionFeedbackProvider({
               justifyContent: "center",
               p: 2,
               background:
-                "radial-gradient(circle at 50% 42%, rgba(112, 161, 221, 0.08), rgba(255,255,255,0) 28%)",
+                "radial-gradient(circle at 50% 42%, rgba(112, 161, 221, 0.12), rgba(255,255,255,0) 28%)",
             }}
           >
             <Stack
@@ -149,14 +150,13 @@ export function ActionFeedbackProvider({
                     background:
                       "conic-gradient(from 220deg, #6ec7c8 0deg, #5c8fda 120deg, #7474dc 220deg, #1e2f63 310deg, #6ec7c8 360deg)",
                     animation: "actionSpin 1400ms linear infinite",
-                    filter:
-                      "drop-shadow(0 18px 34px rgba(71, 96, 158, 0.16))",
+                    filter: "drop-shadow(0 18px 34px rgba(71, 96, 158, 0.16))",
                     "&::before": {
                       content: '""',
                       position: "absolute",
                       inset: 14,
                       borderRadius: "50%",
-                      background: "#ffffff",
+                      background: "var(--app-surface)",
                     },
                   }}
                 />
@@ -175,7 +175,7 @@ export function ActionFeedbackProvider({
                   component="h2"
                   sx={{
                     textAlign: "center",
-                    color: "#202939",
+                    color: "var(--app-ink)",
                     fontSize: "clamp(1.5rem, 2vw, 1.85rem)",
                     lineHeight: 1.1,
                     fontWeight: 500,
@@ -188,7 +188,7 @@ export function ActionFeedbackProvider({
                   component="p"
                   sx={{
                     textAlign: "center",
-                    color: "#566273",
+                    color: "var(--app-muted)",
                     fontSize: "1rem",
                     lineHeight: 1.5,
                     maxWidth: 280,
