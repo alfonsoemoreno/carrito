@@ -40,6 +40,10 @@ export const updatePersonStatusSchema = z.object({
   status: z.nativeEnum(PersonStatus),
 });
 
+export const deletePersonSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export const createRelationshipSchema = z.object({
   personAId: z.string().uuid(),
   personBId: z.string().uuid(),
@@ -114,3 +118,7 @@ export const createAvailabilitySchema = z
     path: ["endDate"],
     message: "La fecha final no puede ser anterior a la inicial.",
   });
+
+export const deleteAvailabilitySchema = z.object({
+  id: z.string().uuid(),
+});

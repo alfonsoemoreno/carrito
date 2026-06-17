@@ -6,11 +6,38 @@ import {
   generateMissingFutureShifts,
   refreshFutureShiftStatuses,
 } from "@/features/admin/automation/service";
+import { prisma } from "@/lib/prisma";
+import { automationHorizonWeeksSchema } from "./validations";
 
-export async function generateMissingFutureShiftsAction() {
+async function persistAutomationHorizonWeeks(adminId: string, weeks: number) {
+  await prisma.systemConfig.upsert({
+    where: {
+      configKey: "default",
+    },
+    create: {
+      configKey: "default",
+      congregationName: "Congregación",
+      city: "Ciudad",
+      systemName: "Carrito",
+      generateFutureWeeks: weeks,
+      updatedByAdminId: adminId,
+    },
+    update: {
+      generateFutureWeeks: weeks,
+      updatedByAdminId: adminId,
+    },
+  });
+}
+
+export async function generateMissingFutureShiftsAction(formData: FormData) {
   const admin = await requireCurrentAdminActor();
-  await generateMissingFutureShifts(admin.id);
-  await refreshFutureShiftStatuses(admin.id);
+  const parsed = automationHorizonWeeksSchema.parse({
+    weeks: formData.get("weeks"),
+  });
+
+  await persistAutomationHorizonWeeks(admin.id, parsed.weeks);
+  await generateMissingFutureShifts(admin.id, parsed.weeks);
+  await refreshFutureShiftStatuses(admin.id, parsed.weeks);
 
   revalidatePath("/admin");
   revalidatePath("/admin/automatizacion");
@@ -18,9 +45,14 @@ export async function generateMissingFutureShiftsAction() {
   revalidatePath("/asignaciones");
 }
 
-export async function refreshShiftStatusesAction() {
+export async function refreshShiftStatusesAction(formData: FormData) {
   const admin = await requireCurrentAdminActor();
-  await refreshFutureShiftStatuses(admin.id);
+  const parsed = automationHorizonWeeksSchema.parse({
+    weeks: formData.get("weeks"),
+  });
+
+  await persistAutomationHorizonWeeks(admin.id, parsed.weeks);
+  await refreshFutureShiftStatuses(admin.id, parsed.weeks);
 
   revalidatePath("/admin");
   revalidatePath("/admin/automatizacion");

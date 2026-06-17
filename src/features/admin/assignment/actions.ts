@@ -28,44 +28,51 @@ function buildShiftRedirect(shiftId: string, params: Record<string, string | nul
 }
 
 export async function rejectShiftRequestAction(formData: FormData) {
-  const parsed = rejectShiftRequestSchema.parse({
+  const parsed = rejectShiftRequestSchema.safeParse({
     requestId: formData.get("requestId"),
     shiftId: formData.get("shiftId"),
     reason: formData.get("reason"),
   });
 
+  if (!parsed.success) {
+    const shiftId = String(formData.get("shiftId") ?? "");
+    const error =
+      parsed.error.issues[0]?.message ?? "Debes indicar un motivo valido para rechazar la solicitud.";
+    redirectTo(buildShiftRedirect(shiftId, { error }));
+  }
+
   const admin = await requireCurrentAdminActor();
 
   const request = await prisma.shiftRequest.findFirst({
     where: {
-      id: parsed.requestId,
-      shiftId: parsed.shiftId,
+      id: parsed.data.requestId,
+      shiftId: parsed.data.shiftId,
       status: ShiftRequestStatus.PENDING,
     },
   });
 
   if (!request) {
-    redirectTo(buildShiftRedirect(parsed.shiftId, { error: "La solicitud ya no esta pendiente." }));
+    redirectTo(buildShiftRedirect(parsed.data.shiftId, { error: "La solicitud ya no esta pendiente." }));
   }
 
   await prisma.$transaction([
     prisma.shiftRequest.update({
-      where: { id: parsed.requestId },
+      where: { id: parsed.data.requestId },
       data: {
         status: ShiftRequestStatus.REJECTED,
         resolvedAt: new Date(),
-        comments: appendAdminNote(request.comments, `Rechazada: ${parsed.reason}`),
+        comments: appendAdminNote(request.comments, `Rechazada: ${parsed.data.reason}`),
       },
     }),
     prisma.auditLog.create({
       data: {
         actorType: "ADMIN",
         entityType: "shift_request",
-        entityId: parsed.requestId,
+        entityId: parsed.data.requestId,
         actorAdminId: admin.id,
         action: "SHIFT_REQUEST_REJECTED",
         afterData: {
-          reason: parsed.reason,
+          reason: parsed.data.reason,
         },
       },
     }),
@@ -73,8 +80,8 @@ export async function rejectShiftRequestAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/solicitudes");
-  revalidatePath(`/admin/turnos/${parsed.shiftId}`);
-  redirectTo(buildShiftRedirect(parsed.shiftId, { notice: "Solicitud rechazada." }));
+  revalidatePath(`/admin/turnos/${parsed.data.shiftId}`);
+  redirectTo(buildShiftRedirect(parsed.data.shiftId, { notice: "Solicitud rechazada." }));
 }
 
 export async function confirmShiftAssignmentAction(formData: FormData) {

@@ -7,7 +7,9 @@ import {
   CardContent,
   Chip,
   Container,
+  MenuItem,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
@@ -26,6 +28,7 @@ import { formatDate } from "@/features/admin/master-data/utils";
 export default async function AdminAutomationPage() {
   await requireCurrentAdminPageAccess();
   const data = await getAutomationDashboardData();
+  const horizonWeekOptions = Array.from({ length: 24 }, (_, index) => index + 1);
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
@@ -93,21 +96,58 @@ export default async function AdminAutomationPage() {
                   Modo mantenimiento:{" "}
                   {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
                 </Typography>
+                <Typography color="text.secondary">
+                  Selecciona cuantas semanas debe abarcar la generacion de nuevos turnos y el recálculo operativo.
+                </Typography>
                 <form action={generateMissingFutureShiftsAction}>
-                  <ActionSubmitButton
-                    variant="contained"
-                    loadingMessage="Estamos generando los turnos faltantes."
-                  >
-                    Generar turnos faltantes ahora
-                  </ActionSubmitButton>
+                  <Stack spacing={1.5}>
+                    <TextField
+                      select
+                      name="weeks"
+                      label="Semanas a procesar"
+                      defaultValue={String(data.config?.generateFutureWeeks ?? 8)}
+                      size="small"
+                      fullWidth
+                      helperText="Este valor se guardará como horizonte operativo para próximas ejecuciones."
+                    >
+                      {horizonWeekOptions.map((weeks) => (
+                        <MenuItem key={`generate-${weeks}`} value={String(weeks)}>
+                          {weeks} {weeks === 1 ? "semana" : "semanas"}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <ActionSubmitButton
+                      variant="contained"
+                      loadingMessage="Estamos generando los turnos faltantes."
+                    >
+                      Generar turnos faltantes ahora
+                    </ActionSubmitButton>
+                  </Stack>
                 </form>
                 <form action={refreshShiftStatusesAction}>
-                  <ActionSubmitButton
-                    variant="outlined"
-                    loadingMessage="Estamos recalculando los estados operativos."
-                  >
-                    Recalcular estados operativos
-                  </ActionSubmitButton>
+                  <Stack spacing={1.5}>
+                    <TextField
+                      select
+                      name="weeks"
+                      label="Semanas a recalcular"
+                      defaultValue={String(data.config?.generateFutureWeeks ?? 8)}
+                      size="small"
+                      fullWidth
+                      helperText="Se revisarán turnos desde la última semana hasta el horizonte seleccionado."
+                    >
+                      {horizonWeekOptions.map((weeks) => (
+                        <MenuItem key={`refresh-${weeks}`} value={String(weeks)}>
+                          {weeks} {weeks === 1 ? "semana" : "semanas"}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <ActionSubmitButton
+                      variant="outlined"
+                      loadingMessage="Estamos recalculando los estados operativos."
+                    >
+                      Recalcular estados operativos
+                    </ActionSubmitButton>
+                  </Stack>
                 </form>
               </Stack>
             </FormCard>

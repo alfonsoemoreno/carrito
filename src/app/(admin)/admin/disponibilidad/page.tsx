@@ -1,8 +1,12 @@
-import { createAvailabilityAction } from "@/features/admin/master-data/actions";
+import {
+  createAvailabilityAction,
+  deleteAvailabilityAction,
+} from "@/features/admin/master-data/actions";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getMasterDataPageData } from "@/features/admin/master-data/queries";
 import { formatDate } from "@/features/admin/master-data/utils";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
 import { Box, Card, CardContent, Container, TextField, Typography } from "@mui/material";
@@ -78,6 +82,18 @@ export default async function AdminAvailabilityPage() {
                     <Typography variant="body2" color="text.secondary">
                       {record.notes || "Sin observaciones."}
                     </Typography>
+                    <Box sx={{ pt: 1 }}>
+                      <form action={deleteAvailabilityAction}>
+                        <input type="hidden" name="id" value={record.id} />
+                        <ActionSubmitButton
+                          variant="outlined"
+                          color="error"
+                          loadingMessage="Estamos eliminando el registro de indisponibilidad."
+                        >
+                          Eliminar registro
+                        </ActionSubmitButton>
+                      </form>
+                    </Box>
                   </Box>
                 </CardContent>
               </Card>

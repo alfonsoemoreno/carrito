@@ -180,7 +180,9 @@ export default async function AdminShiftAssignmentPage({
                                 name="reason"
                                 label="Motivo de rechazo"
                                 placeholder="Ej. supera limite semanal o pareja no valida"
+                                required
                                 fullWidth
+                                helperText="Ingresa al menos 3 caracteres."
                               />
                               <ActionSubmitButton
                                 variant="outlined"

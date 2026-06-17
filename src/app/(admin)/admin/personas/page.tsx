@@ -1,4 +1,8 @@
-import { createPersonAction, updatePersonStatusAction } from "@/features/admin/master-data/actions";
+import {
+  createPersonAction,
+  deletePersonAction,
+  updatePersonStatusAction,
+} from "@/features/admin/master-data/actions";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
@@ -98,6 +102,16 @@ export default async function AdminPeoplePage() {
                           loadingMessage="Estamos actualizando el estado de la persona."
                         >
                           {person.status === "ACTIVE" ? "Desactivar" : "Activar"}
+                        </ActionSubmitButton>
+                      </form>
+                      <form action={deletePersonAction}>
+                        <input type="hidden" name="id" value={person.id} />
+                        <ActionSubmitButton
+                          variant="outlined"
+                          color="error"
+                          loadingMessage="Estamos eliminando la persona y sus registros asociados."
+                        >
+                          Eliminar
                         </ActionSubmitButton>
                       </form>
                     </Box>

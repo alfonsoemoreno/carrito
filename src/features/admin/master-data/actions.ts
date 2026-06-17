@@ -12,6 +12,8 @@ import {
   createShiftBlockSchema,
   createTemplateSchema,
   createZoneSchema,
+  deleteAvailabilitySchema,
+  deletePersonSchema,
   deleteZoneSchema,
   updatePersonStatusSchema,
   updateZoneVisibilitySchema,
@@ -68,6 +70,175 @@ export async function updatePersonStatusAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/personas");
+}
+
+export async function deletePersonAction(formData: FormData) {
+  const parsed = deletePersonSchema.parse({
+    id: formData.get("id"),
+  });
+  await requireCurrentAdminActor();
+
+  await prisma.$transaction(async (tx) => {
+    const person = await tx.person.findUnique({
+      where: { id: parsed.id },
+      select: {
+        id: true,
+        requests: {
+          select: { id: true },
+        },
+        suggestedInRequests: {
+          select: { id: true },
+        },
+        assignmentSlotsOne: {
+          select: { id: true },
+        },
+        assignmentSlotsTwo: {
+          select: { id: true },
+        },
+        availabilityExceptions: {
+          select: { id: true },
+        },
+        relationshipsAsPersonA: {
+          select: { id: true },
+        },
+        relationshipsAsPersonB: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!person) {
+      return;
+    }
+
+    const requestIds = person.requests.map((request) => request.id);
+    const suggestedRequestIds = person.suggestedInRequests.map((request) => request.id);
+    const assignmentIds = [
+      ...person.assignmentSlotsOne.map((assignment) => assignment.id),
+      ...person.assignmentSlotsTwo.map((assignment) => assignment.id),
+    ];
+    const availabilityIds = person.availabilityExceptions.map((record) => record.id);
+    const relationshipIds = [
+      ...person.relationshipsAsPersonA.map((relationship) => relationship.id),
+      ...person.relationshipsAsPersonB.map((relationship) => relationship.id),
+    ];
+
+    await tx.auditLog.updateMany({
+      where: {
+        actorPersonId: person.id,
+      },
+      data: {
+        actorPersonId: null,
+      },
+    });
+
+    await tx.shiftRequest.updateMany({
+      where: {
+        suggestedPartnerId: person.id,
+      },
+      data: {
+        suggestedPartnerId: null,
+      },
+    });
+
+    await tx.auditLog.deleteMany({
+      where: {
+        entityType: "person",
+        entityId: person.id,
+      },
+    });
+
+    if (requestIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "shift_request",
+          entityId: { in: requestIds },
+        },
+      });
+    }
+
+    if (assignmentIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "assignment",
+          entityId: { in: assignmentIds },
+        },
+      });
+    }
+
+    if (availabilityIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "availability_exception",
+          entityId: { in: availabilityIds },
+        },
+      });
+    }
+
+    if (relationshipIds.length > 0) {
+      await tx.auditLog.deleteMany({
+        where: {
+          entityType: "relationship",
+          entityId: { in: relationshipIds },
+        },
+      });
+    }
+
+    if (assignmentIds.length > 0) {
+      await tx.assignment.deleteMany({
+        where: {
+          id: { in: assignmentIds },
+        },
+      });
+    }
+
+    if (requestIds.length > 0) {
+      await tx.shiftRequest.deleteMany({
+        where: {
+          id: { in: requestIds },
+        },
+      });
+    }
+
+    if (availabilityIds.length > 0) {
+      await tx.availabilityException.deleteMany({
+        where: {
+          id: { in: availabilityIds },
+        },
+      });
+    }
+
+    if (relationshipIds.length > 0) {
+      await tx.relationship.deleteMany({
+        where: {
+          id: { in: relationshipIds },
+        },
+      });
+    }
+
+    if (suggestedRequestIds.length > 0) {
+      await tx.shiftRequest.updateMany({
+        where: {
+          id: { in: suggestedRequestIds },
+        },
+        data: {
+          suggestedPartnerId: null,
+        },
+      });
+    }
+
+    await tx.person.delete({
+      where: { id: person.id },
+    });
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/personas");
+  revalidatePath("/admin/relaciones");
+  revalidatePath("/admin/disponibilidad");
+  revalidatePath("/admin/solicitudes");
+  revalidatePath("/admin/estadisticas");
+  revalidatePath("/solicitar");
 }
 
 export async function createRelationshipAction(formData: FormData) {
@@ -336,4 +507,29 @@ export async function createAvailabilityAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/disponibilidad");
+}
+
+export async function deleteAvailabilityAction(formData: FormData) {
+  const parsed = deleteAvailabilitySchema.parse({
+    id: formData.get("id"),
+  });
+  await requireCurrentAdminActor();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.auditLog.deleteMany({
+      where: {
+        entityType: "availability_exception",
+        entityId: parsed.id,
+      },
+    });
+
+    await tx.availabilityException.delete({
+      where: { id: parsed.id },
+    });
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/disponibilidad");
+  revalidatePath("/admin/estadisticas");
+  revalidatePath("/solicitar");
 }

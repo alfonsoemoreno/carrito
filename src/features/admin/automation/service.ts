@@ -56,7 +56,11 @@ function buildExpectedTemplateDates(input: {
   return results;
 }
 
-export async function generateMissingFutureShifts(actorAdminId?: string) {
+async function resolveGenerationWeeks(weeksOverride?: number) {
+  if (typeof weeksOverride === "number") {
+    return weeksOverride;
+  }
+
   const config = await prisma.systemConfig.findFirst({
     orderBy: { createdAt: "asc" },
     select: {
@@ -64,7 +68,14 @@ export async function generateMissingFutureShifts(actorAdminId?: string) {
     },
   });
 
-  const weeks = config?.generateFutureWeeks ?? 8;
+  return config?.generateFutureWeeks ?? 8;
+}
+
+export async function generateMissingFutureShifts(
+  actorAdminId?: string,
+  weeksOverride?: number,
+) {
+  const weeks = await resolveGenerationWeeks(weeksOverride);
   const from = startOfTodayUtc();
   const to = addDaysUtc(from, weeks * 7);
 
@@ -212,12 +223,19 @@ export async function generateMissingFutureShifts(actorAdminId?: string) {
   };
 }
 
-export async function refreshFutureShiftStatuses(actorAdminId?: string) {
+export async function refreshFutureShiftStatuses(
+  actorAdminId?: string,
+  weeksOverride?: number,
+) {
   const today = startOfTodayUtc();
+  const weeks = await resolveGenerationWeeks(weeksOverride);
+  const from = addDaysUtc(today, -7);
+  const to = addDaysUtc(today, weeks * 7);
   const shifts = await prisma.shift.findMany({
     where: {
       shiftDate: {
-        gte: addDaysUtc(today, -7),
+        gte: from,
+        lte: to,
       },
     },
     include: {
@@ -287,6 +305,9 @@ export async function refreshFutureShiftStatuses(actorAdminId?: string) {
         action: "REFRESH_SHIFT_OPERATIONAL_STATUSES",
         afterData: {
           updatedCount: updates.length,
+          from: from.toISOString(),
+          to: to.toISOString(),
+          horizonWeeks: weeks,
         },
       },
     });
@@ -294,18 +315,14 @@ export async function refreshFutureShiftStatuses(actorAdminId?: string) {
 
   return {
     updatedCount: updates.length,
+    horizonWeeks: weeks,
+    from,
+    to,
   };
 }
 
-export async function findTemplateHorizonGaps() {
-  const config = await prisma.systemConfig.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: {
-      generateFutureWeeks: true,
-    },
-  });
-
-  const weeks = config?.generateFutureWeeks ?? 8;
+export async function findTemplateHorizonGaps(weeksOverride?: number) {
+  const weeks = await resolveGenerationWeeks(weeksOverride);
   const from = startOfTodayUtc();
   const to = addDaysUtc(from, weeks * 7);
 

@@ -1,3 +1,5 @@
+import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
+import CheckBoxRoundedIcon from "@mui/icons-material/CheckBoxRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import PersonSearchRoundedIcon from "@mui/icons-material/PersonSearchRounded";
 import {
@@ -450,6 +452,24 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                   <Checkbox
                                                     name="shiftIds"
                                                     value={shift.id}
+                                                    icon={
+                                                      <CheckBoxOutlineBlankRoundedIcon
+                                                        sx={{
+                                                          color: "#ffffff",
+                                                          fontSize: 22,
+                                                          filter:
+                                                            "drop-shadow(0 0 0.6px rgba(109, 123, 145, 0.95))",
+                                                        }}
+                                                      />
+                                                    }
+                                                    checkedIcon={
+                                                      <CheckBoxRoundedIcon
+                                                        sx={{
+                                                          color: "#4a6da7",
+                                                          fontSize: 22,
+                                                        }}
+                                                      />
+                                                    }
                                                     disabled={
                                                       disabled ||
                                                       state.config
@@ -459,6 +479,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                       flexShrink: 0,
                                                       ml: 0.5,
                                                       p: 0.5,
+                                                      color: "#ffffff",
+                                                      "&:hover": {
+                                                        backgroundColor:
+                                                          "rgba(74, 109, 167, 0.08)",
+                                                      },
+                                                      "&.Mui-disabled": {
+                                                        opacity: 0.58,
+                                                      },
                                                     }}
                                                   />
                                                 </Box>

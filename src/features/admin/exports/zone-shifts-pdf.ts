@@ -45,8 +45,29 @@ const BOTTOM_MARGIN = 46;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_X * 2;
 const FOOTER_Y = 28;
 
+function normalizePdfText(value: string) {
+  return value
+    .replaceAll("’", "'")
+    .replaceAll("‘", "'")
+    .replaceAll("“", "\"")
+    .replaceAll("”", "\"")
+    .replaceAll("–", "-")
+    .replaceAll("—", "-")
+    .replaceAll("…", "...")
+    .replaceAll("\u00a0", " ")
+    .split("")
+    .map((character) => {
+      const codePoint = character.codePointAt(0) ?? 63;
+      return codePoint <= 255 ? character : "?";
+    })
+    .join("");
+}
+
 function pdfEscape(value: string) {
-  return value.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
+  return normalizePdfText(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("(", "\\(")
+    .replaceAll(")", "\\)");
 }
 
 function rgb(hex: string) {
@@ -405,7 +426,7 @@ function buildPdfDocument(pages: PageState[]) {
     const contentId = nextObjectId++;
     const pageId = nextObjectId++;
     const content = `${page.commands.join("\n")}\n`;
-    const contentStream = `<< /Length ${Buffer.byteLength(content, "utf8")} >>\nstream\n${content}endstream`;
+    const contentStream = `<< /Length ${Buffer.byteLength(content, "latin1")} >>\nstream\n${content}endstream`;
     objects[contentId] = contentStream;
     objects[pageId] = `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Resources << /Font << /F1 ${fontRegularId} 0 R /F2 ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`;
     pageObjectIds.push(pageId);
@@ -424,11 +445,11 @@ function buildPdfDocument(pages: PageState[]) {
     if (!object) {
       continue;
     }
-    offsets[id] = Buffer.byteLength(pdf, "utf8");
+    offsets[id] = Buffer.byteLength(pdf, "latin1");
     pdf += `${id} 0 obj\n${object}\nendobj\n`;
   }
 
-  const xrefOffset = Buffer.byteLength(pdf, "utf8");
+  const xrefOffset = Buffer.byteLength(pdf, "latin1");
   pdf += `xref\n0 ${objects.length}\n`;
   pdf += "0000000000 65535 f \n";
 
@@ -439,7 +460,7 @@ function buildPdfDocument(pages: PageState[]) {
 
   pdf += `trailer\n<< /Size ${objects.length} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
 
-  return Buffer.from(pdf, "utf8");
+  return Buffer.from(pdf, "latin1");
 }
 
 export { buildZoneShiftsPdf };
