@@ -7,6 +7,21 @@ import {
 } from "@/features/admin/master-data/utils";
 import { resolveStatsRange } from "@/features/admin/stats/utils";
 
+function formatDateWithWeekday(value: Date | string | null | undefined) {
+  if (!value) {
+    return "Sin fecha";
+  }
+
+  const date = new Date(value);
+  const weekday = new Intl.DateTimeFormat("es-CL", {
+    weekday: "long",
+    timeZone: "UTC",
+  }).format(date);
+  const weekdayLabel = `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}`;
+
+  return `${weekdayLabel}, ${formatDate(date)}`;
+}
+
 export async function getAssignmentsExportRows(input: {
   from?: string | null | undefined;
   to?: string | null | undefined;
@@ -188,8 +203,7 @@ export async function getZoneShiftPdfReportData(input: {
         `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
     );
     const pendingPeople = shift.requests.map(
-      (request) =>
-        `${request.person.firstName} ${request.person.lastName}`,
+      (request) => `${request.person.firstName} ${request.person.lastName}`,
     );
 
     const status =
@@ -203,7 +217,7 @@ export async function getZoneShiftPdfReportData(input: {
 
     return {
       id: shift.id,
-      dateLabel: formatDate(shift.shiftDate),
+      dateLabel: formatDateWithWeekday(shift.shiftDate),
       dateKey: shift.shiftDate.toISOString(),
       timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
       status,

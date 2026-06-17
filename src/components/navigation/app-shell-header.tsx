@@ -3,10 +3,10 @@
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
+import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import {
   Box,
   Button,
@@ -22,6 +22,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useThemeMode } from "@/components/providers/theme-mode-provider";
 
 export type AppShellSection = {
   label: string;
@@ -33,10 +34,7 @@ export type AppShellSection = {
   }>;
 };
 
-type BrandMarkVariant = "literature";
-
 type AppShellHeaderProps = {
-  brandMarkVariant?: BrandMarkVariant;
   brandTitle: string;
   brandSubtitle: string;
   homeHref: string;
@@ -380,7 +378,6 @@ function MobileMenu({
 }
 
 export function AppShellHeader({
-  brandMarkVariant = "literature",
   brandTitle,
   brandSubtitle,
   homeHref,
@@ -388,6 +385,7 @@ export function AppShellHeader({
   sections,
 }: AppShellHeaderProps) {
   const pathname = usePathname();
+  const { mode, toggleMode } = useThemeMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpenLabel, setDesktopOpenLabel] = useState<string | null>(null);
   const [desktopPointerOffset, setDesktopPointerOffset] = useState(0);
@@ -418,6 +416,40 @@ export function AppShellHeader({
   };
   const hasSections = sections.length > 0;
   const showPublicUserMenu = !hasSections && pathname !== "/" && !!publicUser;
+  const themeToggleButton = (
+    <Button
+      variant="outlined"
+      aria-label={
+        mode === "light" ? "Activar modo oscuro" : "Activar modo claro"
+      }
+      onClick={toggleMode}
+      sx={{
+        minWidth: 0,
+        height: 44,
+        px: 1.4,
+        gap: 0.9,
+        borderColor: "var(--app-form-border)",
+        color: "var(--app-accent-deep)",
+        backgroundColor: "var(--app-surface)",
+      }}
+    >
+      {mode === "light" ? (
+        <DarkModeRoundedIcon fontSize="small" />
+      ) : (
+        <LightModeRoundedIcon fontSize="small" />
+      )}
+      <Typography
+        sx={{
+          fontSize: "0.84rem",
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        {mode === "light" ? "Oscuro" : "Claro"}
+      </Typography>
+    </Button>
+  );
 
   const desktopOpenSection = sections.find(
     (
@@ -518,34 +550,20 @@ export function AppShellHeader({
                 }}
               >
                 <Box className="app-brand-mark">
-                  {brandMarkVariant === "literature" ? (
-                    <Box
-                      sx={{
-                        position: "relative",
-                        width: 34,
-                        height: 34,
-                      }}
-                    >
-                      <LibraryBooksOutlinedIcon
-                        sx={{
-                          position: "absolute",
-                          top: 6,
-                          left: 7,
-                          fontSize: 24,
-                          color: "#ffffff",
-                        }}
-                      />
-                      <MenuBookOutlinedIcon
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          fontSize: 28,
-                          color: "#ffffff",
-                        }}
-                      />
-                    </Box>
-                  ) : null}
+                  <Box
+                    component="img"
+                    src="/icons/app-icon-192.png"
+                    alt={`${brandTitle} logo`}
+                    sx={{
+                      width: { xs: 40, md: 36, lg: 40 },
+                      height: { xs: 40, md: 36, lg: 40 },
+                      display: "block",
+                      borderRadius: "11px",
+                      boxShadow:
+                        "0 10px 24px rgba(19, 33, 63, 0.12), 0 1px 0 rgba(255,255,255,0.85) inset",
+                      backgroundColor: "#ffffff",
+                    }}
+                  />
                 </Box>
                 <Box style={{ marginLeft: "0px" }} sx={{ minWidth: 0 }}>
                   <Typography
@@ -575,20 +593,24 @@ export function AppShellHeader({
             </Link>
 
             {hasSections ? (
-              <IconButton
-                aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-                onClick={() => setMobileOpen((current) => !current)}
-                sx={{
-                  display: { xs: "inline-flex", md: "none" },
-                  color: "#4b4f55",
-                  border: "1px solid #cfd4dc",
-                  borderRadius: 0,
-                }}
-              >
-                {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
-              </IconButton>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                {themeToggleButton}
+                <IconButton
+                  aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+                  onClick={() => setMobileOpen((current) => !current)}
+                  sx={{
+                    display: { xs: "inline-flex", md: "none" },
+                    color: "#4b4f55",
+                    border: "1px solid #cfd4dc",
+                    borderRadius: 0,
+                  }}
+                >
+                  {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
+                </IconButton>
+              </Stack>
             ) : (
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                {themeToggleButton}
                 <Link href={homeHref as never}>
                   <Button
                     variant="outlined"

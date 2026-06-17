@@ -16,6 +16,30 @@
   --app-form-label: #526071;
   --app-form-muted: #7b8591;
   --app-form-fill: #fbfcfd;
+  --app-surface-muted: #f7f9fc;
+  --app-shadow-soft: 0 10px 28px rgba(17, 17, 17, 0.05);
+  --app-selection: rgba(91, 120, 182, 0.22);
+}
+
+:root[data-color-mode="dark"] {
+  --app-background: #0f141c;
+  --app-surface: #18202c;
+  --app-ink: #edf2fb;
+  --app-muted: #a8b6ca;
+  --app-accent: #86a9eb;
+  --app-accent-strong: #6e93d8;
+  --app-accent-deep: #dbe7ff;
+  --app-header: #121925;
+  --app-nav: #0c1118;
+  --app-border: #2b3646;
+  --app-form-border: #41516a;
+  --app-form-border-strong: #607496;
+  --app-form-label: #b6c4d8;
+  --app-form-muted: #8c9bb0;
+  --app-form-fill: #111925;
+  --app-surface-muted: #111925;
+  --app-shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.34);
+  --app-selection: rgba(134, 169, 235, 0.28);
 }
 
 @keyframes mobileMenuFadeIn {
@@ -119,7 +143,7 @@ a {
 }
 
 ::selection {
-  background: rgba(91, 120, 182, 0.22);
+  background: var(--app-selection);
 }
 
 button,
@@ -155,10 +179,10 @@ main {
 }
 
 .MuiCard-root {
-  background-color: #ffffff !important;
-  border: 1px solid #d9dde5 !important;
+  background-color: var(--app-surface) !important;
+  border: 1px solid var(--app-border) !important;
   border-radius: 4px !important;
-  box-shadow: 0 10px 28px rgba(17, 17, 17, 0.05) !important;
+  box-shadow: var(--app-shadow-soft) !important;
   overflow: hidden;
 }
 
@@ -240,12 +264,12 @@ main {
 .MuiButton-outlined {
   border-color: var(--app-form-border) !important;
   color: var(--app-accent-deep) !important;
-  background-color: #fff !important;
+  background-color: var(--app-surface) !important;
 }
 
 .MuiButton-text {
   color: var(--app-accent-deep) !important;
-  background-color: rgba(91, 120, 182, 0.06) !important;
+  background-color: color-mix(in srgb, var(--app-accent) 12%, transparent) !important;
 }
 
 .MuiTextField-root,
@@ -287,7 +311,7 @@ main {
 .MuiInputBase-input:not(.MuiSelect-nativeInput) {
   padding: 15px 14px !important;
   line-height: 1.35 !important;
-  color: #212833 !important;
+  color: var(--app-ink) !important;
 }
 
 .MuiSelect-select {
@@ -296,12 +320,12 @@ main {
   align-items: center !important;
   padding: 15px 48px 15px 20px !important;
   line-height: 1.35 !important;
-  color: #212833 !important;
+  color: var(--app-ink) !important;
 }
 
 .MuiSelect-icon {
   right: 12px !important;
-  color: #6f7a86 !important;
+  color: var(--app-form-muted) !important;
 }
 
 .MuiSelect-nativeInput {
@@ -319,7 +343,7 @@ main {
 
 .MuiInputBase-input:not(.MuiSelect-nativeInput)::placeholder,
 .MuiSelect-select:empty {
-  color: #8a93a0 !important;
+  color: var(--app-form-muted) !important;
   opacity: 1 !important;
 }
 
@@ -351,7 +375,7 @@ main {
 }
 
 .MuiFormControlLabel-label {
-  color: #425063 !important;
+  color: var(--app-ink) !important;
 }
 
 .MuiListItem-root {
@@ -361,7 +385,7 @@ main {
 
 .MuiListItemText-primary {
   font-weight: 600 !important;
-  color: #233043 !important;
+  color: var(--app-ink) !important;
 }
 
 .MuiListItemText-secondary {
@@ -371,19 +395,19 @@ main {
 .auth-panel [class~="bg-card"] {
   width: 100% !important;
   max-width: none !important;
-  border: 1px solid #d9dde5 !important;
+  border: 1px solid var(--app-border) !important;
   border-radius: 4px !important;
-  background: #ffffff !important;
-  color: #1f2a37 !important;
-  box-shadow: 0 10px 28px rgba(17, 17, 17, 0.05) !important;
+  background: var(--app-surface) !important;
+  color: var(--app-ink) !important;
+  box-shadow: var(--app-shadow-soft) !important;
 }
 
 .auth-panel [class~="text-muted-foreground"] {
-  color: #6f7a86 !important;
+  color: var(--app-form-muted) !important;
 }
 
 .auth-panel label {
-  color: #425063 !important;
+  color: var(--app-form-label) !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
 }
@@ -393,12 +417,12 @@ main {
   border: 1px solid var(--app-form-border) !important;
   border-radius: 3px !important;
   background: var(--app-form-fill) !important;
-  color: #212833 !important;
+  color: var(--app-ink) !important;
   box-shadow: none !important;
 }
 
 .auth-panel input::placeholder {
-  color: #8a93a0 !important;
+  color: var(--app-form-muted) !important;
   opacity: 1 !important;
 }
 

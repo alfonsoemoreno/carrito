@@ -1,14 +1,13 @@
 "use client";
 
 import { authClient } from "@/lib/auth/client";
-import theme from "@/theme/theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { NeonAuthUIProvider } from "@neondatabase/auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { ActionFeedbackProvider } from "@/components/feedback/action-feedback-provider";
+import { ThemeModeProvider } from "@/components/providers/theme-mode-provider";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -30,8 +29,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+      <ThemeModeProvider>
         <ActionFeedbackProvider>
           <NeonAuthUIProvider
             authClient={authClient}
@@ -44,7 +42,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
             {children}
           </NeonAuthUIProvider>
         </ActionFeedbackProvider>
-      </ThemeProvider>
+      </ThemeModeProvider>
     </AppRouterCacheProvider>
   );
 }
