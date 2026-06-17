@@ -1,49 +1,16 @@
-import { spawn } from "node:child_process";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import { recordAdminExportAudit } from "@/features/admin/exports/audit";
 import { getZoneShiftPdfReportData } from "@/features/admin/exports/queries";
+import * as zoneShiftsPdfModule from "@/features/admin/exports/zone-shifts-pdf";
 import { getCurrentAdminActorOrNull } from "@/features/admin/master-data/auth";
 
-function runPdfRenderer(payload: unknown) {
-  return new Promise<Buffer>((resolve, reject) => {
-    const python = process.env.PYTHON_PDF_EXECUTABLE || "python3";
-    const scriptPath = path.join(
-      /* turbopackIgnore: true */ process.cwd(),
-      "src/features/admin/exports/render_zone_shifts_report.py",
-    );
-    const child = spawn(python, [scriptPath], {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    const chunks: Buffer[] = [];
-    let stderr = "";
-
-    child.stdout.on("data", (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
-
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString("utf8");
-    });
-
-    child.on("error", (error) => {
-      reject(error);
-    });
-
-    child.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(stderr || `PDF renderer exited with code ${code}`));
-        return;
-      }
-
-      resolve(Buffer.concat(chunks));
-    });
-
-    child.stdin.write(JSON.stringify(payload));
-    child.stdin.end();
-  });
-}
+const zoneShiftsPdfExports = zoneShiftsPdfModule as Record<string, unknown>;
+const buildZoneShiftsPdf =
+  typeof zoneShiftsPdfExports.buildZoneShiftsPdf === "function"
+    ? zoneShiftsPdfExports.buildZoneShiftsPdf
+    : typeof zoneShiftsPdfExports.default === "function"
+      ? zoneShiftsPdfExports.default
+      : null;
 
 export async function GET(request: Request) {
   const admin = await getCurrentAdminActorOrNull();
@@ -78,7 +45,14 @@ export async function GET(request: Request) {
     );
   }
 
-  const pdf = await runPdfRenderer(data);
+  if (!buildZoneShiftsPdf) {
+    return NextResponse.json(
+      { ok: false, error: "El generador PDF no está disponible." },
+      { status: 500 },
+    );
+  }
+
+  const pdf = buildZoneShiftsPdf(data);
   const fileName = `turnos-${data.zone.name.toLowerCase().replaceAll(/\s+/g, "-")}.pdf`;
 
   await recordAdminExportAudit({
