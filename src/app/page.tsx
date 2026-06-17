@@ -26,8 +26,9 @@ export default function HomePage() {
             <Card
               elevation={0}
               sx={{
+                border: "1px solid var(--app-border)",
                 background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(243,246,252,0.96))",
+                  "linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 94%, var(--app-accent) 6%), var(--app-surface-muted))",
               }}
             >
               <CardContent sx={{ p: { xs: 3, md: 3.5 } }}>

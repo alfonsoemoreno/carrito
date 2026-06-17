@@ -466,7 +466,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                     checkedIcon={
                                                       <CheckBoxRoundedIcon
                                                         sx={{
-                                                          color: "#4a6da7",
+                                                          color:
+                                                            "var(--app-accent)",
                                                           fontSize: 22,
                                                         }}
                                                       />
