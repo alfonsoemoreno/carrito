@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
@@ -181,13 +182,13 @@ export default async function AdminShiftAssignmentPage({
                                 placeholder="Ej. supera limite semanal o pareja no valida"
                                 fullWidth
                               />
-                              <Button
-                                type="submit"
+                              <ActionSubmitButton
                                 variant="outlined"
                                 color="error"
+                                loadingMessage="Estamos rechazando la solicitud."
                               >
                                 Rechazar solicitud
-                              </Button>
+                              </ActionSubmitButton>
                             </Stack>
                           </form>
                         </Stack>
@@ -247,9 +248,12 @@ export default async function AdminShiftAssignmentPage({
                         minRows={3}
                         fullWidth
                       />
-                      <Button type="submit" variant="contained">
+                      <ActionSubmitButton
+                        variant="contained"
+                        loadingMessage="Estamos confirmando la asignación."
+                      >
                         Confirmar pareja para este turno
-                      </Button>
+                      </ActionSubmitButton>
                     </Stack>
                   </form>
                 </FormCard>

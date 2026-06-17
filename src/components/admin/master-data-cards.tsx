@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 
 export function FormCard({
   title,
@@ -48,13 +49,13 @@ export function FormCard({
 
 export function SubmitButton({ label }: { label: string }) {
   return (
-    <Button
-      type="submit"
+    <ActionSubmitButton
       variant="contained"
       sx={{ alignSelf: "flex-start", minWidth: 200, px: 3 }}
+      loadingMessage="Estamos guardando los cambios."
     >
       {label}
-    </Button>
+    </ActionSubmitButton>
   );
 }
 

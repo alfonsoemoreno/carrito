@@ -8,6 +8,7 @@ import { NeonAuthUIProvider } from "@neondatabase/auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { ActionFeedbackProvider } from "@/components/feedback/action-feedback-provider";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -31,16 +32,18 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <NeonAuthUIProvider
-          authClient={authClient}
-          navigate={navigate}
-          replace={replace}
-          onSessionChange={() => router.refresh()}
-          redirectTo="/admin"
-          Link={AuthLink}
-        >
-          {children}
-        </NeonAuthUIProvider>
+        <ActionFeedbackProvider>
+          <NeonAuthUIProvider
+            authClient={authClient}
+            navigate={navigate}
+            replace={replace}
+            onSessionChange={() => router.refresh()}
+            redirectTo="/admin"
+            Link={AuthLink}
+          >
+            {children}
+          </NeonAuthUIProvider>
+        </ActionFeedbackProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
   );

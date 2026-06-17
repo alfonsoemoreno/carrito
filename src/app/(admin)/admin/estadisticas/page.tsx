@@ -2,7 +2,6 @@ import BarChartRoundedIcon from "@mui/icons-material/BarChartRounded";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Container,
@@ -16,6 +15,7 @@ import {
 } from "@mui/material";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getAdminStatsPageState } from "@/features/admin/stats/queries";
@@ -88,13 +88,13 @@ export default async function AdminStatsPage({ searchParams }: Props) {
                     slotProps={{ inputLabel: { shrink: true } }}
                     fullWidth
                   />
-                  <Button
-                    type="submit"
+                  <ActionSubmitButton
                     variant="outlined"
                     sx={{ minWidth: 140 }}
+                    loadingMessage="Estamos recalculando las estadísticas."
                   >
                     Aplicar
-                  </Button>
+                  </ActionSubmitButton>
                 </Box>
               </form>
             </CardContent>

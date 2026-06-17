@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
@@ -123,9 +124,12 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                         </MenuItem>
                       </Select>
                     </FormControl>
-                    <Button type="submit" variant="outlined">
+                    <ActionSubmitButton
+                      variant="outlined"
+                      loadingMessage="Estamos filtrando la bandeja."
+                    >
                       Aplicar
-                    </Button>
+                    </ActionSubmitButton>
                   </Stack>
                 </form>
               </Stack>

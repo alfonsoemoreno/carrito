@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { PublicPersonPicker } from "@/components/public/public-person-picker";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
 import { submitShiftRequestsAction } from "@/features/public/actions";
 import { getSolicitarPageState } from "@/features/public/queries";
@@ -206,14 +207,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                 ))}
                               </Select>
                             </FormControl>
-                            <Button
-                              type="submit"
+                            <ActionSubmitButton
                               variant="contained"
                               size="large"
                               fullWidth
+                              loadingMessage="Estamos cargando los turnos disponibles."
                             >
                               Ver turnos
-                            </Button>
+                            </ActionSubmitButton>
                           </Stack>
                         </form>
                       </Stack>
@@ -253,11 +254,6 @@ export default async function SolicitarPage({ searchParams }: Props) {
                               type="hidden"
                               name="returnTo"
                               value={requestReturnTo}
-                            />
-                            <input
-                              type="hidden"
-                              name="suggestedPartnerId"
-                              value=""
                             />
 
                             <Stack
@@ -400,13 +396,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
                                             <Box
                                               sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
+                                                display: "grid",
+                                                gridTemplateColumns: {
+                                                  xs: "1fr",
+                                                  md: "minmax(0, 1fr) auto",
+                                                },
                                                 gap: 1,
-                                                minHeight: 44,
                                                 px: 1.25,
-                                                py: 0.35,
+                                                py: 1,
                                                 border: "1px solid",
                                                 borderColor:
                                                   "var(--app-form-border)",
@@ -417,32 +414,77 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                   "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
                                               }}
                                             >
-                                              <Typography
-                                                variant="caption"
-                                                sx={{
-                                                  color:
-                                                    "var(--app-form-label)",
-                                                  fontWeight: 600,
-                                                }}
-                                              >
-                                                {disabled
-                                                  ? "No disponible para nueva solicitud"
-                                                  : "Incluir en esta solicitud"}
-                                              </Typography>
-                                              <Checkbox
-                                                name="shiftIds"
-                                                value={shift.id}
-                                                disabled={
-                                                  disabled ||
-                                                  state.config
-                                                    .maintenanceModeEnabled
-                                                }
-                                                sx={{
-                                                  flexShrink: 0,
-                                                  ml: 0.5,
-                                                  p: 0.5,
-                                                }}
-                                              />
+                                              <Stack spacing={1}>
+                                                <Box
+                                                  sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent:
+                                                      "space-between",
+                                                    gap: 1,
+                                                    minHeight: 32,
+                                                  }}
+                                                >
+                                                  <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                      color:
+                                                        "var(--app-form-label)",
+                                                      fontWeight: 600,
+                                                    }}
+                                                  >
+                                                    {disabled
+                                                      ? "No disponible para nueva solicitud"
+                                                      : "Incluir en esta solicitud"}
+                                                  </Typography>
+                                                  <Checkbox
+                                                    name="shiftIds"
+                                                    value={shift.id}
+                                                    disabled={
+                                                      disabled ||
+                                                      state.config
+                                                        .maintenanceModeEnabled
+                                                    }
+                                                    sx={{
+                                                      flexShrink: 0,
+                                                      ml: 0.5,
+                                                      p: 0.5,
+                                                    }}
+                                                  />
+                                                </Box>
+
+                                                {state.partnerOptions.length >
+                                                0 ? (
+                                                  <TextField
+                                                    select
+                                                    name={`suggestedPartnerByShift:${shift.id}`}
+                                                    label="Compañero o compañera opcional"
+                                                    defaultValue=""
+                                                    disabled={
+                                                      disabled ||
+                                                      state.config
+                                                        .maintenanceModeEnabled
+                                                    }
+                                                    helperText="Se aplicará solo si incluyes este turno en la solicitud."
+                                                    fullWidth
+                                                    size="small"
+                                                  >
+                                                    <MenuItem value="">
+                                                      Sin sugerencia
+                                                    </MenuItem>
+                                                    {state.partnerOptions.map(
+                                                      (partner) => (
+                                                        <MenuItem
+                                                          key={`${shift.id}-${partner.id}`}
+                                                          value={partner.id}
+                                                        >
+                                                          {partner.label}
+                                                        </MenuItem>
+                                                      ),
+                                                    )}
+                                                  </TextField>
+                                                ) : null}
+                                              </Stack>
                                             </Box>
                                           </Stack>
                                         </CardContent>
@@ -459,14 +501,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             )}
 
                             {hasAvailableShifts ? (
-                              <Button
-                                type="submit"
+                              <ActionSubmitButton
                                 variant="contained"
                                 size="large"
                                 disabled={state.config.maintenanceModeEnabled}
+                                loadingMessage="Estamos enviando tu solicitud de turnos."
                               >
                                 5. Solicitar turnos seleccionados
-                              </Button>
+                              </ActionSubmitButton>
                             ) : null}
                           </Stack>
                         </CardContent>

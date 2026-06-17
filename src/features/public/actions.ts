@@ -126,14 +126,31 @@ export async function logoutPublicPersonAction() {
 export async function submitShiftRequestsAction(formData: FormData) {
   const currentPerson = await requireSessionPerson();
   const returnTo = String(formData.get("returnTo") ?? "/solicitar");
-  const selectedShiftIds = formData
+  const selectedShiftIds = Array.from(
+    new Set(
+      formData
     .getAll("shiftIds")
     .map((value) => String(value))
-    .filter(Boolean);
-  const suggestedPartnerId = String(formData.get("suggestedPartnerId") ?? "");
+        .filter(Boolean),
+    ),
+  );
+  const suggestedPartnerByShift = new Map<string, string>();
   const comments = String(formData.get("comments") ?? "").trim();
   const redirectWithRequestError = (message: string): never =>
     redirectTo(buildRedirect(returnTo, { requestError: message }));
+
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith("suggestedPartnerByShift:")) {
+      continue;
+    }
+
+    const shiftId = key.slice("suggestedPartnerByShift:".length);
+    const partnerId = String(value).trim();
+
+    if (shiftId && partnerId) {
+      suggestedPartnerByShift.set(shiftId, partnerId);
+    }
+  }
 
   if (selectedShiftIds.length === 0) {
     redirectWithRequestError("Selecciona al menos un turno.");
@@ -158,17 +175,21 @@ export async function submitShiftRequestsAction(formData: FormData) {
     allowSameSexPairing: config?.allowSameSexPairing ?? true,
   };
 
-  if (
-    suggestedPartnerId &&
-    !(await isValidSuggestedPartner(
-      currentPerson.id,
-      suggestedPartnerId,
-      policy.allowSameSexPairing,
-    ))
-  ) {
-    redirectWithRequestError(
-      "La pareja sugerida no cumple las reglas vigentes.",
-    );
+  for (const shiftId of selectedShiftIds) {
+    const suggestedPartnerId = suggestedPartnerByShift.get(shiftId);
+
+    if (
+      suggestedPartnerId &&
+      !(await isValidSuggestedPartner(
+        currentPerson.id,
+        suggestedPartnerId,
+        policy.allowSameSexPairing,
+      ))
+    ) {
+      redirectWithRequestError(
+        "Una de las parejas sugeridas no cumple las reglas vigentes.",
+      );
+    }
   }
 
   const shifts = await prisma.shift.findMany({
@@ -477,11 +498,12 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     for (const shift of shifts) {
+      const suggestedPartnerId = suggestedPartnerByShift.get(shift.id) ?? null;
       const created = await tx.shiftRequest.create({
         data: {
           shiftId: shift.id,
           personId: currentPerson.id,
-          suggestedPartnerId: suggestedPartnerId || null,
+          suggestedPartnerId,
           comments: comments || null,
           status: ShiftRequestStatus.PENDING,
         },
@@ -496,7 +518,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
           action: "PUBLIC_REQUEST_CREATED",
           afterData: {
             shiftId: shift.id,
-            suggestedPartnerId: suggestedPartnerId || null,
+            suggestedPartnerId,
           },
         },
       });

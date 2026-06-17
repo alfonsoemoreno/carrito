@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { getExportsPageState } from "@/features/admin/exports/queries";
@@ -96,13 +97,13 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                     slotProps={{ inputLabel: { shrink: true } }}
                     fullWidth
                   />
-                  <Button
-                    type="submit"
+                  <ActionSubmitButton
                     variant="outlined"
                     sx={{ minWidth: 140 }}
+                    loadingMessage="Estamos actualizando los filtros del reporte."
                   >
                     Aplicar
-                  </Button>
+                  </ActionSubmitButton>
                 </Box>
               </form>
             </CardContent>

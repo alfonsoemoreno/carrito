@@ -3,10 +3,10 @@
 import { useState } from "react";
 import {
   Autocomplete,
-  Button,
   Stack,
   TextField,
 } from "@mui/material";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 
 type PersonOption = {
   id: string;
@@ -55,15 +55,15 @@ export function PublicPersonPicker({
           value={selectedPerson?.id ?? ""}
         />
         <input type="hidden" name="returnTo" value="/solicitar" />
-        <Button
-          type="submit"
+        <ActionSubmitButton
           variant="contained"
           size="large"
           disabled={!selectedPerson}
           sx={{ alignSelf: { xs: "stretch", md: "flex-start" }, minWidth: 180 }}
+          loadingMessage="Estamos preparando tu acceso."
         >
           Continuar
-        </Button>
+        </ActionSubmitButton>
       </Stack>
     </form>
   );

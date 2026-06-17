@@ -16,7 +16,6 @@ import {
 import { prisma } from "@/lib/prisma";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Chip,
@@ -24,6 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 
 export default async function AdminZonesPage() {
   await requireCurrentAdminPageAccess();
@@ -146,17 +146,24 @@ export default async function AdminZonesPage() {
                           name="publicVisible"
                           value={zone.publicVisible ? "false" : "true"}
                         />
-                        <Button type="submit" variant="outlined">
+                        <ActionSubmitButton
+                          variant="outlined"
+                          loadingMessage="Estamos actualizando el lugar."
+                        >
                           {zone.status === "ACTIVE" ? "Desactivar" : "Activar"} y{" "}
                           {zone.publicVisible ? "ocultar" : "mostrar"}
-                        </Button>
+                        </ActionSubmitButton>
                       </Box>
                     </form>
                     <form action={deleteZoneAction}>
                       <input type="hidden" name="id" value={zone.id} />
-                      <Button type="submit" variant="contained" color="error">
+                      <ActionSubmitButton
+                        variant="contained"
+                        color="error"
+                        loadingMessage="Estamos eliminando el lugar y sus registros asociados."
+                      >
                         Eliminar lugar y registros asociados
-                      </Button>
+                      </ActionSubmitButton>
                     </form>
                   </Box>
                 </CardContent>

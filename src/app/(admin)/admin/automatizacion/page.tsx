@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
@@ -93,14 +94,20 @@ export default async function AdminAutomationPage() {
                   {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
                 </Typography>
                 <form action={generateMissingFutureShiftsAction}>
-                  <Button type="submit" variant="contained">
+                  <ActionSubmitButton
+                    variant="contained"
+                    loadingMessage="Estamos generando los turnos faltantes."
+                  >
                     Generar turnos faltantes ahora
-                  </Button>
+                  </ActionSubmitButton>
                 </form>
                 <form action={refreshShiftStatusesAction}>
-                  <Button type="submit" variant="outlined">
+                  <ActionSubmitButton
+                    variant="outlined"
+                    loadingMessage="Estamos recalculando los estados operativos."
+                  >
                     Recalcular estados operativos
-                  </Button>
+                  </ActionSubmitButton>
                 </form>
               </Stack>
             </FormCard>
