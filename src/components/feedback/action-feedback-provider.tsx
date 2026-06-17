@@ -125,152 +125,88 @@ export function ActionFeedbackProvider({
           >
             <Box
               sx={{
-                width: "min(100%, 440px)",
-                borderRadius: 5,
-                overflow: "hidden",
-                border: "1px solid rgba(22, 34, 54, 0.14)",
-                background: "#ffffff",
+                width: "min(100%, 360px)",
+                borderRadius: 6,
+                border: "1px solid rgba(255,255,255,0.18)",
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,255,0.94))",
                 boxShadow:
-                  "0 28px 80px rgba(10, 16, 28, 0.34), 0 8px 24px rgba(10, 16, 28, 0.14)",
+                  "0 24px 72px rgba(9, 16, 30, 0.32), inset 0 1px 0 rgba(255,255,255,0.82)",
+                px: 4,
+                py: 4.5,
               }}
             >
-              <Box
-                sx={{
-                  px: 3.5,
-                  pt: 3.5,
-                  pb: 2,
-                  borderBottom: "1px solid #e4e9f1",
-                  background: "linear-gradient(180deg, #f7faff, #ffffff)",
-                }}
-              >
-                <Stack spacing={2.5} sx={{ alignItems: "center" }}>
+              <Stack spacing={3} sx={{ alignItems: "center" }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: 92,
+                    height: 92,
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
                   <Box
                     sx={{
-                      position: "relative",
-                      width: 112,
-                      height: 112,
-                      display: "grid",
-                      placeItems: "center",
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "50%",
+                      border: "6px solid rgba(74,109,167,0.12)",
                     }}
-                  >
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        borderRadius: "50%",
-                        background:
-                          "radial-gradient(circle, rgba(74,109,167,0.22), rgba(74,109,167,0.03) 66%, rgba(74,109,167,0) 72%)",
-                        animation: "actionHalo 1800ms ease-in-out infinite",
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        inset: 12,
-                        borderRadius: "50%",
-                        border: "6px solid rgba(74,109,167,0.14)",
-                        borderTopColor: "var(--app-accent)",
-                        borderRightColor: "var(--app-accent-strong)",
-                        animation: "actionSpin 980ms linear infinite",
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        width: 52,
-                        height: 52,
-                        borderRadius: 3,
-                        background:
-                        "linear-gradient(145deg, var(--app-accent), var(--app-accent-deep))",
-                        boxShadow: "0 14px 30px rgba(74,109,167,0.34)",
-                        display: "grid",
-                        placeItems: "center",
-                        color: "#ffffff",
-                        fontSize: "1.3rem",
-                        fontWeight: 800,
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      ...
-                    </Box>
-                  </Box>
-
-                  <Stack spacing={1} sx={{ alignItems: "center" }}>
-                    <Typography
-                      component="div"
-                      sx={{
-                        fontSize: "0.72rem",
-                        lineHeight: 1,
-                        fontWeight: 800,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                        color: "var(--app-accent-deep)",
-                      }}
-                    >
-                      Acción en curso
-                    </Typography>
-                    <Typography
-                      component="h2"
-                      sx={{
-                        textAlign: "center",
-                        color: "#142033",
-                        fontSize: "1.45rem",
-                        lineHeight: 1.15,
-                        fontWeight: 800,
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      {DEFAULT_TITLE}
-                    </Typography>
-                    <Typography
-                      component="p"
-                      sx={{
-                        textAlign: "center",
-                        color: "#445268",
-                        fontSize: "0.98rem",
-                        lineHeight: 1.5,
-                        maxWidth: 320,
-                      }}
-                    >
-                      {message}
-                    </Typography>
-                  </Stack>
-                </Stack>
-              </Box>
-
-              <Box sx={{ px: 3.5, py: 2.25, backgroundColor: "#fbfcff" }}>
-                <Stack spacing={1.25}>
+                  />
                   <Box
                     sx={{
-                      height: 8,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      backgroundColor: "#dce5f2",
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "50%",
+                      border: "6px solid transparent",
+                      borderTopColor: "var(--app-accent)",
+                      borderRightColor: "var(--app-accent-strong)",
+                      animation: "actionSpin 900ms linear infinite",
+                      filter: "drop-shadow(0 10px 18px rgba(74,109,167,0.22))",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 54,
+                      height: 54,
+                      borderRadius: "50%",
+                      background:
+                        "radial-gradient(circle at 30% 30%, #ffffff, #edf3fb 72%)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 18px rgba(20,32,51,0.08)",
+                    }}
+                  />
+                </Box>
+
+                <Stack spacing={1} sx={{ alignItems: "center" }}>
+                  <Typography
+                    component="h2"
+                    sx={{
+                      textAlign: "center",
+                      color: "#162338",
+                      fontSize: "1.35rem",
+                      lineHeight: 1.15,
+                      fontWeight: 750,
+                      letterSpacing: "-0.02em",
                     }}
                   >
-                    <Box
-                      sx={{
-                        width: "42%",
-                        height: "100%",
-                        borderRadius: 999,
-                        background:
-                          "linear-gradient(90deg, var(--app-accent), #7ea2dc)",
-                        animation: "actionSlide 1200ms ease-in-out infinite",
-                      }}
-                    />
-                  </Box>
+                    {DEFAULT_TITLE}
+                  </Typography>
                   <Typography
                     component="p"
                     sx={{
                       textAlign: "center",
-                      color: "#607086",
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
+                      color: "#536277",
+                      fontSize: "0.96rem",
+                      lineHeight: 1.5,
+                      maxWidth: 260,
                     }}
                   >
-                    No cierres esta ventana mientras terminamos.
+                    {message}
                   </Typography>
                 </Stack>
-              </Box>
+              </Stack>
             </Box>
           </Box>
         </Fade>

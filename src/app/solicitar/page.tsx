@@ -26,29 +26,6 @@ import { submitShiftRequestsAction } from "@/features/public/actions";
 import { getSolicitarPageState } from "@/features/public/queries";
 
 type ScheduleView = "available" | "confirmed" | "calendar";
-type RequestStep = "person" | "zone" | "shifts";
-
-const REQUEST_STEPS: Array<{
-  id: RequestStep;
-  title: string;
-  description: string;
-}> = [
-  {
-    id: "person",
-    title: "Tu nombre",
-    description: "Identifica quién hará la solicitud.",
-  },
-  {
-    id: "zone",
-    title: "Lugar",
-    description: "Elige dónde quieres participar.",
-  },
-  {
-    id: "shifts",
-    title: "Turnos",
-    description: "Selecciona horarios y envía la solicitud.",
-  },
-];
 
 function buildScheduleHref(
   filters: { zoneId: string; from: string; to: string; selectedDate: string },
@@ -99,14 +76,6 @@ export default async function SolicitarPage({ searchParams }: Props) {
     { ...state.filters, selectedDate: "" },
     "available",
   );
-  const currentStep: RequestStep = !state.currentPerson
-    ? "person"
-    : !selectedZone
-      ? "zone"
-      : "shifts";
-  const currentStepIndex = REQUEST_STEPS.findIndex(
-    (step) => step.id === currentStep,
-  );
 
   return (
     <PublicSiteShell>
@@ -129,125 +98,6 @@ export default async function SolicitarPage({ searchParams }: Props) {
                 pocos pasos.
               </Typography>
             </Box>
-
-            <Card
-              elevation={0}
-              sx={{
-                borderRadius: 1,
-                border: "1px solid",
-                borderColor: "divider",
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,250,255,0.95))",
-              }}
-            >
-              <CardContent>
-                <Stack spacing={2.25}>
-                  <Stack
-                    direction={{ xs: "column", md: "row" }}
-                    spacing={1.25}
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: { xs: "flex-start", md: "center" },
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="overline" color="text.secondary">
-                        Flujo guiado
-                      </Typography>
-                      <Typography variant="h5">
-                        {REQUEST_STEPS[currentStepIndex]?.title}
-                      </Typography>
-                      <Typography color="text.secondary">
-                        {REQUEST_STEPS[currentStepIndex]?.description}
-                      </Typography>
-                    </Box>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{ flexWrap: "wrap", alignItems: "center" }}
-                    >
-                      {state.currentPerson ? (
-                        <Chip
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          label={`${state.currentPerson.firstName} ${state.currentPerson.lastName}`}
-                        />
-                      ) : null}
-                      {selectedZone ? (
-                        <Chip
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          label={selectedZone.name}
-                        />
-                      ) : null}
-                    </Stack>
-                  </Stack>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(3, minmax(0, 1fr))",
-                      },
-                      gap: 1,
-                    }}
-                  >
-                    {REQUEST_STEPS.map((step, index) => {
-                      const active = index === currentStepIndex;
-                      const completed = index < currentStepIndex;
-
-                      return (
-                        <Box
-                          key={step.id}
-                          sx={{
-                            px: 1.25,
-                            py: 1.1,
-                            borderRadius: 1,
-                            border: "1px solid",
-                            borderColor: active
-                              ? "primary.main"
-                              : completed
-                                ? "rgba(74,109,167,0.35)"
-                                : "divider",
-                            backgroundColor: active
-                              ? "rgba(74,109,167,0.08)"
-                              : completed
-                                ? "rgba(74,109,167,0.04)"
-                                : "#ffffff",
-                          }}
-                        >
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: "block",
-                              fontWeight: 700,
-                              color: active || completed
-                                ? "primary.main"
-                                : "text.secondary",
-                            }}
-                          >
-                            {completed
-                              ? "Listo"
-                              : active
-                                ? "Actual"
-                                : "Pendiente"}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 700, color: "#1f2a3d" }}
-                          >
-                            {step.title}
-                          </Typography>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
 
             {state.notice ? (
               <Alert severity="success">{state.notice}</Alert>
@@ -364,7 +214,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                 formMethod="post"
                                 loadingMessage="Estamos regresando al paso anterior."
                               >
-                                Anterior: cambiar persona
+                                Cambiar persona
                               </ActionSubmitButton>
                               <ActionSubmitButton
                                 variant="contained"
@@ -422,7 +272,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             >
                               <Link href="/solicitar">
                                 <Button variant="outlined" fullWidth>
-                                  Anterior: cambiar lugar
+                                  Cambiar lugar
                                 </Button>
                               </Link>
                             </Stack>
