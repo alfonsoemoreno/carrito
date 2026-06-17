@@ -32,7 +32,7 @@ export function normalizeExportAuditFilters(filters: ExportFilters) {
 export async function recordAdminExportAudit(input: {
   admin: AdminUser;
   request: Request;
-  exportType: "assignments" | "requests";
+  exportType: "assignments" | "requests" | "zone-shifts-pdf";
   fileName: string;
   rowCount: number;
   filters: ExportFilters;
@@ -49,7 +49,9 @@ export async function recordAdminExportAudit(input: {
       action:
         input.exportType === "assignments"
           ? "EXPORT_ASSIGNMENTS_CSV_DOWNLOADED"
-          : "EXPORT_REQUESTS_CSV_DOWNLOADED",
+          : input.exportType === "requests"
+            ? "EXPORT_REQUESTS_CSV_DOWNLOADED"
+            : "EXPORT_ZONE_SHIFTS_PDF_DOWNLOADED",
       meta: {
         exportType: input.exportType,
         fileName: input.fileName,

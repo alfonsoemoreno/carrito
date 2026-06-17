@@ -1,4 +1,3 @@
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import {
   Box,
@@ -11,20 +10,12 @@ import {
 import Link from "next/link";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
 
-const entryPoints = [
-  {
-    href: "/solicitar",
-    icon: <EventAvailableRoundedIcon />,
-    title: "Solicitar turnos",
-    body: "Revise los turnos disponibles y envíe una solicitud en pocos pasos.",
-  },
-  {
-    href: "/asignaciones",
-    icon: <AssignmentRoundedIcon />,
-    title: "Ver asignaciones",
-    body: "Consulte las asignaciones visibles y revise su seguimiento personal.",
-  },
-] as const;
+const entryPoint = {
+  href: "/solicitar",
+  icon: <EventAvailableRoundedIcon />,
+  title: "Solicitar turnos",
+  body: "Revise los turnos disponibles y envíe una solicitud en pocos pasos.",
+} as const;
 
 export default function HomePage() {
   return (
@@ -52,54 +43,41 @@ export default function HomePage() {
                     Elige lo que necesitas hacer
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    El acceso público se centra solo en solicitar turnos y
-                    revisar asignaciones visibles.
+                    El acceso público se centra solo en solicitar turnos con el
+                    menor número posible de pasos.
                   </Typography>
                 </Box>
               </CardContent>
             </Card>
 
-            <Box
+            <Card
+              elevation={0}
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(2, minmax(0, 1fr))",
-                },
-                gap: 2,
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(243,246,252,0.96))",
               }}
             >
-              {entryPoints.map((item) => (
-                <Card
-                  key={item.href}
-                  elevation={0}
+              <CardContent sx={{ p: { xs: 3, md: 3.5 } }}>
+                <Box
                   sx={{
-                    backgroundColor: "#f7f7f7",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.5,
                   }}
                 >
-                  <CardContent sx={{ p: { xs: 3, md: 3.5 } }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 1.5,
-                      }}
-                    >
-                      <Box sx={{ color: "primary.main" }}>{item.icon}</Box>
-                      <Typography variant="h5">{item.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.body}
-                      </Typography>
-                      <Link href={item.href}>
-                        <Button variant="contained" fullWidth>
-                          Entrar
-                        </Button>
-                      </Link>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
+                  <Box sx={{ color: "primary.main" }}>{entryPoint.icon}</Box>
+                  <Typography variant="h5">{entryPoint.title}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {entryPoint.body}
+                  </Typography>
+                  <Link href={entryPoint.href}>
+                    <Button variant="contained" fullWidth>
+                      Empezar
+                    </Button>
+                  </Link>
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         </Container>
       </Box>

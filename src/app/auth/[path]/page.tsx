@@ -25,14 +25,11 @@ export default async function AuthPage({
                 </Box>
                 <Alert severity="info">
                   Este acceso es solo para administradores y superadministradores. Si eres publicador y
-                  quieres solicitar turnos o revisar asignaciones, usa el flujo público.
+                  quieres solicitar turnos, usa el flujo público.
                 </Alert>
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                   <Link href="/solicitar">
                     <Button variant="outlined">Ir a solicitar turnos</Button>
-                  </Link>
-                  <Link href="/asignaciones">
-                    <Button variant="outlined">Ver asignaciones</Button>
                   </Link>
                 </Box>
                 <Box className="auth-panel">

@@ -111,6 +111,138 @@ export async function getRequestsExportRows(input: {
   }));
 }
 
+export async function getZoneShiftPdfReportData(input: {
+  from?: string | null | undefined;
+  to?: string | null | undefined;
+  zoneId?: string | null | undefined;
+}) {
+  const range = resolveStatsRange(input);
+
+  if (!input.zoneId) {
+    return null;
+  }
+
+  const zone = await prisma.zone.findUnique({
+    where: { id: input.zoneId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+  });
+
+  if (!zone) {
+    return null;
+  }
+
+  const shifts = await prisma.shift.findMany({
+    where: {
+      zoneId: input.zoneId,
+      shiftDate: {
+        gte: range.from,
+        lte: range.to,
+      },
+    },
+    include: {
+      requests: {
+        where: {
+          status: ShiftRequestStatus.PENDING,
+        },
+        select: {
+          id: true,
+          person: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      assignments: {
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+        },
+        select: {
+          id: true,
+          person1: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+          person2: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ shiftDate: "asc" }, { startTime: "asc" }],
+  });
+
+  const rows = shifts.map((shift) => {
+    const takenBy = shift.assignments.map(
+      (assignment) =>
+        `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
+    );
+    const pendingPeople = shift.requests.map(
+      (request) =>
+        `${request.person.firstName} ${request.person.lastName}`,
+    );
+
+    const status =
+      takenBy.length > 0
+        ? "Tomado"
+        : pendingPeople.length > 0
+          ? "En revisión"
+          : shift.status === "OPEN"
+            ? "Disponible"
+            : "No disponible";
+
+    return {
+      id: shift.id,
+      dateLabel: formatDate(shift.shiftDate),
+      dateKey: shift.shiftDate.toISOString(),
+      timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
+      status,
+      takenBy,
+      pendingPeople,
+      notes:
+        status === "Disponible"
+          ? "Disponible para asignación o solicitud."
+          : status === "En revisión"
+            ? `Solicitudes pendientes: ${pendingPeople.join(", ")}`
+            : takenBy.length > 0
+              ? `Asignado a ${takenBy.join(" / ")}`
+              : "Fuera de disponibilidad operativa.",
+    };
+  });
+
+  return {
+    zone: {
+      id: zone.id,
+      name: zone.name,
+      description: zone.description ?? "",
+    },
+    range: {
+      fromValue: range.fromValue,
+      toValue: range.toValue,
+      fromLabel: formatDate(range.from),
+      toLabel: formatDate(range.to),
+    },
+    summary: {
+      total: rows.length,
+      taken: rows.filter((row) => row.status === "Tomado").length,
+      available: rows.filter((row) => row.status === "Disponible").length,
+      pending: rows.filter((row) => row.status === "En revisión").length,
+      unavailable: rows.filter((row) => row.status === "No disponible").length,
+    },
+    rows,
+  };
+}
+
 export async function getExportsPageState(
   rawSearchParams: Promise<{ [key: string]: string | string[] | undefined }>,
 ) {
@@ -191,6 +323,7 @@ export async function getExportsPageState(
           in: [
             "EXPORT_ASSIGNMENTS_CSV_DOWNLOADED",
             "EXPORT_REQUESTS_CSV_DOWNLOADED",
+            "EXPORT_ZONE_SHIFTS_PDF_DOWNLOADED",
           ],
         },
       },
@@ -241,7 +374,9 @@ export async function getExportsPageState(
         actionLabel:
           meta.exportType === "requests"
             ? "Solicitudes CSV"
-            : "Asignaciones CSV",
+            : meta.exportType === "zone-shifts-pdf"
+              ? "Turnos PDF"
+              : "Asignaciones CSV",
         fileName: meta.fileName ?? "",
         rowCount: typeof meta.rowCount === "number" ? meta.rowCount : 0,
         ipAddress: meta.ipAddress ?? "",

@@ -149,7 +149,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", xl: "1fr 1fr 1fr" },
+              gridTemplateColumns: { xs: "1fr", xl: "repeat(4, minmax(0, 1fr))" },
               gap: 2.5,
             }}
           >
@@ -182,6 +182,22 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                   Abrir calendario
                 </Button>
               </Link>
+            </FormCard>
+            <FormCard
+              title="PDF por lugar"
+              description="Reporte visual de turnos tomados, disponibles y en revisión para un solo lugar."
+            >
+              {state.filters.zoneId ? (
+                <Link href={`/api/exports/shifts-pdf?${query}`}>
+                  <Button variant="contained" startIcon={<PrintRoundedIcon />}>
+                    Descargar reporte PDF
+                  </Button>
+                </Link>
+              ) : (
+                <Alert severity="info">
+                  Selecciona un lugar para habilitar el PDF.
+                </Alert>
+              )}
             </FormCard>
           </Box>
 
