@@ -6,38 +6,21 @@ import {
   generateMissingFutureShifts,
   refreshFutureShiftStatuses,
 } from "@/features/admin/automation/service";
-import { prisma } from "@/lib/prisma";
-import { automationHorizonWeeksSchema } from "./validations";
-
-async function persistAutomationHorizonWeeks(adminId: string, weeks: number) {
-  await prisma.systemConfig.upsert({
-    where: {
-      configKey: "default",
-    },
-    create: {
-      configKey: "default",
-      congregationName: "Congregación",
-      city: "Ciudad",
-      systemName: "Carrito",
-      generateFutureWeeks: weeks,
-      updatedByAdminId: adminId,
-    },
-    update: {
-      generateFutureWeeks: weeks,
-      updatedByAdminId: adminId,
-    },
-  });
-}
+import { parseDateOnly } from "@/features/admin/master-data/utils";
+import { automationDateRangeSchema } from "./validations";
 
 export async function generateMissingFutureShiftsAction(formData: FormData) {
   const admin = await requireCurrentAdminActor();
-  const parsed = automationHorizonWeeksSchema.parse({
-    weeks: formData.get("weeks"),
+  const parsed = automationDateRangeSchema.parse({
+    from: formData.get("from"),
+    to: formData.get("to"),
   });
 
-  await persistAutomationHorizonWeeks(admin.id, parsed.weeks);
-  await generateMissingFutureShifts(admin.id, parsed.weeks);
-  await refreshFutureShiftStatuses(admin.id, parsed.weeks);
+  const from = parseDateOnly(parsed.from);
+  const to = parseDateOnly(parsed.to);
+
+  await generateMissingFutureShifts(admin.id, { from, to });
+  await refreshFutureShiftStatuses(admin.id, { from, to });
 
   revalidatePath("/admin");
   revalidatePath("/admin/automatizacion");
@@ -47,12 +30,15 @@ export async function generateMissingFutureShiftsAction(formData: FormData) {
 
 export async function refreshShiftStatusesAction(formData: FormData) {
   const admin = await requireCurrentAdminActor();
-  const parsed = automationHorizonWeeksSchema.parse({
-    weeks: formData.get("weeks"),
+  const parsed = automationDateRangeSchema.parse({
+    from: formData.get("from"),
+    to: formData.get("to"),
   });
 
-  await persistAutomationHorizonWeeks(admin.id, parsed.weeks);
-  await refreshFutureShiftStatuses(admin.id, parsed.weeks);
+  const from = parseDateOnly(parsed.from);
+  const to = parseDateOnly(parsed.to);
+
+  await refreshFutureShiftStatuses(admin.id, { from, to });
 
   revalidatePath("/admin");
   revalidatePath("/admin/automatizacion");

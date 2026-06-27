@@ -2,6 +2,12 @@ import { ShiftStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { addDaysUtc, startOfTodayUtc, toDateOnlyString } from "@/features/public/utils";
 
+type AutomationDateRangeInput = {
+  from?: Date;
+  to?: Date;
+  weeksOverride?: number;
+};
+
 function appliesDateBlock(
   shiftDate: Date,
   block: { startDate: Date; endDate: Date },
@@ -71,13 +77,35 @@ async function resolveGenerationWeeks(weeksOverride?: number) {
   return config?.generateFutureWeeks ?? 8;
 }
 
-export async function generateMissingFutureShifts(
-  actorAdminId?: string,
-  weeksOverride?: number,
-) {
-  const weeks = await resolveGenerationWeeks(weeksOverride);
+async function resolveAutomationDateRange(input: AutomationDateRangeInput = {}) {
+  if (input.from && input.to) {
+    return {
+      from: input.from,
+      to: input.to,
+      horizonWeeks: null,
+    };
+  }
+
+  const weeks = await resolveGenerationWeeks(input.weeksOverride);
   const from = startOfTodayUtc();
   const to = addDaysUtc(from, weeks * 7);
+
+  return {
+    from,
+    to,
+    horizonWeeks: weeks,
+  };
+}
+
+export async function generateMissingFutureShifts(
+  actorAdminId?: string,
+  rangeInput: AutomationDateRangeInput = {},
+) {
+  const {
+    from,
+    to,
+    horizonWeeks,
+  } = await resolveAutomationDateRange(rangeInput);
 
   const [templates, zoneBlocks, existingShifts] = await Promise.all([
     prisma.shiftTemplate.findMany({
@@ -217,7 +245,7 @@ export async function generateMissingFutureShifts(
 
   return {
     createdCount: pendingCreates.length,
-    horizonWeeks: weeks,
+    horizonWeeks,
     from,
     to,
   };
@@ -225,12 +253,13 @@ export async function generateMissingFutureShifts(
 
 export async function refreshFutureShiftStatuses(
   actorAdminId?: string,
-  weeksOverride?: number,
+  rangeInput: AutomationDateRangeInput = {},
 ) {
-  const today = startOfTodayUtc();
-  const weeks = await resolveGenerationWeeks(weeksOverride);
-  const from = addDaysUtc(today, -7);
-  const to = addDaysUtc(today, weeks * 7);
+  const {
+    from,
+    to,
+    horizonWeeks,
+  } = await resolveAutomationDateRange(rangeInput);
   const shifts = await prisma.shift.findMany({
     where: {
       shiftDate: {
@@ -307,7 +336,7 @@ export async function refreshFutureShiftStatuses(
           updatedCount: updates.length,
           from: from.toISOString(),
           to: to.toISOString(),
-          horizonWeeks: weeks,
+          horizonWeeks,
         },
       },
     });
@@ -315,7 +344,7 @@ export async function refreshFutureShiftStatuses(
 
   return {
     updatedCount: updates.length,
-    horizonWeeks: weeks,
+    horizonWeeks,
     from,
     to,
   };

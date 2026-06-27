@@ -1,5 +1,11 @@
 import { z } from "zod";
 
-export const automationHorizonWeeksSchema = z.object({
-  weeks: z.coerce.number().int().min(1).max(24),
-});
+export const automationDateRangeSchema = z
+  .object({
+    from: z.string().date(),
+    to: z.string().date(),
+  })
+  .refine((values) => values.from <= values.to, {
+    path: ["to"],
+    message: "La fecha final no puede ser anterior a la inicial.",
+  });

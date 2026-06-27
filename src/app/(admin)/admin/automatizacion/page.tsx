@@ -7,7 +7,6 @@ import {
   CardContent,
   Chip,
   Container,
-  MenuItem,
   Stack,
   TextField,
   Typography,
@@ -24,11 +23,18 @@ import {
 } from "@/features/admin/automation/actions";
 import { getAutomationDashboardData } from "@/features/admin/automation/queries";
 import { formatDate } from "@/features/admin/master-data/utils";
+import { addDaysUtc, startOfTodayUtc, toDateOnlyString } from "@/features/public/utils";
 
 export default async function AdminAutomationPage() {
   await requireCurrentAdminPageAccess();
   const data = await getAutomationDashboardData();
-  const horizonWeekOptions = Array.from({ length: 24 }, (_, index) => index + 1);
+  const defaultFrom = startOfTodayUtc();
+  const defaultTo = addDaysUtc(
+    defaultFrom,
+    (data.config?.generateFutureWeeks ?? 8) * 7,
+  );
+  const defaultFromValue = toDateOnlyString(defaultFrom);
+  const defaultToValue = toDateOnlyString(defaultTo);
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
@@ -97,55 +103,71 @@ export default async function AdminAutomationPage() {
                   {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
                 </Typography>
                 <Typography color="text.secondary">
-                  Selecciona cuantas semanas debe abarcar la generacion de nuevos turnos y el recálculo operativo.
+                  Selecciona el rango exacto de días que quieres abrir o recalcular. La ejecución manual trabajará solo dentro de ese calendario.
                 </Typography>
                 <form action={generateMissingFutureShiftsAction}>
                   <Stack spacing={1.5}>
-                    <TextField
-                      select
-                      name="weeks"
-                      label="Semanas a procesar"
-                      defaultValue={String(data.config?.generateFutureWeeks ?? 8)}
-                      size="small"
-                      fullWidth
-                      helperText="Este valor se guardará como horizonte operativo para próximas ejecuciones."
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      spacing={1.5}
                     >
-                      {horizonWeekOptions.map((weeks) => (
-                        <MenuItem key={`generate-${weeks}`} value={String(weeks)}>
-                          {weeks} {weeks === 1 ? "semana" : "semanas"}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                      <TextField
+                        name="from"
+                        label="Desde"
+                        type="date"
+                        required
+                        defaultValue={defaultFromValue}
+                        fullWidth
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                      <TextField
+                        name="to"
+                        label="Hasta"
+                        type="date"
+                        required
+                        defaultValue={defaultToValue}
+                        fullWidth
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                    </Stack>
                     <ActionSubmitButton
                       variant="contained"
-                      loadingMessage="Estamos generando los turnos faltantes."
+                      loadingMessage="Estamos generando los turnos faltantes dentro del rango seleccionado."
                     >
-                      Generar turnos faltantes ahora
+                      Abrir turnos dentro de este rango
                     </ActionSubmitButton>
                   </Stack>
                 </form>
                 <form action={refreshShiftStatusesAction}>
                   <Stack spacing={1.5}>
-                    <TextField
-                      select
-                      name="weeks"
-                      label="Semanas a recalcular"
-                      defaultValue={String(data.config?.generateFutureWeeks ?? 8)}
-                      size="small"
-                      fullWidth
-                      helperText="Se revisarán turnos desde la última semana hasta el horizonte seleccionado."
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      spacing={1.5}
                     >
-                      {horizonWeekOptions.map((weeks) => (
-                        <MenuItem key={`refresh-${weeks}`} value={String(weeks)}>
-                          {weeks} {weeks === 1 ? "semana" : "semanas"}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                      <TextField
+                        name="from"
+                        label="Desde"
+                        type="date"
+                        required
+                        defaultValue={defaultFromValue}
+                        fullWidth
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                      <TextField
+                        name="to"
+                        label="Hasta"
+                        type="date"
+                        required
+                        defaultValue={defaultToValue}
+                        fullWidth
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                    </Stack>
                     <ActionSubmitButton
                       variant="outlined"
-                      loadingMessage="Estamos recalculando los estados operativos."
+                      loadingMessage="Estamos recalculando los estados operativos dentro del rango seleccionado."
                     >
-                      Recalcular estados operativos
+                      Recalcular turnos de este rango
                     </ActionSubmitButton>
                   </Stack>
                 </form>
