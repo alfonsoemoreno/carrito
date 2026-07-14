@@ -170,7 +170,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
   const policy = {
     maxRequestsPerWeek: config?.maxRequestsPerWeek ?? 4,
     allowConsecutiveDays: config?.allowConsecutiveDays ?? false,
-    allowMultiplePerDay: config?.allowMultiplePerDay ?? false,
+    allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
     allowOverlapping: config?.allowOverlapping ?? false,
     allowSameSexPairing: config?.allowSameSexPairing ?? true,
   };

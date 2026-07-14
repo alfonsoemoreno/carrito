@@ -98,6 +98,41 @@ test("buildAssignmentWarnings exige dos personas distintas", () => {
   assert.deepEqual(warnings, ["Debes seleccionar dos personas diferentes."]);
 });
 
+test("buildAssignmentWarnings permite multiples turnos el mismo dia cuando la regla esta habilitada", () => {
+  const warnings = buildAssignmentWarnings({
+    config: {
+      allowSameSexPairing: true,
+      allowConsecutiveDays: true,
+      allowMultiplePerDay: true,
+      allowOverlapping: false,
+      maxConfirmedPerWeek: 10,
+      maxConfirmedPerMonth: 10,
+    },
+    pair: {
+      person1: {
+        id: "p1",
+        label: "Ana",
+        gender: "F",
+        status: "ACTIVE",
+      },
+      person2: {
+        id: "p2",
+        label: "Berta",
+        gender: "F",
+        status: "ACTIVE",
+      },
+    },
+    shift: createShift("2026-06-13", "12:00", "14:00"),
+    relationshipTypes: [RelationshipType.ADMIN_EXCEPTION],
+    person1Assignments: [createShift("2026-06-13", "09:00", "11:00")],
+    person2Assignments: [],
+    person1Availability: [],
+    person2Availability: [],
+  });
+
+  assert.deepEqual(warnings, []);
+});
+
 test("appendAdminNote concatena respetando el formato administrativo", () => {
   assert.equal(appendAdminNote(null, "Asignado manualmente"), "Asignado manualmente");
   assert.equal(

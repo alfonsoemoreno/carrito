@@ -312,7 +312,7 @@ model SystemConfig {
   maxConfirmedPerWeek         Int               @default(2) @map("max_confirmed_per_week")
   maxConfirmedPerMonth        Int               @default(6) @map("max_confirmed_per_month")
   allowConsecutiveDays        Boolean           @default(false) @map("allow_consecutive_days")
-  allowMultiplePerDay         Boolean           @default(false) @map("allow_multiple_per_day")
+  allowMultiplePerDay         Boolean           @default(true) @map("allow_multiple_per_day")
   allowOverlapping            Boolean           @default(false) @map("allow_overlapping")
   allowSameSexPairing         Boolean           @default(true) @map("allow_same_sex_pairing")
   historyVisibility           HistoryVisibility @default(ONE_YEAR) @map("history_visibility")

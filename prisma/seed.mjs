@@ -272,7 +272,7 @@ async function main() {
       maxConfirmedPerWeek: 2,
       maxConfirmedPerMonth: 6,
       allowConsecutiveDays: false,
-      allowMultiplePerDay: false,
+      allowMultiplePerDay: true,
       allowOverlapping: false,
       allowSameSexPairing: true,
       historyVisibility: "ONE_YEAR",
