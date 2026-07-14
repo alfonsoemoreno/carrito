@@ -30,7 +30,7 @@ export function PublicPersonPicker({
 
   return (
     <form action="/public/authenticate" method="post">
-      <Stack spacing={2}>
+      <Stack spacing={2.75}>
         <Autocomplete
           options={people}
           value={selectedPerson}
@@ -40,6 +40,28 @@ export function PublicPersonPicker({
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.label}
           noOptionsText="No hay personas activas disponibles"
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 1.25,
+                borderRadius: 3,
+                overflow: "hidden",
+              },
+            },
+            listbox: {
+              sx: {
+                py: 1,
+                "& .MuiAutocomplete-option": {
+                  minHeight: 52,
+                  paddingLeft: "28px !important",
+                  pr: 2.5,
+                  py: 1.25,
+                  alignItems: "center",
+                  fontSize: "1.03rem",
+                },
+              },
+            },
+          }}
           renderInput={(params) => (
             <TextField
               {...params}

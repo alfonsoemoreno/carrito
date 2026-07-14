@@ -152,6 +152,28 @@ export function getAppTheme(mode: PaletteMode) {
           },
         },
       },
+      MuiCardContent: {
+        styleOverrides: {
+          root: {
+            padding: 32,
+            "&:last-child": {
+              paddingBottom: 32,
+            },
+            "@media (max-width:900px)": {
+              padding: 28,
+              "&:last-child": {
+                paddingBottom: 28,
+              },
+            },
+            "@media (max-width:600px)": {
+              padding: 24,
+              "&:last-child": {
+                paddingBottom: 24,
+              },
+            },
+          },
+        },
+      },
       MuiChip: {
         styleOverrides: {
           root: {
@@ -181,6 +203,39 @@ export function getAppTheme(mode: PaletteMode) {
             borderRadius: "4px !important",
             backgroundColor: palette.inputBackground,
           },
+          input: {
+            paddingTop: 16,
+            paddingBottom: 16,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            minHeight: 48,
+            paddingTop: 12,
+            paddingBottom: 12,
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          inputRoot: {
+            paddingTop: "4px !important",
+            paddingBottom: "4px !important",
+          },
+          paper: {
+            borderRadius: 12,
+          },
+          listbox: {
+            paddingTop: 8,
+            paddingBottom: 8,
+          },
+          option: {
+            minHeight: 52,
+            paddingTop: 10,
+            paddingBottom: 10,
+          },
         },
       },
       MuiAlert: {
@@ -200,6 +255,12 @@ export function getAppTheme(mode: PaletteMode) {
       MuiContainer: {
         defaultProps: {
           maxWidth: "lg",
+        },
+        styleOverrides: {
+          root: {
+            paddingLeft: "clamp(20px, 4.5vw, 40px)",
+            paddingRight: "clamp(20px, 4.5vw, 40px)",
+          },
         },
       },
     },

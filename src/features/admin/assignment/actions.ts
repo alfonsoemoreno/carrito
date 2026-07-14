@@ -7,9 +7,11 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentAdminActor } from "@/features/admin/master-data/auth";
 import { appendAdminNote, buildAssignmentWarnings } from "@/features/admin/assignment/utils";
 import {
+  cancelShiftAssignmentSchema,
   confirmShiftAssignmentSchema,
   rejectShiftRequestSchema,
 } from "@/features/admin/assignment/validations";
+import { toDateOnlyString } from "@/features/public/utils";
 
 function redirectTo(path: string): never {
   redirect(path as never);
@@ -25,6 +27,35 @@ function buildShiftRedirect(shiftId: string, params: Record<string, string | nul
   }
 
   return `${url.pathname}${url.search}`;
+}
+
+function appliesDateBlock(
+  shiftDate: Date,
+  block: { startDate: Date; endDate: Date },
+) {
+  const target = toDateOnlyString(shiftDate);
+  return target >= toDateOnlyString(block.startDate) && target <= toDateOnlyString(block.endDate);
+}
+
+function resolveShiftStatus(input: {
+  shiftDate: Date;
+  confirmedAssignments: number;
+  shiftBlocks: Array<{ startDate: Date; endDate: Date }>;
+  zoneBlocks: Array<{ startDate: Date; endDate: Date }>;
+}) {
+  if (toDateOnlyString(input.shiftDate) < toDateOnlyString(new Date())) {
+    return ShiftStatus.CLOSED;
+  }
+
+  if (input.confirmedAssignments > 0) {
+    return ShiftStatus.FULL;
+  }
+
+  const blocked = [...input.shiftBlocks, ...input.zoneBlocks].some((block) =>
+    appliesDateBlock(input.shiftDate, block),
+  );
+
+  return blocked ? ShiftStatus.BLOCKED : ShiftStatus.OPEN;
 }
 
 export async function rejectShiftRequestAction(formData: FormData) {
@@ -419,6 +450,163 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
         shift.assignments[0]
           ? "Asignacion reemplazada y turno actualizado."
           : "Asignacion confirmada correctamente.",
+    }),
+  );
+}
+
+export async function cancelShiftAssignmentAction(formData: FormData) {
+  const parsed = cancelShiftAssignmentSchema.safeParse({
+    assignmentId: formData.get("assignmentId"),
+    shiftId: formData.get("shiftId"),
+    reason: formData.get("reason"),
+  });
+
+  if (!parsed.success) {
+    const shiftId = String(formData.get("shiftId") ?? "");
+    const error =
+      parsed.error.issues[0]?.message ?? "Debes indicar un motivo valido para cancelar la asignacion.";
+    redirectTo(buildShiftRedirect(shiftId, { error }));
+  }
+
+  const admin = await requireCurrentAdminActor();
+
+  const assignment = await prisma.assignment.findFirst({
+    where: {
+      id: parsed.data.assignmentId,
+      shiftId: parsed.data.shiftId,
+      status: AssignmentStatus.CONFIRMED,
+    },
+    select: {
+      id: true,
+      person1Id: true,
+      person2Id: true,
+      shift: {
+        select: {
+          id: true,
+          shiftDate: true,
+          status: true,
+          blocks: {
+            select: {
+              startDate: true,
+              endDate: true,
+            },
+          },
+          zone: {
+            select: {
+              blocks: {
+                select: {
+                  startDate: true,
+                  endDate: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!assignment) {
+    redirectTo(
+      buildShiftRedirect(parsed.data.shiftId, {
+        error: "La asignacion ya no esta confirmada o fue modificada.",
+      }),
+    );
+  }
+
+  if (assignment.shift.status === ShiftStatus.CLOSED) {
+    redirectTo(
+      buildShiftRedirect(parsed.data.shiftId, {
+        error: "El turno esta cerrado y ya no admite cancelacion administrativa.",
+      }),
+    );
+  }
+
+  const now = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.assignment.update({
+      where: { id: assignment.id },
+      data: {
+        status: AssignmentStatus.CANCELLED,
+        cancelledAt: now,
+        exceptionReason: parsed.data.reason,
+        decidedByAdminId: admin.id,
+      },
+    });
+
+    const relatedRequests = await tx.shiftRequest.findMany({
+      where: {
+        shiftId: assignment.shift.id,
+        personId: {
+          in: [assignment.person1Id, assignment.person2Id],
+        },
+        status: ShiftRequestStatus.CONFIRMED,
+      },
+      select: {
+        id: true,
+        comments: true,
+      },
+    });
+
+    for (const request of relatedRequests) {
+      await tx.shiftRequest.update({
+        where: { id: request.id },
+        data: {
+          status: ShiftRequestStatus.CANCELLED,
+          cancelledAt: now,
+          resolvedAt: now,
+          comments: appendAdminNote(
+            request.comments,
+            `Asignacion cancelada por administracion: ${parsed.data.reason}`,
+          ),
+        },
+      });
+    }
+
+    const confirmedAssignments = await tx.assignment.count({
+      where: {
+        shiftId: assignment.shift.id,
+        status: AssignmentStatus.CONFIRMED,
+      },
+    });
+
+    await tx.shift.update({
+      where: { id: assignment.shift.id },
+      data: {
+        status: resolveShiftStatus({
+          shiftDate: assignment.shift.shiftDate,
+          confirmedAssignments,
+          shiftBlocks: assignment.shift.blocks,
+          zoneBlocks: assignment.shift.zone.blocks,
+        }),
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorType: "ADMIN",
+        entityType: "assignment",
+        entityId: assignment.id,
+        actorAdminId: admin.id,
+        action: "SHIFT_ASSIGNMENT_CANCELLED",
+        afterData: {
+          shiftId: assignment.shift.id,
+          reason: parsed.data.reason,
+        },
+      },
+    });
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/solicitudes");
+  revalidatePath("/admin/calendario");
+  revalidatePath(`/admin/turnos/${parsed.data.shiftId}`);
+  revalidatePath("/solicitar");
+  revalidatePath("/asignaciones");
+  redirectTo(
+    buildShiftRedirect(parsed.data.shiftId, {
+      notice: "Asignacion cancelada y turno actualizado.",
     }),
   );
 }

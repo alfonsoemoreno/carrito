@@ -13,7 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
+import { cancelOwnPendingRequestAction } from "@/features/public/actions";
 import { getAsignacionesPageState } from "@/features/public/queries";
 
 function getRequestStatusCopy(status: string) {
@@ -46,8 +48,12 @@ function getRequestStatusCopy(status: string) {
   }
 }
 
-export default async function AsignacionesPage() {
-  const state = await getAsignacionesPageState();
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function AsignacionesPage({ searchParams }: Props) {
+  const state = await getAsignacionesPageState(searchParams);
 
   return (
     <PublicSiteShell>
@@ -78,6 +84,8 @@ export default async function AsignacionesPage() {
                 <Link href="/solicitar">/solicitar</Link>.
               </Alert>
             ) : null}
+            {state.notice ? <Alert severity="success">{state.notice}</Alert> : null}
+            {state.requestError ? <Alert severity="error">{state.requestError}</Alert> : null}
 
             <Stack spacing={3}>
               <Card
@@ -221,6 +229,33 @@ export default async function AsignacionesPage() {
                                       >
                                         Nota: {request.comments}
                                       </Typography>
+                                    ) : null}
+                                    {request.status === "PENDING" ? (
+                                      <form action={cancelOwnPendingRequestAction}>
+                                        <Stack
+                                          direction={{ xs: "column", sm: "row" }}
+                                          spacing={1.25}
+                                          sx={{ pt: 1 }}
+                                        >
+                                          <input
+                                            type="hidden"
+                                            name="requestId"
+                                            value={request.id}
+                                          />
+                                          <input
+                                            type="hidden"
+                                            name="returnTo"
+                                            value="/asignaciones"
+                                          />
+                                          <ActionSubmitButton
+                                            variant="outlined"
+                                            color="error"
+                                            loadingMessage="Estamos cancelando la solicitud."
+                                          >
+                                            Cancelar solicitud
+                                          </ActionSubmitButton>
+                                        </Stack>
+                                      </form>
                                     ) : null}
                                   </Stack>
                                 </CardContent>

@@ -12,3 +12,9 @@ export const confirmShiftAssignmentSchema = z.object({
   person2Id: z.uuid(),
   exceptionReason: z.string().trim().max(300).optional().or(z.literal("")),
 });
+
+export const cancelShiftAssignmentSchema = z.object({
+  assignmentId: z.uuid(),
+  shiftId: z.uuid(),
+  reason: z.string().trim().min(3, "Debes indicar un motivo breve.").max(300),
+});

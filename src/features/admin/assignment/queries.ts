@@ -268,6 +268,9 @@ export async function getShiftAssignmentPageState(
   const suggestedDefaults = pendingRequests
     .slice(0, 2)
     .map((request) => request.person.id);
+  const activeAssignment = shift.assignments.find(
+    (assignment) => assignment.status === AssignmentStatus.CONFIRMED,
+  );
 
   return {
     notice: readFirstSearchParam(searchParams.notice),
@@ -307,6 +310,12 @@ export async function getShiftAssignmentPageState(
       exceptionReason: assignment.exceptionReason,
       pairLabel: `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
     })),
+    activeAssignment: activeAssignment
+      ? {
+          id: activeAssignment.id,
+          pairLabel: `${activeAssignment.person1.firstName} ${activeAssignment.person1.lastName} + ${activeAssignment.person2.firstName} ${activeAssignment.person2.lastName}`,
+        }
+      : null,
     activePeople: activePeople.map((person) => ({
       id: person.id,
       label: `${person.firstName} ${person.lastName}`,

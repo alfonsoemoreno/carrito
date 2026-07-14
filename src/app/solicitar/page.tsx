@@ -81,17 +81,20 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 4, md: 5 } }}>
+      <Box component="main" sx={{ py: { xs: 5, md: 6 } }}>
         <Container maxWidth="md">
-          <Stack spacing={3}>
+          <Stack spacing={{ xs: 3.5, md: 4.5 }}>
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 1,
+                gap: 1.5,
                 borderLeft: "4px solid",
                 borderColor: "primary.main",
-                pl: 2,
+                pl: { xs: 2.25, md: 2.75 },
+                pr: { xs: 0.5, md: 1 },
+                pt: { xs: 0.5, md: 0.75 },
+                pb: { xs: 0.5, md: 0.75 },
               }}
             >
               <Typography variant="h3">Solicitar turnos</Typography>
@@ -128,7 +131,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                 }}
               >
                 <CardContent>
-                  <Stack spacing={3}>
+                  <Stack spacing={{ xs: 3.25, md: 4 }}>
                     <Stack
                       direction="row"
                       spacing={1.5}
@@ -159,7 +162,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                     }}
                   >
                     <CardContent>
-                      <Stack spacing={3}>
+                      <Stack spacing={{ xs: 3.25, md: 4 }}>
                         <Stack
                           direction="row"
                           spacing={1.5}
@@ -169,7 +172,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                           <Typography variant="h5">Elige un lugar</Typography>
                         </Stack>
                         <form action="/solicitar">
-                          <Stack spacing={2}>
+                          <Stack spacing={{ xs: 2.5, md: 3 }}>
                             <input
                               type="hidden"
                               name="scheduleView"
@@ -207,7 +210,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                             </FormControl>
                             <Stack
                               direction={{ xs: "column-reverse", sm: "row" }}
-                              spacing={1.25}
+                              spacing={{ xs: 1.5, md: 2 }}
+                              sx={{ pt: 0.5 }}
                             >
                               <ActionSubmitButton
                                 variant="outlined"
@@ -244,7 +248,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                         }}
                       >
                         <CardContent>
-                          <Stack spacing={3}>
+                          <Stack spacing={{ xs: 3.25, md: 4 }}>
                             <Stack
                               direction="row"
                               spacing={1.5}
@@ -270,7 +274,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
                             <Stack
                               direction={{ xs: "column", sm: "row" }}
-                              spacing={1.25}
+                              spacing={{ xs: 1.5, md: 2 }}
                             >
                               <Link href="/solicitar">
                                 <Button variant="outlined" fullWidth>
@@ -288,7 +292,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                       xs: "1fr",
                                       md: "minmax(0, 1fr)",
                                     },
-                                    gap: 2,
+                                    gap: 2.5,
                                   }}
                                 >
                                   <TextField
@@ -301,7 +305,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
 
                                 <Divider />
 
-                                <Stack spacing={1.25}>
+                                <Stack spacing={2}>
                                   {zoneAvailableShifts.map((shift) => {
                                     const disabled =
                                       shift.status !== "OPEN" ||
@@ -323,12 +327,14 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                       >
                                         <CardContent
                                           sx={{
-                                            px: 1.5,
-                                            py: 1.35,
-                                            "&:last-child": { pb: 1.35 },
+                                            px: { xs: 2.25, md: 2.5 },
+                                            py: { xs: 2.25, md: 2.5 },
+                                            "&:last-child": {
+                                              pb: { xs: 2.25, md: 2.5 },
+                                            },
                                           }}
                                         >
-                                          <Stack spacing={1}>
+                                          <Stack spacing={1.75}>
                                             <Stack
                                               direction="row"
                                               spacing={1.25}
@@ -356,7 +362,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                 </Typography>
                                               </Box>
                                               <Stack
-                                                spacing={0.5}
+                                                spacing={0.75}
                                                 sx={{
                                                   alignItems: "flex-end",
                                                   flexShrink: 0,
@@ -413,9 +419,9 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                   xs: "1fr",
                                                   md: "minmax(0, 1fr) auto",
                                                 },
-                                                gap: 1,
-                                                px: 1.25,
-                                                py: 1,
+                                                gap: 1.5,
+                                                px: { xs: 1.75, md: 2 },
+                                                py: { xs: 1.5, md: 1.75 },
                                                 border: "1px solid",
                                                 borderColor:
                                                   "var(--app-form-border)",
@@ -426,7 +432,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                                                   "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
                                               }}
                                             >
-                                              <Stack spacing={1}>
+                                              <Stack spacing={1.25}>
                                                 <Box
                                                   sx={{
                                                     display: "flex",

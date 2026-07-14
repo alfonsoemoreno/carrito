@@ -174,8 +174,8 @@ main {
 }
 
 .MuiContainer-root {
-  padding-left: clamp(16px, 4vw, 32px) !important;
-  padding-right: clamp(16px, 4vw, 32px) !important;
+  padding-left: clamp(20px, 4.5vw, 40px) !important;
+  padding-right: clamp(20px, 4.5vw, 40px) !important;
 }
 
 .MuiCard-root {
@@ -187,11 +187,11 @@ main {
 }
 
 .MuiCardContent-root {
-  padding: 28px !important;
+  padding: clamp(24px, 3vw, 32px) !important;
 }
 
 .MuiCardContent-root:last-child {
-  padding-bottom: 28px !important;
+  padding-bottom: clamp(24px, 3vw, 32px) !important;
 }
 
 .MuiCardHeader-root {

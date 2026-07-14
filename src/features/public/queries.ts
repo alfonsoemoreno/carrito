@@ -5,6 +5,8 @@ import {
   ShiftRequestStatus,
   ShiftStatus,
 } from "@prisma/client";
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getPublicSession } from "@/features/public/session";
 import {
@@ -57,18 +59,27 @@ function isShiftBlocked(shift: {
   });
 }
 
-export async function getPublicConfig() {
-  const config = await prisma.systemConfig.findFirst({
-    orderBy: { createdAt: "asc" },
-  });
+const getCachedPublicConfigRecord = unstable_cache(
+  async () =>
+    prisma.systemConfig.findFirst({
+      orderBy: { createdAt: "asc" },
+    }),
+  ["public-config"],
+  {
+    revalidate: 30,
+  },
+);
+
+export const getPublicConfig = cache(async () => {
+  const config = await getCachedPublicConfigRecord();
 
   return {
     ...DEFAULT_CONFIG,
     ...config,
   };
-}
+});
 
-export async function getCurrentPublicPerson() {
+export const getCurrentPublicPerson = cache(async () => {
   const session = await getPublicSession();
 
   if (!session) {
@@ -90,6 +101,52 @@ export async function getCurrentPublicPerson() {
       email: true,
     },
   });
+});
+
+const getCachedActivePeople = unstable_cache(
+  async () =>
+    prisma.person.findMany({
+      where: {
+        status: PersonStatus.ACTIVE,
+      },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    }),
+  ["active-people"],
+  {
+    revalidate: 30,
+  },
+);
+
+export async function listActivePeople() {
+  return getCachedActivePeople();
+}
+
+const getCachedPublicZones = unstable_cache(
+  async () =>
+    prisma.zone.findMany({
+      where: {
+        status: "ACTIVE",
+        publicVisible: true,
+      },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ["public-zones"],
+  {
+    revalidate: 30,
+  },
+);
+
+async function listPublicZones() {
+  return getCachedPublicZones();
 }
 
 export async function searchActivePeople(query: string) {
@@ -112,20 +169,6 @@ export async function searchActivePeople(query: string) {
       firstName: true,
       lastName: true,
       pinLockedUntil: true,
-    },
-  });
-}
-
-export async function listActivePeople() {
-  return prisma.person.findMany({
-    where: {
-      status: PersonStatus.ACTIVE,
-    },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
     },
   });
 }
@@ -630,15 +673,14 @@ export async function getSolicitarPageState(
   const requestedScheduleView = readFirstSearchParam(searchParams.scheduleView);
   const requestedSelectedDate = readFirstSearchParam(searchParams.selectedDate);
 
-  const [config, currentPerson, people] = await Promise.all([
+  const [config, currentPerson, zones] = await Promise.all([
     getPublicConfig(),
     getCurrentPublicPerson(),
-    listActivePeople(),
+    listPublicZones(),
   ]);
+  const people = currentPerson ? [] : await listActivePeople();
 
   const defaultRange = buildVisibleDateRange(config.visibleWeeks);
-  const resolvedFrom = parseDateInput(from) ?? defaultRange.from;
-  const resolvedTo = parseDateInput(to) ?? defaultRange.to;
   const scheduleView =
     requestedScheduleView === "confirmed" ||
     requestedScheduleView === "calendar"
@@ -648,13 +690,9 @@ export async function getSolicitarPageState(
     ? requestedSelectedDate
     : "";
 
-  const [
-    shiftBoard,
-    partnerOptions,
-    ownPendingRequests,
-    ownConfirmedAssignments,
-  ] = currentPerson
-    ? await Promise.all([
+  const [shiftBoard, partnerOptions] =
+    currentPerson && zoneId
+      ? await Promise.all([
         getPublicShiftBoard({
           currentPersonId: currentPerson.id,
           zoneId,
@@ -662,22 +700,9 @@ export async function getSolicitarPageState(
           to,
         }),
         getSuggestedPartners(currentPerson.id),
-        getOwnPendingRequests(currentPerson.id),
-        getOwnConfirmedAssignments(currentPerson.id, resolvedFrom, resolvedTo),
       ])
-    : [[], [], [], []];
+      : [[], []];
 
-  const zones = await prisma.zone.findMany({
-    where: {
-      status: "ACTIVE",
-      publicVisible: true,
-    },
-    orderBy: { name: "asc" },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
   return {
     config,
     currentPerson,
@@ -685,18 +710,6 @@ export async function getSolicitarPageState(
     zones,
     shiftBoard,
     partnerOptions,
-    ownPendingRequests,
-    ownConfirmedAssignments: ownConfirmedAssignments.map((assignment) => ({
-      id: assignment.id,
-      shiftId: assignment.shift.id,
-      zoneName: assignment.shift.zone.name,
-      shiftDate: assignment.shift.shiftDate,
-      startTime: assignment.shift.startTime,
-      endTime: assignment.shift.endTime,
-      dateLabel: formatDate(assignment.shift.shiftDate),
-      timeLabel: `${formatTime(assignment.shift.startTime)} - ${formatTime(assignment.shift.endTime)}`,
-      pairLabel: `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
-    })),
     filters: {
       personQuery,
       zoneId,
@@ -711,12 +724,17 @@ export async function getSolicitarPageState(
   };
 }
 
-export async function getAsignacionesPageState() {
+export async function getAsignacionesPageState(
+  rawSearchParams: Promise<{ [key: string]: string | string[] | undefined }>,
+) {
+  const searchParams = await rawSearchParams;
   const currentPerson = await getCurrentPublicPerson();
   const snapshot = await getPublicAssignmentsSnapshot(currentPerson?.id);
 
   return {
     currentPerson,
+    notice: readFirstSearchParam(searchParams.notice),
+    requestError: readFirstSearchParam(searchParams.requestError),
     ...snapshot,
   };
 }

@@ -537,11 +537,12 @@ export async function submitShiftRequestsAction(formData: FormData) {
 export async function cancelOwnPendingRequestAction(formData: FormData) {
   const currentPerson = await requireSessionPerson();
   const requestId = String(formData.get("requestId") ?? "");
+  const returnTo = String(formData.get("returnTo") ?? "/asignaciones");
+  const redirectWithRequestError = (message: string): never =>
+    redirectTo(buildRedirect(returnTo, { requestError: message }));
 
   if (!requestId) {
-    redirectTo(
-      "/solicitar?requestError=No%20se%20indico%20la%20solicitud%20a%20cancelar.",
-    );
+    redirectWithRequestError("No se indico la solicitud a cancelar.");
   }
 
   const request = await prisma.shiftRequest.findFirst({
@@ -555,15 +556,17 @@ export async function cancelOwnPendingRequestAction(formData: FormData) {
     },
   });
 
-  if (!request) {
-    redirectTo(
-      "/solicitar?requestError=La%20solicitud%20ya%20no%20puede%20cancelarse.",
-    );
+  const requestIdToCancel = request?.id;
+
+  if (!requestIdToCancel) {
+    redirectWithRequestError("La solicitud ya no puede cancelarse.");
   }
+
+  const resolvedRequestId = requestIdToCancel!;
 
   await prisma.$transaction([
     prisma.shiftRequest.update({
-      where: { id: request.id },
+      where: { id: resolvedRequestId },
       data: {
         status: ShiftRequestStatus.CANCELLED,
         cancelledAt: new Date(),
@@ -574,7 +577,7 @@ export async function cancelOwnPendingRequestAction(formData: FormData) {
       data: {
         actorType: "PUBLIC_PERSON",
         entityType: "shift_request",
-        entityId: request.id,
+        entityId: resolvedRequestId,
         actorPersonId: currentPerson.id,
         action: "PUBLIC_REQUEST_CANCELLED",
       },
@@ -583,5 +586,5 @@ export async function cancelOwnPendingRequestAction(formData: FormData) {
 
   revalidatePath("/solicitar");
   revalidatePath("/asignaciones");
-  redirectTo("/solicitar?notice=Solicitud%20cancelada.");
+  redirectTo(buildRedirect(returnTo, { notice: "Solicitud cancelada." }));
 }

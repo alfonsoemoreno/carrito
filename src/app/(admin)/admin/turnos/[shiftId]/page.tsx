@@ -18,6 +18,7 @@ import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
+  cancelShiftAssignmentAction,
   confirmShiftAssignmentAction,
   rejectShiftRequestAction,
 } from "@/features/admin/assignment/actions";
@@ -261,7 +262,51 @@ export default async function AdminShiftAssignmentPage({
                 </FormCard>
               </Box>
 
-              <Box sx={{ order: 2 }}>
+              {state.activeAssignment ? (
+                <Box sx={{ order: 2 }}>
+                  <FormCard
+                    title="Cancelar asignacion actual"
+                    description="Cancela la pareja confirmada y devuelve el turno a su estado operativo correspondiente."
+                  >
+                    <form action={cancelShiftAssignmentAction}>
+                      <Stack spacing={2}>
+                        <input
+                          type="hidden"
+                          name="shiftId"
+                          value={state.shift.id}
+                        />
+                        <input
+                          type="hidden"
+                          name="assignmentId"
+                          value={state.activeAssignment.id}
+                        />
+                        <Alert severity="warning">
+                          Asignacion actual: {state.activeAssignment.pairLabel}
+                        </Alert>
+                        <TextField
+                          name="reason"
+                          label="Motivo de cancelacion"
+                          placeholder="Ej. una de las personas ya no puede asistir"
+                          required
+                          multiline
+                          minRows={3}
+                          fullWidth
+                          helperText="Este motivo quedara auditado."
+                        />
+                        <ActionSubmitButton
+                          variant="outlined"
+                          color="error"
+                          loadingMessage="Estamos cancelando la asignación."
+                        >
+                          Cancelar asignacion confirmada
+                        </ActionSubmitButton>
+                      </Stack>
+                    </form>
+                  </FormCard>
+                </Box>
+              ) : null}
+
+              <Box sx={{ order: 3 }}>
                 <FormCard
                   title="Historial del turno"
                   description="Lo ya resuelto queda visible para contexto operativo."
