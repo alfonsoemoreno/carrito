@@ -30,9 +30,19 @@ export async function POST(request: Request) {
     });
   }
 
-  const redirectUrl = buildRedirectUrl("/solicitar?notice=Sesion%20cerrada.", request);
+  const redirectUrl = buildRedirectUrl(
+    `/solicitar?sessionReset=${Date.now()}`,
+    request,
+  );
   const response = NextResponse.redirect(redirectUrl, 303);
-  response.cookies.delete(PUBLIC_SESSION_COOKIE);
+  // The session cookie is created with path "/". Deleting it without the
+  // same path can leave the original cookie in the browser, making the next
+  // page render as the previous user.
+  response.cookies.set(PUBLIC_SESSION_COOKIE, "", {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+  });
 
   return response;
 }

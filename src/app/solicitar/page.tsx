@@ -1,60 +1,9 @@
-import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
-import CheckBoxRoundedIcon from "@mui/icons-material/CheckBoxRounded";
-import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import PersonSearchRoundedIcon from "@mui/icons-material/PersonSearchRounded";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  Container,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Link from "next/link";
-import { PublicPersonPicker } from "@/components/public/public-person-picker";
-import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
+import { Alert, Box, Card, CardContent, Container, Stack, Typography } from "@mui/material";
+import { ShiftRequestFlow } from "@/components/public/shift-request-flow";
+import { PublicRequestJourney } from "@/components/public/public-request-journey";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
-import { submitShiftRequestsAction } from "@/features/public/actions";
 import { getSolicitarPageState } from "@/features/public/queries";
-
-type ScheduleView = "available" | "confirmed" | "calendar";
-
-function buildScheduleHref(
-  filters: { zoneId: string; from: string; to: string; selectedDate: string },
-  view: ScheduleView,
-) {
-  const params = new URLSearchParams();
-
-  if (filters.zoneId) {
-    params.set("zoneId", filters.zoneId);
-  }
-
-  if (filters.from) {
-    params.set("from", filters.from);
-  }
-
-  if (filters.to) {
-    params.set("to", filters.to);
-  }
-
-  if (filters.selectedDate) {
-    params.set("selectedDate", filters.selectedDate);
-  }
-
-  params.set("scheduleView", view);
-
-  return `/solicitar?${params.toString()}`;
-}
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -62,508 +11,51 @@ type Props = {
 
 export default async function SolicitarPage({ searchParams }: Props) {
   const state = await getSolicitarPageState(searchParams);
-  const selectedZone = state.zones.find(
-    (zone) => zone.id === state.filters.zoneId,
-  );
-  const zoneAvailableShifts = state.filters.zoneId
-    ? state.shiftBoard.filter(
-        (shift) =>
-          shift.status === "OPEN" &&
-          shift.ownLatestRequest?.status !== "PENDING" &&
-          shift.ownLatestRequest?.status !== "CONFIRMED",
-      )
-    : [];
-  const hasAvailableShifts = zoneAvailableShifts.length > 0;
-  const requestReturnTo = buildScheduleHref(
-    { ...state.filters, selectedDate: "" },
-    "available",
-  );
 
   return (
     <PublicSiteShell>
       <Box component="main" sx={{ py: { xs: 5, md: 6 } }}>
         <Container maxWidth="md">
           <Stack spacing={{ xs: 3.5, md: 4.5 }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1.5,
-                borderLeft: "4px solid",
-                borderColor: "primary.main",
-                pl: { xs: 2.25, md: 2.75 },
-                pr: { xs: 0.5, md: 1 },
-                pt: { xs: 0.5, md: 0.75 },
-                pb: { xs: 0.5, md: 0.75 },
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, maxWidth: 700 }}>
               <Typography variant="h3">Solicitar turnos</Typography>
               <Typography variant="body1" color="text.secondary">
-                Selecciona tu usuario, elige un lugar y pide tus turnos en pocos
-                pasos.
+                Selecciona tu usuario, elige un lugar y pide tus turnos en pocos pasos.
               </Typography>
             </Box>
 
-            {state.notice ? (
-              <Alert severity="success">{state.notice}</Alert>
-            ) : null}
-            {state.authError ? (
-              <Alert severity="error">{state.authError}</Alert>
-            ) : null}
-            {state.requestError ? (
-              <Alert severity="error">{state.requestError}</Alert>
-            ) : null}
+            {state.notice && state.currentPerson ? <Alert severity="success">{state.notice}</Alert> : null}
+            {state.authError ? <Alert severity="error">{state.authError}</Alert> : null}
             {state.config.maintenanceModeEnabled ? (
-              <Alert severity="warning">
-                El sistema esta en modo mantenimiento. Las consultas publicas
-                siguen visibles, pero no se deberian registrar nuevas
-                solicitudes hasta desactivar ese modo.
-              </Alert>
+              <Alert severity="warning">El sistema está en modo mantenimiento. Puedes consultar los turnos, pero no registrar nuevas solicitudes.</Alert>
             ) : null}
 
             {!state.currentPerson ? (
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 1,
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
+              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
                   <Stack spacing={{ xs: 3.25, md: 4 }}>
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      sx={{ alignItems: "center" }}
-                    >
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                       <PersonSearchRoundedIcon color="primary" />
                       <Typography variant="h5">Elige tu nombre</Typography>
                     </Stack>
-                    <PublicPersonPicker
-                      people={state.people.map((person) => ({
-                        id: person.id,
-                        label: `${person.firstName} ${person.lastName}`,
-                      }))}
-                      selectedPersonId=""
+                    <PublicRequestJourney
+                      key={state.sessionResetKey || "public-request-journey"}
+                      people={state.people.map((person) => ({ id: person.id, label: `${person.firstName} ${person.lastName}` }))}
                     />
                   </Stack>
                 </CardContent>
               </Card>
             ) : (
-              <Stack spacing={3}>
-                {!selectedZone ? (
-                  <Card
-                    elevation={0}
-                    sx={{
-                      borderRadius: 1,
-                      border: "1px solid",
-                      borderColor: "divider",
-                    }}
-                  >
-                    <CardContent>
-                      <Stack spacing={{ xs: 3.25, md: 4 }}>
-                        <Stack
-                          direction="row"
-                          spacing={1.5}
-                          sx={{ alignItems: "center" }}
-                        >
-                          <EventAvailableRoundedIcon color="primary" />
-                          <Typography variant="h5">Elige un lugar</Typography>
-                        </Stack>
-                        <form action="/solicitar">
-                          <Stack spacing={{ xs: 2.5, md: 3 }}>
-                            <input
-                              type="hidden"
-                              name="scheduleView"
-                              value="available"
-                            />
-                            <input
-                              type="hidden"
-                              name="from"
-                              value={state.filters.from}
-                            />
-                            <input
-                              type="hidden"
-                              name="to"
-                              value={state.filters.to}
-                            />
-                            <FormControl fullWidth>
-                              <InputLabel id="zone-filter-label">
-                                Lugar
-                              </InputLabel>
-                              <Select
-                                labelId="zone-filter-label"
-                                name="zoneId"
-                                defaultValue={state.filters.zoneId}
-                                label="Lugar"
-                              >
-                                <MenuItem value="">
-                                  Selecciona un lugar
-                                </MenuItem>
-                                {state.zones.map((zone) => (
-                                  <MenuItem key={zone.id} value={zone.id}>
-                                    {zone.name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                            <Stack
-                              direction={{ xs: "column-reverse", sm: "row" }}
-                              spacing={{ xs: 1.5, md: 2 }}
-                              sx={{ pt: 0.5 }}
-                            >
-                              <ActionSubmitButton
-                                variant="outlined"
-                                fullWidth
-                                formAction="/public/logout"
-                                formMethod="post"
-                                loadingMessage="Estamos regresando al paso anterior."
-                              >
-                                Cambiar persona
-                              </ActionSubmitButton>
-                              <ActionSubmitButton
-                                variant="contained"
-                                size="large"
-                                fullWidth
-                                loadingMessage="Estamos cargando los turnos disponibles."
-                              >
-                                Siguiente: ver turnos
-                              </ActionSubmitButton>
-                            </Stack>
-                          </Stack>
-                        </form>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                ) : state.scheduleView === "available" ? (
-                  <form action={submitShiftRequestsAction}>
-                    <Stack spacing={3}>
-                      <Card
-                        elevation={0}
-                        sx={{
-                          borderRadius: 1,
-                          border: "1px solid",
-                          borderColor: "divider",
-                        }}
-                      >
-                        <CardContent>
-                          <Stack spacing={{ xs: 3.25, md: 4 }}>
-                            <Stack
-                              direction="row"
-                              spacing={1.5}
-                              sx={{ alignItems: "center" }}
-                            >
-                              <EventAvailableRoundedIcon color="primary" />
-                              <Typography variant="h5">
-                                Revisa y envía tu solicitud
-                              </Typography>
-                            </Stack>
-                            <Chip
-                              label={selectedZone.name}
-                              color="primary"
-                              variant="outlined"
-                              sx={{ alignSelf: "flex-start" }}
-                            />
-
-                            <input
-                              type="hidden"
-                              name="returnTo"
-                              value={requestReturnTo}
-                            />
-
-                            <Stack
-                              direction={{ xs: "column", sm: "row" }}
-                              spacing={{ xs: 1.5, md: 2 }}
-                            >
-                              <Link href="/solicitar">
-                                <Button variant="outlined" fullWidth>
-                                  Cambiar lugar
-                                </Button>
-                              </Link>
-                            </Stack>
-
-                            {hasAvailableShifts ? (
-                              <>
-                                <Box
-                                  sx={{
-                                    display: "grid",
-                                    gridTemplateColumns: {
-                                      xs: "1fr",
-                                      md: "minmax(0, 1fr)",
-                                    },
-                                    gap: 2.5,
-                                  }}
-                                >
-                                  <TextField
-                                    name="comments"
-                                    label="Comentario general"
-                                    placeholder="Observación opcional para estas solicitudes"
-                                    fullWidth
-                                  />
-                                </Box>
-
-                                <Divider />
-
-                                <Stack spacing={2}>
-                                  {zoneAvailableShifts.map((shift) => {
-                                    const disabled =
-                                      shift.status !== "OPEN" ||
-                                      shift.ownLatestRequest?.status ===
-                                        "PENDING" ||
-                                      shift.ownLatestRequest?.status ===
-                                        "CONFIRMED";
-
-                                    return (
-                                      <Card
-                                        key={shift.id}
-                                        elevation={0}
-                                        sx={{
-                                          borderRadius: 3,
-                                          border: "1px solid",
-                                          borderColor: "divider",
-                                          backgroundColor: "var(--app-surface)",
-                                        }}
-                                      >
-                                        <CardContent
-                                          sx={{
-                                            px: { xs: 2.25, md: 2.5 },
-                                            py: { xs: 2.25, md: 2.5 },
-                                            "&:last-child": {
-                                              pb: { xs: 2.25, md: 2.5 },
-                                            },
-                                          }}
-                                        >
-                                          <Stack spacing={1.75}>
-                                            <Stack
-                                              direction="row"
-                                              spacing={1.25}
-                                              sx={{
-                                                justifyContent: "space-between",
-                                                alignItems: "flex-start",
-                                              }}
-                                            >
-                                              <Box
-                                                sx={{ flex: 1, minWidth: 0 }}
-                                              >
-                                                <Typography
-                                                  variant="subtitle1"
-                                                  sx={{ fontWeight: 700 }}
-                                                >
-                                                  {shift.dateLabel}
-                                                </Typography>
-                                                <Typography
-                                                  variant="body2"
-                                                  color="text.secondary"
-                                                >
-                                                  {shift.zoneName} ·{" "}
-                                                  {shift.startLabel} -{" "}
-                                                  {shift.endLabel}
-                                                </Typography>
-                                              </Box>
-                                              <Stack
-                                                spacing={0.75}
-                                                sx={{
-                                                  alignItems: "flex-end",
-                                                  flexShrink: 0,
-                                                }}
-                                              >
-                                                <Chip
-                                                  label={
-                                                    shift.status === "OPEN"
-                                                      ? "Abierto"
-                                                      : "Completo"
-                                                  }
-                                                  color={
-                                                    shift.status === "OPEN"
-                                                      ? "success"
-                                                      : "default"
-                                                  }
-                                                  size="small"
-                                                />
-                                              </Stack>
-                                            </Stack>
-
-                                            {shift.ownLatestRequest ? (
-                                              <Alert
-                                                severity={
-                                                  shift.ownLatestRequest
-                                                    .status === "PENDING"
-                                                    ? "info"
-                                                    : "success"
-                                                }
-                                              >
-                                                Ya tienes una solicitud{" "}
-                                                {shift.ownLatestRequest.status.toLowerCase()}{" "}
-                                                para este turno.
-                                              </Alert>
-                                            ) : null}
-
-                                            {shift.publicAssignments.length >
-                                            0 ? (
-                                              <Typography
-                                                variant="caption"
-                                                color="text.secondary"
-                                              >
-                                                Ya tomado por{" "}
-                                                {shift.publicAssignments
-                                                  .map((item) => item.label)
-                                                  .join(", ")}
-                                              </Typography>
-                                            ) : null}
-
-                                            <Box
-                                              sx={{
-                                                display: "grid",
-                                                gridTemplateColumns: {
-                                                  xs: "1fr",
-                                                  md: "minmax(0, 1fr) auto",
-                                                },
-                                                gap: 1.5,
-                                                px: { xs: 1.75, md: 2 },
-                                                py: { xs: 1.5, md: 1.75 },
-                                                border: "1px solid",
-                                                borderColor:
-                                                  "var(--app-form-border)",
-                                                borderRadius: "4px",
-                                                backgroundColor:
-                                                  "var(--app-form-fill)",
-                                                boxShadow:
-                                                  "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
-                                              }}
-                                            >
-                                              <Stack spacing={1.25}>
-                                                <Box
-                                                  sx={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent:
-                                                      "space-between",
-                                                    gap: 1,
-                                                    minHeight: 32,
-                                                  }}
-                                                >
-                                                  <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                      color:
-                                                        "var(--app-form-label)",
-                                                      fontWeight: 600,
-                                                    }}
-                                                  >
-                                                    {disabled
-                                                      ? "No disponible para nueva solicitud"
-                                                      : "Incluir en esta solicitud"}
-                                                  </Typography>
-                                                  <Checkbox
-                                                    name="shiftIds"
-                                                    value={shift.id}
-                                                    icon={
-                                                      <CheckBoxOutlineBlankRoundedIcon
-                                                        sx={{
-                                                          color:
-                                                            "var(--app-form-border-strong)",
-                                                          fontSize: 22,
-                                                          filter:
-                                                            "drop-shadow(0 0 0.6px rgba(109, 123, 145, 0.95))",
-                                                        }}
-                                                      />
-                                                    }
-                                                    checkedIcon={
-                                                      <CheckBoxRoundedIcon
-                                                        sx={{
-                                                          color:
-                                                            "var(--app-accent)",
-                                                          fontSize: 22,
-                                                        }}
-                                                      />
-                                                    }
-                                                    disabled={
-                                                      disabled ||
-                                                      state.config
-                                                        .maintenanceModeEnabled
-                                                    }
-                                                    sx={{
-                                                      flexShrink: 0,
-                                                      ml: 0.5,
-                                                      p: 0.5,
-                                                      color:
-                                                        "var(--app-form-border-strong)",
-                                                      "&:hover": {
-                                                        backgroundColor:
-                                                          "rgba(74, 109, 167, 0.08)",
-                                                      },
-                                                      "&.Mui-disabled": {
-                                                        opacity: 0.58,
-                                                      },
-                                                    }}
-                                                  />
-                                                </Box>
-
-                                                {state.partnerOptions.length >
-                                                0 ? (
-                                                  <TextField
-                                                    select
-                                                    name={`suggestedPartnerByShift:${shift.id}`}
-                                                    label="Compañero o compañera opcional"
-                                                    defaultValue=""
-                                                    disabled={
-                                                      disabled ||
-                                                      state.config
-                                                        .maintenanceModeEnabled
-                                                    }
-                                                    helperText="Se aplicará solo si incluyes este turno en la solicitud."
-                                                    fullWidth
-                                                    size="small"
-                                                  >
-                                                    <MenuItem value="">
-                                                      Sin sugerencia
-                                                    </MenuItem>
-                                                    {state.partnerOptions.map(
-                                                      (partner) => (
-                                                        <MenuItem
-                                                          key={`${shift.id}-${partner.id}`}
-                                                          value={partner.id}
-                                                        >
-                                                          {partner.label}
-                                                        </MenuItem>
-                                                      ),
-                                                    )}
-                                                  </TextField>
-                                                ) : null}
-                                              </Stack>
-                                            </Box>
-                                          </Stack>
-                                        </CardContent>
-                                      </Card>
-                                    );
-                                  })}
-                                </Stack>
-                              </>
-                            ) : (
-                              <Alert severity="warning">
-                                No hay turnos disponibles para este lugar en el
-                                rango activo. Cambia de lugar para seguir.
-                              </Alert>
-                            )}
-
-                            {hasAvailableShifts ? (
-                              <ActionSubmitButton
-                                variant="contained"
-                                size="large"
-                                disabled={state.config.maintenanceModeEnabled}
-                                loadingMessage="Estamos enviando tu solicitud de turnos."
-                              >
-                                Enviar solicitud
-                              </ActionSubmitButton>
-                            ) : null}
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    </Stack>
-                  </form>
-                ) : null}
-              </Stack>
+              <ShiftRequestFlow
+                zones={state.zones}
+                shifts={state.shiftBoard}
+                partners={state.partnerOptions}
+                initialZoneId={state.filters.zoneId}
+                from={state.filters.from}
+                to={state.filters.to}
+                maintenanceModeEnabled={state.config.maintenanceModeEnabled}
+                requestError={state.requestError}
+              />
             )}
           </Stack>
         </Container>

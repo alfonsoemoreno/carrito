@@ -1,11 +1,11 @@
 "use client";
 
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import {
   Box,
@@ -17,6 +17,7 @@ import {
   Menu,
   MenuItem,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
@@ -64,13 +65,11 @@ function splitIntoColumns<T>(items: readonly T[]) {
 function DesktopDropdownPanel({
   label,
   items,
-  pointerOffset,
   onClose,
   panelRef,
 }: {
   label: string;
   items: ReadonlyArray<{ href: string; label: string; description: string }>;
-  pointerOffset: number;
   onClose: () => void;
   panelRef: React.RefObject<HTMLDivElement | null>;
 }) {
@@ -101,32 +100,18 @@ function DesktopDropdownPanel({
             position: "relative",
             backgroundColor: "var(--app-surface)",
             border: "1px solid var(--app-border)",
-            borderTop: "none",
-            boxShadow: "0 24px 54px rgba(15, 22, 36, 0.18)",
+            borderRadius: "0 0 20px 20px",
+            boxShadow: "0 14px 32px rgba(60, 64, 67, 0.16)",
             overflow: "visible",
           }}
         >
-          <Box
-            sx={{
-              position: "absolute",
-              top: -9,
-              left: `${Math.max(panelInset + 18, pointerOffset - panelInset)}px`,
-              width: 18,
-              height: 18,
-              backgroundColor: "var(--app-surface)",
-              borderLeft: "1px solid var(--app-border)",
-              borderTop: "1px solid var(--app-border)",
-              transform: "translateX(-50%) rotate(45deg)",
-            }}
-          />
-
           <IconButton
             aria-label={`Cerrar menú ${label}`}
             onClick={onClose}
             sx={{
               position: "absolute",
-              top: 20,
-              right: 22,
+              top: 14,
+              right: 16,
               color: "var(--app-muted)",
             }}
           >
@@ -135,23 +120,23 @@ function DesktopDropdownPanel({
 
           <Box
             style={{
-              paddingLeft: "60px",
-              paddingRight: "60px",
-              paddingTop: "36px",
-              paddingBottom: "48px",
+              paddingLeft: "32px",
+              paddingRight: "32px",
+              paddingTop: "28px",
+              paddingBottom: "32px",
             }}
             sx={{
-              paddingLeft: { lg: "68px" },
-              paddingRight: { lg: "68px" },
+              paddingLeft: { lg: "40px" },
+              paddingRight: { lg: "40px" },
             }}
           >
             <Typography
               sx={{
                 color: "var(--app-accent)",
-                fontSize: "1.9rem",
+                fontSize: "1.5rem",
                 lineHeight: 1.1,
-                fontWeight: 500,
-                mb: 3,
+                fontWeight: 650,
+                mb: 2.5,
               }}
             >
               {label}
@@ -160,9 +145,7 @@ function DesktopDropdownPanel({
             <Divider
               sx={{
                 borderColor: "var(--app-border)",
-                mb: 4.5,
-                marginLeft: "12px",
-                marginRight: "12px",
+                mb: 2.5,
               }}
             />
 
@@ -170,14 +153,12 @@ function DesktopDropdownPanel({
               sx={{
                 display: "grid",
                 gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
-                columnGap: 7,
-                rowGap: 3,
-                paddingLeft: "12px",
-                paddingRight: "12px",
+                columnGap: 3,
+                rowGap: 2,
               }}
             >
               {columns.map((column, index) => (
-                <Stack key={`${label}-${index}`} spacing={2.2}>
+                <Stack key={`${label}-${index}`} spacing={0.75}>
                   {column.map((item) => (
                     <Box
                       key={item.href}
@@ -195,13 +176,13 @@ function DesktopDropdownPanel({
                     >
                       <Box
                         style={{
-                          paddingLeft: "21px",
-                          paddingRight: "21px",
-                          paddingTop: "14px",
-                          paddingBottom: "14px",
+                          paddingLeft: "16px",
+                          paddingRight: "16px",
+                          paddingTop: "12px",
+                          paddingBottom: "12px",
                         }}
                         sx={{
-                          borderRadius: "2px",
+                          borderRadius: "12px",
                           "&:hover": {
                             backgroundColor: "var(--app-surface-muted)",
                           },
@@ -210,8 +191,8 @@ function DesktopDropdownPanel({
                         <Typography
                           sx={{
                             color: "var(--app-accent)",
-                            fontSize: "1.1rem",
-                            fontWeight: 500,
+                            fontSize: "1rem",
+                            fontWeight: 650,
                             lineHeight: 1.35,
                           }}
                         >
@@ -388,15 +369,11 @@ export function AppShellHeader({
   const { mode, toggleMode } = useThemeMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpenLabel, setDesktopOpenLabel] = useState<string | null>(null);
-  const [desktopPointerOffset, setDesktopPointerOffset] = useState(0);
   const [publicUserAnchor, setPublicUserAnchor] = useState<HTMLElement | null>(
     null,
   );
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const desktopPanelRef = useRef<HTMLDivElement | null>(null);
-  const desktopButtonRefs = useRef<Record<string, HTMLButtonElement | null>>(
-    {},
-  );
 
   const closeAll = () => {
     setMobileOpen(false);
@@ -417,38 +394,27 @@ export function AppShellHeader({
   const hasSections = sections.length > 0;
   const showPublicUserMenu = !hasSections && pathname !== "/" && !!publicUser;
   const themeToggleButton = (
-    <Button
-      variant="outlined"
+    <Tooltip title={mode === "light" ? "Activar modo oscuro" : "Activar modo claro"}>
+      <IconButton
       aria-label={
         mode === "light" ? "Activar modo oscuro" : "Activar modo claro"
       }
       onClick={toggleMode}
       sx={{
-        minWidth: 0,
-        height: 44,
-        px: 1.4,
-        gap: 0.9,
-        borderColor: "var(--app-form-border)",
-        color: "var(--app-accent-deep)",
+        width: 40,
+        height: 40,
+        color: "var(--app-muted)",
+        border: "1px solid var(--app-border)",
         backgroundColor: "var(--app-surface)",
       }}
     >
       {mode === "light" ? (
-        <DarkModeRoundedIcon fontSize="small" />
+        <DarkModeOutlinedIcon fontSize="small" />
       ) : (
-        <LightModeRoundedIcon fontSize="small" />
+        <LightModeOutlinedIcon fontSize="small" />
       )}
-      <Typography
-        sx={{
-          fontSize: "0.84rem",
-          fontWeight: 700,
-          letterSpacing: "0.02em",
-          display: { xs: "none", sm: "block" },
-        }}
-      >
-        {mode === "light" ? "Oscuro" : "Claro"}
-      </Typography>
-    </Button>
+      </IconButton>
+    </Tooltip>
   );
 
   const desktopOpenSection = sections.find(
@@ -458,33 +424,6 @@ export function AppShellHeader({
       items: NonNullable<AppShellSection["items"]>;
     } => section.label === desktopOpenLabel && isDropdownSection(section),
   );
-
-  useEffect(() => {
-    if (!desktopOpenLabel) {
-      return;
-    }
-
-    const syncPointer = () => {
-      const nav = desktopNavRef.current;
-      const button = desktopButtonRefs.current[desktopOpenLabel];
-
-      if (!nav || !button) {
-        return;
-      }
-
-      const navRect = nav.getBoundingClientRect();
-      const buttonRect = button.getBoundingClientRect();
-      const nextOffset = buttonRect.left - navRect.left + buttonRect.width / 2;
-      setDesktopPointerOffset(nextOffset);
-    };
-
-    syncPointer();
-    window.addEventListener("resize", syncPointer);
-
-    return () => {
-      window.removeEventListener("resize", syncPointer);
-    };
-  }, [desktopOpenLabel]);
 
   useEffect(() => {
     if (!desktopOpenLabel) {
@@ -558,9 +497,8 @@ export function AppShellHeader({
                       width: { xs: 40, md: 36, lg: 40 },
                       height: { xs: 40, md: 36, lg: 40 },
                       display: "block",
-                      borderRadius: "11px",
-                      boxShadow:
-                        "0 10px 24px rgba(19, 33, 63, 0.12), 0 1px 0 rgba(255,255,255,0.85) inset",
+                      borderRadius: "13px",
+                      boxShadow: "0 2px 7px rgba(60, 64, 67, 0.18)",
                       backgroundColor: "var(--app-surface)",
                     }}
                   />
@@ -571,7 +509,7 @@ export function AppShellHeader({
                       color: "var(--app-ink)",
                       fontSize: { xs: "1.3rem", md: "1.14rem", lg: "1.34rem" },
                       lineHeight: 1.08,
-                      fontWeight: 400,
+                      fontWeight: 650,
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -602,7 +540,7 @@ export function AppShellHeader({
                     display: { xs: "inline-flex", md: "none" },
                     color: "var(--app-muted)",
                     border: "1px solid var(--app-border)",
-                    borderRadius: 0,
+                    borderRadius: 12,
                   }}
                 >
                   {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
@@ -612,13 +550,14 @@ export function AppShellHeader({
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 {themeToggleButton}
                 <Link href={homeHref as never}>
-                  <Button
-                    variant="outlined"
+                  <Tooltip title="Ir al inicio">
+                    <IconButton
                     aria-label="Ir al inicio"
-                    sx={{ minWidth: 0, width: 44, height: 44, px: 0 }}
+                    sx={{ width: 40, height: 40, color: "var(--app-muted)", border: "1px solid var(--app-border)" }}
                   >
-                    <HomeRoundedIcon fontSize="small" />
-                  </Button>
+                    <HomeOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </Link>
                 {showPublicUserMenu ? (
                   <>
@@ -630,7 +569,7 @@ export function AppShellHeader({
                       }
                       sx={{ minWidth: 0, width: 44, height: 44, px: 0 }}
                     >
-                      <AccountCircleRoundedIcon fontSize="small" />
+                      <AccountCircleOutlinedIcon fontSize="small" />
                     </Button>
                     <Menu
                       anchorEl={publicUserAnchor}
@@ -639,13 +578,25 @@ export function AppShellHeader({
                       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                       transformOrigin={{ vertical: "top", horizontal: "right" }}
                     >
-                      <MenuItem disabled>
+                      <MenuItem
+                        disabled
+                        sx={{
+                          opacity: "1 !important",
+                          color: "text.secondary !important",
+                          fontWeight: 650,
+                          cursor: "default",
+                        }}
+                      >
                         {publicUser?.firstName} {publicUser?.lastName}
                       </MenuItem>
                       <Box
                         component="form"
                         action="/public/logout"
                         method="post"
+                        data-suppress-global-feedback="true"
+                        onSubmit={() => {
+                          window.dispatchEvent(new Event("public-session-ending"));
+                        }}
                       >
                         <MenuItem component="button" type="submit">
                           Cerrar sesión
@@ -664,8 +615,9 @@ export function AppShellHeader({
         <Box
           sx={{
             position: "relative",
-            backgroundColor: "var(--app-nav)",
-            boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.08)",
+            backgroundColor: "var(--app-header)",
+            borderBottom: "1px solid var(--app-border)",
+            boxShadow: "0 1px 2px rgba(60, 64, 67, 0.04)",
           }}
         >
           <Container maxWidth="lg">
@@ -674,7 +626,7 @@ export function AppShellHeader({
               sx={{
                 display: { xs: "none", md: "flex" },
                 alignItems: "stretch",
-                minHeight: 58,
+                minHeight: 56,
                 position: "relative",
               }}
             >
@@ -694,28 +646,29 @@ export function AppShellHeader({
                           marginLeft: index === 0 ? "0px" : "8px",
                         }}
                         sx={{
-                          height: 58,
+                          height: 56,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 1.1,
                           flexWrap: "nowrap",
-                          color: "#ffffff",
-                          backgroundColor: active ? "#353535" : "transparent",
+                          color: "var(--app-muted)",
+                          borderRadius: "999px",
+                          backgroundColor: active ? "rgba(11, 87, 208, 0.11)" : "transparent",
                           "& .MuiTypography-root, & .MuiSvgIcon-root": {
-                            color: "#ffffff",
+                            color: active ? "var(--app-accent-deep)" : "var(--app-muted)",
                           },
                           "&:hover": {
-                            backgroundColor: "#343434",
+                            backgroundColor: "var(--app-surface-muted)",
                           },
                         }}
                       >
                         <Typography
                           sx={{
                             fontSize: "1rem",
-                            letterSpacing: "0.02em",
-                            textTransform: "uppercase",
-                            fontWeight: 700,
+                            letterSpacing: 0,
+                            textTransform: "none",
+                            fontWeight: 650,
                             lineHeight: 1.1,
                             whiteSpace: "nowrap",
                           }}
@@ -741,9 +694,6 @@ export function AppShellHeader({
                     <Box
                       component="button"
                       type="button"
-                      ref={(node: HTMLButtonElement | null) => {
-                        desktopButtonRefs.current[section.label] = node;
-                      }}
                       onClick={() =>
                         setDesktopOpenLabel((current) =>
                           current === section.label ? null : section.label,
@@ -755,34 +705,35 @@ export function AppShellHeader({
                         marginLeft: index === 0 ? "0px" : "8px",
                       }}
                       sx={{
-                        height: 58,
+                        height: 56,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 1.05,
                         flexWrap: "nowrap",
                         cursor: "pointer",
-                        color: "#ffffff",
+                        color: "var(--app-muted)",
                         border: 0,
                         outline: 0,
-                        backgroundColor: active ? "#353535" : "transparent",
+                        borderRadius: "999px",
+                        backgroundColor: active ? "rgba(11, 87, 208, 0.11)" : "transparent",
                         "& .MuiTypography-root, & .MuiSvgIcon-root": {
-                          color: "#ffffff",
+                          color: active ? "var(--app-accent-deep)" : "var(--app-muted)",
                         },
                         "& .MuiSvgIcon-root": {
                           flexShrink: 0,
                         },
                         "&:hover": {
-                          backgroundColor: "#343434",
+                          backgroundColor: "var(--app-surface-muted)",
                         },
                       }}
                     >
                       <Typography
                         sx={{
                           fontSize: "1rem",
-                          letterSpacing: "0.02em",
-                          textTransform: "uppercase",
-                          fontWeight: 700,
+                          letterSpacing: 0,
+                          textTransform: "none",
+                          fontWeight: 650,
                           lineHeight: 1.1,
                           whiteSpace: "nowrap",
                         }}
@@ -810,7 +761,6 @@ export function AppShellHeader({
             <DesktopDropdownPanel
               label={desktopOpenSection.label}
               items={desktopOpenSection.items}
-              pointerOffset={desktopPointerOffset}
               onClose={() => setDesktopOpenLabel(null)}
               panelRef={desktopPanelRef}
             />
@@ -820,8 +770,8 @@ export function AppShellHeader({
             style={{
               paddingLeft: "16px",
               paddingRight: "16px",
-              paddingTop: "10px",
-              paddingBottom: "10px",
+              paddingTop: "8px",
+              paddingBottom: "8px",
             }}
             sx={{
               display: { xs: "flex", md: "none" },
@@ -841,12 +791,12 @@ export function AppShellHeader({
                 minHeight: "54px",
                 paddingLeft: "22px",
                 paddingRight: "22px",
-                border: "1px solid rgba(255,255,255,0.16)",
-                borderRadius: "10px",
-                color: "#ffffff",
+                border: "1px solid var(--app-border)",
+                borderRadius: "14px",
+                color: "var(--app-ink)",
                 background: mobileOpen
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(255,255,255,0.04)",
+                  ? "var(--app-surface-muted)"
+                  : "var(--app-surface)",
               }}
               sx={{
                 display: "flex",
@@ -856,18 +806,18 @@ export function AppShellHeader({
                 transition:
                   "background-color 180ms ease, border-color 180ms ease, transform 180ms ease",
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                  borderColor: "rgba(255,255,255,0.2)",
+                  backgroundColor: "var(--app-surface-muted)",
+                  borderColor: "var(--app-form-border)",
                 },
               }}
             >
               <Typography
                 sx={{
-                  color: "#ffffff",
+                  color: "var(--app-ink)",
                   fontSize: "0.93rem",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                  fontWeight: 700,
+                  letterSpacing: 0,
+                  textTransform: "none",
+                  fontWeight: 650,
                   pl: 0.9,
                 }}
               >
@@ -875,7 +825,7 @@ export function AppShellHeader({
               </Typography>
               <ExpandMoreRoundedIcon
                 sx={{
-                  color: "#ffffff",
+                  color: "var(--app-muted)",
                   fontSize: 22,
                   mr: 0.25,
                   transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",

@@ -171,7 +171,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                         <Stack
                           direction="row"
                           spacing={1}
-                          sx={{ flexWrap: "wrap" }}
+                          sx={{ flexWrap: "wrap", rowGap: 1, justifyContent: { xs: "flex-start", md: "flex-end" } }}
                         >
                           <Chip
                             label={`${shift.pendingCount} pendientes`}

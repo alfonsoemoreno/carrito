@@ -5,7 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { CssBaseline, ThemeProvider, type PaletteMode } from "@mui/material";
@@ -18,14 +18,11 @@ type ThemeModeContextValue = {
 };
 
 const STORAGE_KEY = "carrito-color-mode";
+const MODE_EVENT = "carrito-color-mode-change";
 
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 
-function getInitialMode(): PaletteMode {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
+function getStoredMode(): PaletteMode {
   const saved = window.localStorage.getItem(STORAGE_KEY);
   if (saved === "light" || saved === "dark") {
     return saved;
@@ -36,20 +33,40 @@ function getInitialMode(): PaletteMode {
     : "light";
 }
 
+function subscribeToMode(onStoreChange: () => void) {
+  window.addEventListener(MODE_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+
+  return () => {
+    window.removeEventListener(MODE_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function getServerMode(): PaletteMode {
+  return "light";
+}
+
 export function ThemeModeProvider({ children }: { children: ReactNode }) {
-  const [mode, setModeState] = useState<PaletteMode>(() => getInitialMode());
+  // useSyncExternalStore uses the light server snapshot during hydration and
+  // then safely applies the browser preference without a theme mismatch.
+  const mode = useSyncExternalStore(subscribeToMode, getStoredMode, getServerMode);
 
   useEffect(() => {
     document.documentElement.dataset.colorMode = mode;
-    window.localStorage.setItem(STORAGE_KEY, mode);
   }, [mode]);
+
+  const setMode = (nextMode: PaletteMode) => {
+    window.localStorage.setItem(STORAGE_KEY, nextMode);
+    window.dispatchEvent(new Event(MODE_EVENT));
+  };
 
   const value = useMemo(
     () => ({
       mode,
-      setMode: (nextMode: PaletteMode) => setModeState(nextMode),
+      setMode,
       toggleMode: () =>
-        setModeState((current) => (current === "light" ? "dark" : "light")),
+        setMode(mode === "light" ? "dark" : "light"),
     }),
     [mode],
   );

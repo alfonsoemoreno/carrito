@@ -12,15 +12,67 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
   clearPublicSession,
+  createPublicSession,
   getPublicSession,
 } from "@/features/public/session";
 import {
+  getPublicConfig,
+  getPublicShiftBoard,
+  getSuggestedPartners,
+  listPublicZonesForFlow,
+} from "@/features/public/queries";
+import {
+  buildVisibleDateRange,
   getWeekKey,
   isConsecutiveUtcDate,
   isSameUtcDate,
   overlapsTimeRange,
   toDateOnlyString,
 } from "@/features/public/utils";
+
+export async function startPublicSessionAction(personId: string) {
+  const person = await prisma.person.findFirst({
+    where: { id: personId, status: PersonStatus.ACTIVE },
+    select: { id: true, firstName: true, lastName: true },
+  });
+
+  if (!person) {
+    return { ok: false as const, message: "La persona seleccionada ya no está disponible." };
+  }
+
+  await createPublicSession(person.id);
+  await prisma.auditLog.create({
+    data: {
+      actorType: "PUBLIC_PERSON",
+      entityType: "public_session",
+      entityId: person.id,
+      actorPersonId: person.id,
+      action: "PUBLIC_SESSION_STARTED",
+      afterData: { at: new Date().toISOString() },
+    },
+  });
+
+  const config = await getPublicConfig();
+  const range = buildVisibleDateRange(config.visibleWeeks);
+  const from = toDateOnlyString(range.from);
+  const to = toDateOnlyString(range.to);
+  const [zones, shifts, partners] = await Promise.all([
+    listPublicZonesForFlow(),
+    getPublicShiftBoard({ currentPersonId: person.id, from, to }),
+    getSuggestedPartners(person.id),
+  ]);
+
+  return {
+    ok: true as const,
+    person,
+    zones,
+    shifts,
+    partners,
+    from,
+    to,
+    maintenanceModeEnabled: config.maintenanceModeEnabled,
+  };
+}
 
 function buildRedirect(
   path: string,

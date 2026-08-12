@@ -17,7 +17,7 @@ export default async function AuthPage({
           <Card sx={{ maxWidth: 680, mx: "auto" }}>
             <CardContent sx={{ p: { xs: 3, md: 4 } }}>
               <Stack spacing={3.5}>
-                <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 2 }}>
+                <Box sx={{ maxWidth: 580 }}>
                   <Typography variant="h4">Acceso administrativo</Typography>
                   <Typography color="text.secondary">
                     Inicie sesión para administrar personas, turnos, solicitudes y reportes internos.

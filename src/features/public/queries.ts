@@ -145,7 +145,7 @@ const getCachedPublicZones = unstable_cache(
   },
 );
 
-async function listPublicZones() {
+export async function listPublicZonesForFlow() {
   return getCachedPublicZones();
 }
 
@@ -238,7 +238,7 @@ export async function getSuggestedPartners(personId: string) {
     }));
 }
 
-export async function getPublicShiftBoard(input: {
+async function getUncachedPublicShiftBoard(input: {
   currentPersonId?: string | null;
   zoneId?: string;
   from?: string;
@@ -406,6 +406,34 @@ export async function getOwnPendingRequests(personId: string) {
       },
     },
   });
+}
+
+const getCachedPublicShiftBoard = unstable_cache(
+  async (currentPersonId: string, from: string, to: string) =>
+    getUncachedPublicShiftBoard({
+      currentPersonId: currentPersonId || null,
+      from,
+      to,
+    }),
+  ["public-shift-board"],
+  { revalidate: 15 },
+);
+
+export async function getPublicShiftBoard(input: {
+  currentPersonId?: string | null;
+  zoneId?: string;
+  from?: string;
+  to?: string;
+}) {
+  const board = await getCachedPublicShiftBoard(
+    input.currentPersonId ?? "",
+    input.from ?? "",
+    input.to ?? "",
+  );
+
+  return input.zoneId
+    ? board.filter((shift) => shift.zoneId === input.zoneId)
+    : board;
 }
 
 export async function getOwnConfirmedAssignments(
@@ -676,7 +704,7 @@ export async function getSolicitarPageState(
   const [config, currentPerson, zones] = await Promise.all([
     getPublicConfig(),
     getCurrentPublicPerson(),
-    listPublicZones(),
+    listPublicZonesForFlow(),
   ]);
   const people = currentPerson ? [] : await listActivePeople();
 
@@ -691,11 +719,10 @@ export async function getSolicitarPageState(
     : "";
 
   const [shiftBoard, partnerOptions] =
-    currentPerson && zoneId
+    currentPerson
       ? await Promise.all([
         getPublicShiftBoard({
           currentPersonId: currentPerson.id,
-          zoneId,
           from,
           to,
         }),
@@ -721,6 +748,7 @@ export async function getSolicitarPageState(
     authError: readFirstSearchParam(searchParams.authError),
     notice: readFirstSearchParam(searchParams.notice),
     requestError: readFirstSearchParam(searchParams.requestError),
+    sessionResetKey: readFirstSearchParam(searchParams.sessionReset),
   };
 }
 

@@ -26,9 +26,6 @@ export default async function AdminAccountPage() {
                   <Typography>
                     <strong>Email:</strong> {status.sessionUser.email}
                   </Typography>
-                  <Typography>
-                    <strong>User ID:</strong> {status.sessionUser.id}
-                  </Typography>
                 </>
               ) : (
                 <Typography color="text.secondary">
@@ -52,9 +49,6 @@ export default async function AdminAccountPage() {
                   />
                   <Typography>
                     <strong>Email admin:</strong> {status.linkedAdmin.email}
-                  </Typography>
-                  <Typography>
-                    <strong>Auth Provider ID:</strong> {status.linkedAdmin.authProviderId}
                   </Typography>
                 </>
               ) : (

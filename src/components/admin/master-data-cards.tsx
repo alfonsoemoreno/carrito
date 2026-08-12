@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 
 export function FormCard({
@@ -94,9 +95,9 @@ export function SwitchField({
         py: 1.5,
         border: "1px solid",
         borderColor: "var(--app-form-border)",
-        borderRadius: "4px",
+        borderRadius: "14px",
         backgroundColor: "var(--app-form-fill)",
-        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.95)",
+        boxShadow: "none",
       }}
     >
       <Typography
@@ -208,15 +209,16 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
   return (
     <Box
       sx={{
-        borderRadius: 1,
+        borderRadius: 4,
         border: "1px dashed",
         borderColor: "divider",
-        p: 3,
-        backgroundColor: "var(--app-surface-muted)",
+        p: { xs: 3, md: 4 },
+        backgroundColor: "background.paper",
+        textAlign: "center",
       }}
     >
-      <Typography variant="h6">{title}</Typography>
-      <Typography color="text.secondary">{body}</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 650 }}>{title}</Typography>
+      <Typography color="text.secondary" sx={{ mt: 0.75 }}>{body}</Typography>
     </Box>
   );
 }
@@ -235,9 +237,8 @@ export function ModuleLinkCard({
   return (
     <Card
       sx={{
-        borderRadius: 1,
-        border: "1px solid",
-        borderColor: "divider",
+        transition: "transform 160ms ease, box-shadow 160ms ease",
+        "&:hover": { transform: "translateY(-2px)", boxShadow: "0 6px 16px rgba(60, 64, 67, 0.12)" },
         height: "100%",
       }}
     >
@@ -246,14 +247,14 @@ export function ModuleLinkCard({
           <Chip
             label={badge}
             size="small"
-            color="primary"
-            sx={{ alignSelf: "flex-start" }}
+            variant="outlined"
+            sx={{ alignSelf: "flex-start", color: "primary.main", borderColor: "rgba(11, 87, 208, 0.28)", backgroundColor: "rgba(11, 87, 208, 0.06)" }}
           />
           <Typography variant="h5">{title}</Typography>
           <Typography color="text.secondary">{description}</Typography>
-          <a href={href}>
-            <Button variant="outlined">Abrir módulo</Button>
-          </a>
+        <Link href={href as never} style={{ alignSelf: "flex-start" }}>
+            <Button variant="text" sx={{ px: 1 }}>Abrir módulo</Button>
+          </Link>
         </Stack>
       </CardContent>
     </Card>

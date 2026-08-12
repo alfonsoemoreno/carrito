@@ -140,9 +140,7 @@ export default async function AsignacionesCalendarioPage({
                   display: "flex",
                   flexDirection: "column",
                   gap: 1,
-                  borderLeft: "4px solid",
-                  borderColor: "primary.main",
-                  pl: 2,
+                  maxWidth: 700,
                 }}
               >
                 <Typography variant="h3">

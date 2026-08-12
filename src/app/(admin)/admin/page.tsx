@@ -149,7 +149,7 @@ export default async function AdminDashboardPage() {
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Typography variant="h4">Modulos maestros</Typography>
+            <Typography variant="h4">Módulos maestros</Typography>
             <Typography color="text.secondary">
               Acceda a los catálogos, la operación diaria y los reportes desde
               un mismo lugar.

@@ -65,9 +65,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                 display: "flex",
                 flexDirection: "column",
                 gap: 1,
-                borderLeft: "4px solid",
-                borderColor: "primary.main",
-                pl: 2,
+                maxWidth: 700,
               }}
             >
               <Typography variant="h3">Seguimiento y asignaciones</Typography>

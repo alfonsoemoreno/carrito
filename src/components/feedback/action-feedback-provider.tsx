@@ -75,7 +75,13 @@ export function ActionFeedbackProvider({ children }: { children: ReactNode }) {
   }, [hide]);
 
   useEffect(() => {
-    const handleSubmit = () => {
+    const handleSubmit = (event: SubmitEvent) => {
+      const form = event.target instanceof HTMLFormElement ? event.target : null;
+
+      if (form?.dataset.suppressGlobalFeedback === "true") {
+        return;
+      }
+
       show();
     };
 

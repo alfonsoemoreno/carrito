@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth/client";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
-import { NeonAuthUIProvider } from "@neondatabase/auth/react";
+import { AuthUIProvider } from "@neondatabase/auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -31,7 +31,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <ThemeModeProvider>
         <ActionFeedbackProvider>
-          <NeonAuthUIProvider
+          <AuthUIProvider
             authClient={authClient}
             navigate={navigate}
             replace={replace}
@@ -40,7 +40,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
             Link={AuthLink}
           >
             {children}
-          </NeonAuthUIProvider>
+          </AuthUIProvider>
         </ActionFeedbackProvider>
       </ThemeModeProvider>
     </AppRouterCacheProvider>
