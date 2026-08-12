@@ -118,5 +118,10 @@ button, input, select, textarea { font: inherit; }
 .auth-panel a { color: var(--app-accent-deep) !important; font-weight: 650 !important; }
 .auth-panel a button { min-height: 44px !important; padding-inline: 18px !important; border: 1px solid var(--app-form-border) !important; border-radius: 999px !important; background: var(--app-surface) !important; color: var(--app-accent-deep) !important; box-shadow: none !important; }
 
-@media (max-width: 600px) { html { font-size: 15px; } .app-brand-mark { width: 2.9rem; height: 2.9rem; border-radius: 12px; } }
+@media (max-width: 600px) {
+  html { font-size: 15px; }
+  /* Safari on iOS zooms the page when a text control smaller than 16px receives focus. */
+  input:not([type="hidden"]), select, textarea, .MuiInputBase-input:not(.MuiSelect-nativeInput) { font-size: 16px !important; }
+  .app-brand-mark { width: 2.9rem; height: 2.9rem; border-radius: 12px; }
+}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
