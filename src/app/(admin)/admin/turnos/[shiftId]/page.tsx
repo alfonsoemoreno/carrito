@@ -341,6 +341,21 @@ export default async function AdminShiftAssignmentPage({
                                 />
                               ) : null}
                             </Stack>
+                            <Typography variant="body2" color="text.secondary">
+                              Abre cada chat y pulsa Enviar en WhatsApp. El sitio no confirma el envío.
+                            </Typography>
+                            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                              {assignment.whatsappRecipients.map((person) => person.href ? (
+                                <Button key={person.id} component="a" href={person.href}
+                                  target="_blank" rel="noopener noreferrer" variant="outlined">
+                                  WhatsApp a {person.label}
+                                </Button>
+                              ) : (
+                                <Typography key={person.id} variant="body2" color="text.secondary">
+                                  {person.label}: agrega un teléfono válido con código de país en Personas.
+                                </Typography>
+                              ))}
+                            </Stack>
                             {assignment.exceptionReason ? (
                               <Typography
                                 variant="body2"

@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { assignmentNotice } from "@/lib/assignment-notifications";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PublicPersonPicker } from "@/components/public/public-person-picker";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
@@ -102,6 +103,31 @@ export default async function AsignacionesPage({ searchParams }: Props) {
             ) : null}
             {state.notice ? <Alert severity="success">{state.notice}</Alert> : null}
             {state.requestError ? <Alert severity="error">{state.requestError}</Alert> : null}
+
+            {state.currentPerson ? (
+              <Card elevation={0} sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}>
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Typography variant="h5">Mis avisos</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Últimas actualizaciones de tus asignaciones. Se actualizan al abrir o recargar esta página.
+                    </Typography>
+                    {state.assignmentNotices.length === 0 ? (
+                      <Alert severity="info">Todavía no tienes avisos de asignaciones.</Alert>
+                    ) : state.assignmentNotices.map((notice) => (
+                      <Alert key={notice.id} severity={notice.status === "CONFIRMED" ? "success" : "warning"}>
+                        <Stack spacing={0.5}>
+                          <Typography sx={{ fontWeight: 700 }}>{assignmentNotice(notice.status)}</Typography>
+                          <Typography variant="body2">{notice.zoneName} · {notice.dateLabel} · {notice.timeLabel}</Typography>
+                          <Typography variant="body2">Pareja de esta asignación: {notice.pairLabel}</Typography>
+                          <Typography variant="caption">Actualizado: {notice.updatedLabel}</Typography>
+                        </Stack>
+                      </Alert>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            ) : null}
 
             <Stack spacing={3}>
               <Card

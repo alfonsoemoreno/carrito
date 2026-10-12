@@ -682,6 +682,28 @@ export async function getAsignacionesPageState(
   const searchParams = await rawSearchParams;
   const currentPerson = await getCurrentPublicPerson();
   const snapshot = await getPublicAssignmentsSnapshot(currentPerson?.id);
+  const assignmentNotices = currentPerson
+    ? await prisma.assignment.findMany({
+        where: {
+          decidedByAdminId: { not: null },
+          OR: [{ person1Id: currentPerson.id }, { person2Id: currentPerson.id }],
+        },
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        take: 30,
+        select: {
+          id: true,
+          status: true,
+          updatedAt: true,
+          shift: { select: {
+            shiftDate: true, startTime: true, endTime: true,
+            zone: { select: { name: true } },
+          } },
+          person1: { select: { firstName: true, lastName: true } },
+          person2: { select: { firstName: true, lastName: true } },
+        },
+      })
+    : [];
+
   const people = currentPerson
     ? []
     : (await listActivePeople()).map((person) => ({
@@ -694,6 +716,17 @@ export async function getAsignacionesPageState(
     people,
     notice: readFirstSearchParam(searchParams.notice),
     requestError: readFirstSearchParam(searchParams.requestError),
+    assignmentNotices: assignmentNotices.map((item) => ({
+      id: item.id,
+      status: item.status,
+      updatedLabel: new Intl.DateTimeFormat("es-CL", {
+        dateStyle: "medium", timeStyle: "short", timeZone: "America/Santiago",
+      }).format(item.updatedAt),
+      zoneName: item.shift.zone.name,
+      dateLabel: formatDate(item.shift.shiftDate),
+      timeLabel: `${formatTime(item.shift.startTime)} - ${formatTime(item.shift.endTime)}`,
+      pairLabel: `${item.person1.firstName} ${item.person1.lastName} + ${item.person2.firstName} ${item.person2.lastName}`,
+    })),
     ...snapshot,
   };
 }

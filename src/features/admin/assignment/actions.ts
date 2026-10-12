@@ -444,6 +444,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/solicitudes");
   revalidatePath(`/admin/turnos/${parsed.shiftId}`);
+  revalidatePath("/asignaciones");
   redirectTo(
     buildShiftRedirect(parsed.shiftId, {
       notice:

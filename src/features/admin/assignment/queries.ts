@@ -1,4 +1,6 @@
 import { AssignmentStatus, ShiftRequestStatus } from "@prisma/client";
+import { buildAssignmentWhatsAppLink } from "@/lib/assignment-notifications";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import { prisma } from "@/lib/prisma";
 import {
   formatDate,
@@ -209,6 +211,7 @@ export async function getShiftAssignmentPageState(
               id: true,
               firstName: true,
               lastName: true,
+              phone: true,
             },
           },
           person2: {
@@ -216,6 +219,7 @@ export async function getShiftAssignmentPageState(
               id: true,
               firstName: true,
               lastName: true,
+              phone: true,
             },
           },
         },
@@ -309,6 +313,22 @@ export async function getShiftAssignmentPageState(
       ruleExceptionUsed: assignment.ruleExceptionUsed,
       exceptionReason: assignment.exceptionReason,
       pairLabel: `${assignment.person1.firstName} ${assignment.person1.lastName} + ${assignment.person2.firstName} ${assignment.person2.lastName}`,
+      whatsappRecipients: [assignment.person1, assignment.person2].map((person, index) => ({
+        id: person.id,
+        label: `${person.firstName} ${person.lastName}`,
+        href: buildAssignmentWhatsAppLink({
+          phone: person.phone,
+          name: person.firstName,
+          partner: index === 0
+            ? `${assignment.person2.firstName} ${assignment.person2.lastName}`
+            : `${assignment.person1.firstName} ${assignment.person1.lastName}`,
+          status: assignment.status,
+          zone: shift.zone.name,
+          date: formatDate(shift.shiftDate),
+          time: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
+          siteUrl: getPublicSiteUrl().toString(),
+        }),
+      })),
     })),
     activeAssignment: activeAssignment
       ? {
