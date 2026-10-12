@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, Box, CircularProgress, useTheme } from "@mui/material";
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from "maplibre-gl";
-import { hasCoordinates, VALDIVIA_CENTER, type MapPlace } from "@/lib/places-map";
+import { getMapColor, hasCoordinates, VALDIVIA_CENTER, type MapPlace } from "@/lib/places-map";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./places-map.css";
 import { loadMapLibre } from "./map-runtime";
@@ -161,7 +161,7 @@ function toGeoJSON(places: MapPlace[]): GeoJSON.FeatureCollection<GeoJSON.Point>
   return { type: "FeatureCollection", features: places.flatMap((place, index) => hasCoordinates(place) ? [{
     type: "Feature" as const,
     geometry: { type: "Point" as const, coordinates: [place.longitude, place.latitude] },
-    properties: { id: place.id, name: place.name, color: place.mapColor, number: place.number ?? index + 1 },
+    properties: { id: place.id, name: place.name, color: getMapColor(place.mapColor), number: place.number ?? index + 1 },
   }] : []) };
 }
 

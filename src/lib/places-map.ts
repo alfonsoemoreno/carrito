@@ -1,11 +1,29 @@
 export const MAP_COLORS = [
-  { value: "#2563eb", label: "Azul" },
-  { value: "#0f766e", label: "Verde" },
-  { value: "#9333ea", label: "Violeta" },
-  { value: "#c2410c", label: "Naranja" },
-  { value: "#be123c", label: "Rosa" },
-  { value: "#475569", label: "Gris" },
+  { value: "#b8d4f5", label: "Azul cielo" },
+  { value: "#bce8ed", label: "Turquesa" },
+  { value: "#bde5d4", label: "Menta" },
+  { value: "#c9ddc1", label: "Salvia" },
+  { value: "#dfe9b5", label: "Lima" },
+  { value: "#f5e6a9", label: "Amarillo" },
+  { value: "#f5d7ad", label: "Albaricoque" },
+  { value: "#f5c7b4", label: "Durazno" },
+  { value: "#efb9b2", label: "Coral" },
+  { value: "#f2c3d5", label: "Rosa" },
+  { value: "#e5c3db", label: "Malva" },
+  { value: "#d7c6ed", label: "Lila" },
+  { value: "#c7c9ed", label: "Lavanda" },
+  { value: "#cbdce2", label: "Gris perla" },
+  { value: "#e5d6c5", label: "Arena" },
 ] as const;
+
+const LEGACY_MAP_COLORS: Record<string, string> = {
+  "#2563eb": "#b8d4f5", "#0f766e": "#bde5d4", "#9333ea": "#d7c6ed",
+  "#c2410c": "#f5c7b4", "#be123c": "#f2c3d5", "#475569": "#cbdce2",
+};
+
+export function getMapColor(value: string) {
+  return LEGACY_MAP_COLORS[value.toLowerCase()] ?? value;
+}
 
 export const VALDIVIA_CENTER: [number, number] = [-73.2459, -39.8142];
 

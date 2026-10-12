@@ -6,7 +6,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import CenterFocusStrongRoundedIcon from "@mui/icons-material/CenterFocusStrongRounded";
-import { directionsUrl, hasCoordinates, type MapPlace } from "@/lib/places-map";
+import { directionsUrl, getMapColor, hasCoordinates, type MapPlace } from "@/lib/places-map";
 import { PlacesCanvas } from "./places-canvas";
 import { ZoneEditor } from "@/components/admin/zone-editor";
 
@@ -68,7 +68,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
                   color: "text.primary", bgcolor: place.id === selected?.id ? "action.selected" : "transparent", border: 0,
                   borderBottom: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "action.hover" },
                   "&:focus-visible": { outline: "3px solid #f5ed00", outlineOffset: -3 } }}>
-                <Box component="span" sx={{ flexShrink: 0, width: 28, height: 28, display: "grid", placeItems: "center", bgcolor: place.mapColor, color: "#fff", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>{place.number ?? index + 1}</Box>
+                <Box component="span" sx={{ flexShrink: 0, width: 28, height: 28, display: "grid", placeItems: "center", bgcolor: getMapColor(place.mapColor), color: "#111", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>{place.number ?? index + 1}</Box>
                 <Box component="span" sx={{ minWidth: 0 }}>
                   <Typography component="span" sx={{ display: "block", fontWeight: 700, fontSize: 15 }}>{place.name}</Typography>
                   <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>{place.address || "Sin dirección de referencia"}</Typography>

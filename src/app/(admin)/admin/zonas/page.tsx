@@ -9,7 +9,7 @@ import {
 } from "@/components/admin/master-data-cards";
 import { RouteButton } from "@/components/navigation/route-button";
 import { ZoneEditor } from "@/components/admin/zone-editor";
-import { hasCoordinates } from "@/lib/places-map";
+import { getMapColor, hasCoordinates } from "@/lib/places-map";
 import { prisma } from "@/lib/prisma";
 import {
   Box,
@@ -110,7 +110,7 @@ export default async function AdminZonesPage() {
                       {zone.address || "Sin dirección de referencia"}
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                      <Box sx={{ width: 16, height: 16, bgcolor: zone.mapColor }} />
+                      <Box sx={{ width: 16, height: 16, bgcolor: getMapColor(zone.mapColor) }} />
                       <Typography variant="caption" color="text.secondary">
                         {hasCoordinates(zone) ? `${zone.latitude}, ${zone.longitude}` : "Ubicación pendiente"}
                       </Typography>

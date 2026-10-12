@@ -1,6 +1,6 @@
 .places-map-canvas .maplibregl-ctrl-group { border-radius: 0; border: 1px solid #dedede; box-shadow: 0 2px 12px #11111114; }
 .places-map-canvas .maplibregl-ctrl-attrib { font-size: 10px; }
-.place-pin { width: 38px; height: 38px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 3px solid white; background: var(--pin-color, #2563eb); color: white; font: 700 14px var(--font-mono), monospace; box-shadow: 0 3px 12px #11111140; cursor: pointer; }
+.place-pin { width: 38px; height: 38px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 3px solid white; background: var(--pin-color, #b8d4f5); color: #111; font: 700 14px var(--font-mono), monospace; box-shadow: 0 3px 12px #11111140; cursor: pointer; }
 .place-pin:hover, .place-pin:focus-visible { outline: 4px solid #f5ed00; outline-offset: 2px; }
 .place-pin[data-selected="true"] { outline: 6px solid #f5ed00; outline-offset: 3px; z-index: 2; }
 .place-pin-cluster { width: 46px; height: 46px; color: #111; background: #f5ed00; border-color: #111; }

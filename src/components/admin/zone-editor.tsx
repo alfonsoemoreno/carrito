@@ -3,7 +3,7 @@
 import { useActionState, useCallback, useState } from "react";
 import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Stack, Switch, TextField, Typography } from "@mui/material";
 import { saveZoneAction } from "@/features/admin/master-data/actions";
-import { MAP_COLORS, parseCoordinatePair, type MapPlace } from "@/lib/places-map";
+import { getMapColor, MAP_COLORS, parseCoordinatePair, type MapPlace } from "@/lib/places-map";
 import { CoordinatePicker } from "@/components/maps/coordinate-picker";
 
 function ZoneForm({ zone, onClose }: { zone?: MapPlace; onClose: () => void }) {
@@ -12,7 +12,7 @@ function ZoneForm({ zone, onClose }: { zone?: MapPlace; onClose: () => void }) {
   const [longitude, setLongitude] = useState(zone?.longitude?.toString() ?? "");
   const [pair, setPair] = useState("");
   const [pairError, setPairError] = useState("");
-  const [color, setColor] = useState(zone?.mapColor ?? MAP_COLORS[0].value);
+  const [color, setColor] = useState(getMapColor(zone?.mapColor ?? MAP_COLORS[0].value));
   const updateCoordinates = useCallback((lat: string, lng: string) => {
     setLatitude(lat); setLongitude(lng);
   }, []);
@@ -62,16 +62,17 @@ function ZoneForm({ zone, onClose }: { zone?: MapPlace; onClose: () => void }) {
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Color del punto</Typography>
             <input type="hidden" name="mapColor" value={color} />
-            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+            <Box role="group" aria-label="Colores pastel del lugar" sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(3, minmax(0, 1fr))", sm: "repeat(5, minmax(0, 1fr))" }, gap: 1 }}>
               {MAP_COLORS.map((option) => (
                 <Button key={option.value} aria-label={option.label} aria-pressed={color === option.value}
-                  onClick={() => setColor(option.value)} sx={{ minWidth: 42, width: 42, height: 42, p: 0,
-                    backgroundColor: option.value, border: "3px solid", borderColor: color === option.value ? "#f5ed00" : "transparent",
-                    outline: color === option.value ? "2px solid currentColor" : "none", "&:hover": { backgroundColor: option.value, opacity: 0.8 } }}>
-                  <Typography component="span" sx={{ color: "white", fontWeight: 700 }}>{color === option.value ? "✓" : ""}</Typography>
+                  onClick={() => setColor(option.value)} sx={{ minWidth: 0, minHeight: 48, px: 1, py: 1,
+                    color: "#111", fontSize: 12, backgroundColor: option.value, border: "2px solid", borderColor: color === option.value ? "#111" : "transparent",
+                    outline: color === option.value ? "2px solid #f5ed00" : "none", outlineOffset: 1,
+                    "&:hover": { backgroundColor: option.value, borderColor: "#111" }, "&:focus-visible": { outline: "3px solid #f5ed00" } }}>
+                  {color === option.value ? "✓ " : ""}{option.label}
                 </Button>
               ))}
-            </Stack>
+            </Box>
           </Box>
         </Stack>
       </DialogContent>
