@@ -7,7 +7,7 @@ import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import {
   EmptyState,
 } from "@/components/admin/master-data-cards";
-import Link from "next/link";
+import { RouteButton } from "@/components/navigation/route-button";
 import { ZoneEditor } from "@/components/admin/zone-editor";
 import { hasCoordinates } from "@/lib/places-map";
 import { prisma } from "@/lib/prisma";
@@ -18,7 +18,6 @@ import {
   Chip,
   Container,
   Typography,
-  Button,
   Stack,
 } from "@mui/material";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
@@ -54,7 +53,7 @@ export default async function AdminZonesPage() {
               </Box>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
                 <ZoneEditor />
-                <Button component={Link} href="/admin/mapa" variant="outlined">Ver mapa</Button>
+                <RouteButton href="/admin/mapa" variant="outlined">Ver mapa</RouteButton>
               </Stack>
             </Stack>
           </CardContent>
