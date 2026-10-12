@@ -6,6 +6,7 @@ import {
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
+import { PersonEditor } from "@/components/admin/person-editor";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
 import { Box, Card, CardContent, Chip, Container, Divider, TextField, Typography } from "@mui/material";
@@ -21,7 +22,7 @@ export default async function AdminPeoplePage() {
       <AdminPageShell
         eyebrow="Personas"
         title="Gestion de personas"
-        description="Alta de personas y cambios de estado para solicitudes y asignaciones."
+        description="Crea personas, edita sus datos y administra su estado para solicitudes y asignaciones."
       >
         <form action={createPersonAction}>
           <FormCard
@@ -90,6 +91,8 @@ export default async function AdminPeoplePage() {
                     </Typography>
                     <Typography variant="body2">{person.notes || "Sin observaciones."}</Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+                      <PersonEditor person={{ id: person.id, firstName: person.firstName, lastName: person.lastName,
+                        gender: person.gender, phone: person.phone, email: person.email, notes: person.notes }} />
                       <form action={updatePersonStatusAction}>
                         <input type="hidden" name="id" value={person.id} />
                         <input

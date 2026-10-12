@@ -16,6 +16,7 @@ import {
   deletePersonSchema,
   deleteZoneSchema,
   updatePersonStatusSchema,
+  updatePersonSchema,
   updateZoneVisibilitySchema,
 } from "./validations";
 import { parseDateOnly, parseTimeOnly } from "./utils";
@@ -55,6 +56,32 @@ export async function createPersonAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/personas");
+}
+
+export async function updatePersonAction(
+  _previousState: { error: string; success: boolean },
+  formData: FormData,
+) {
+  await requireCurrentAdminActor();
+  const parsed = updatePersonSchema.safeParse({
+    id: formData.get("id"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    gender: formData.get("gender"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    notes: formData.get("notes"),
+  });
+  if (!parsed.success) {
+    return { error: "Revisa nombre y apellido (2 a 80 caracteres), correo y teléfono (máximo 30 caracteres).", success: false };
+  }
+  const { id, ...data } = parsed.data;
+  const result = await prisma.person.updateMany({ where: { id }, data });
+  if (!result.count) return { error: "Esta persona ya no existe. Recarga la página.", success: false };
+  revalidatePath("/admin", "layout");
+  revalidatePath("/solicitar");
+  revalidatePath("/asignaciones");
+  return { error: "", success: true };
 }
 
 export async function updatePersonStatusAction(formData: FormData) {

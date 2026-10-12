@@ -40,6 +40,14 @@ export const updatePersonStatusSchema = z.object({
   status: z.nativeEnum(PersonStatus),
 });
 
+export const updatePersonSchema = createPersonSchema.omit({ status: true }).extend({
+  id: z.string().uuid(),
+  phone: z.string().trim().max(30).transform((value) => value || null),
+  email: z.string().trim().max(255).email().or(z.literal(""))
+    .transform((value) => value || null),
+  notes: z.string().trim().transform((value) => value || null),
+});
+
 export const deletePersonSchema = z.object({
   id: z.string().uuid(),
 });
