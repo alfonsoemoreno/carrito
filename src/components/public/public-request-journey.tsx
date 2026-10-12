@@ -17,7 +17,7 @@ type FlowData = {
   maintenanceModeEnabled: boolean;
 };
 
-export function PublicRequestJourney({ people }: { people: Person[] }) {
+export function PublicRequestJourney({ people, initialZoneId = "" }: { people: Person[]; initialZoneId?: string }) {
   const [flow, setFlow] = useState<FlowData | null>(null);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function PublicRequestJourney({ people }: { people: Person[] }) {
   }, []);
 
   if (flow) {
-    return <ShiftRequestFlow zones={flow.zones} shifts={flow.shifts} initialZoneId="" from={flow.from} to={flow.to} maintenanceModeEnabled={flow.maintenanceModeEnabled} requestError="" />;
+    return <ShiftRequestFlow zones={flow.zones} shifts={flow.shifts} initialZoneId={flow.zones.some((zone) => zone.id === initialZoneId) ? initialZoneId : ""} from={flow.from} to={flow.to} maintenanceModeEnabled={flow.maintenanceModeEnabled} requestError="" />;
   }
 
   return (

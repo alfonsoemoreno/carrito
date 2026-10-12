@@ -17,6 +17,7 @@ import {
   deleteZoneSchema,
   updatePersonStatusSchema,
   updatePersonSchema,
+  saveZoneSchema,
   updateZoneVisibilitySchema,
 } from "./validations";
 import { parseDateOnly, parseTimeOnly } from "./utils";
@@ -309,7 +310,44 @@ export async function createZoneAction(formData: FormData) {
   revalidatePath("/admin/zonas");
 }
 
+export async function saveZoneAction(
+  _previousState: { error: string; success: boolean },
+  formData: FormData,
+) {
+  await requireCurrentAdminActor();
+  const parsed = saveZoneSchema.safeParse({
+    id: formData.get("id") ?? "",
+    name: formData.get("name"),
+    description: formData.get("description"),
+    status: formData.get("status"),
+    publicVisible: booleanFromFormData(formData.get("publicVisible")),
+    address: formData.get("address"),
+    latitude: formData.get("latitude"),
+    longitude: formData.get("longitude"),
+    mapColor: formData.get("mapColor"),
+  });
+  if (!parsed.success) {
+    return { error: "Revisa los datos: nombre de 2 a 120 caracteres, latitud entre -90 y 90 y longitud entre -180 y 180. Ingresa ambas coordenadas o deja ambas vacías.", success: false };
+  }
+  const { id, ...values } = parsed.data;
+  const data = { ...values, description: values.description ?? null };
+  const duplicate = await prisma.zone.findFirst({ where: { name: data.name, ...(id ? { id: { not: id } } : {}) }, select: { id: true } });
+  if (duplicate) return { error: "Ya existe un lugar con ese nombre.", success: false };
+  if (id) {
+    const result = await prisma.zone.updateMany({ where: { id }, data });
+    if (!result.count) return { error: "El lugar ya no existe. Recarga la página.", success: false };
+  } else {
+    await prisma.zone.create({ data });
+  }
+  revalidatePath("/admin", "layout");
+  revalidatePath("/mapa");
+  revalidatePath("/solicitar");
+  revalidatePath("/asignaciones");
+  return { error: "", success: true };
+}
+
 export async function updateZoneVisibilityAction(formData: FormData) {
+  await requireCurrentAdminActor();
   const parsed = updateZoneVisibilitySchema.parse({
     id: formData.get("id"),
     publicVisible: booleanFromFormData(formData.get("publicVisible")),
@@ -326,6 +364,7 @@ export async function updateZoneVisibilityAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/zonas");
+  revalidatePath("/mapa");
 }
 
 export async function deleteZoneAction(formData: FormData) {
@@ -458,6 +497,8 @@ export async function deleteZoneAction(formData: FormData) {
   revalidatePath("/admin/estadisticas");
   revalidatePath("/admin/exportaciones");
   revalidatePath("/solicitar");
+  revalidatePath("/mapa");
+  revalidatePath("/admin/mapa");
 }
 
 export async function createTemplateAction(formData: FormData) {

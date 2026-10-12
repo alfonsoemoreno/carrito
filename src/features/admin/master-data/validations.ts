@@ -67,6 +67,22 @@ export const createZoneSchema = z.object({
   publicVisible: z.boolean().default(true),
 });
 
+const optionalCoordinate = (min: number, max: number) => z.preprocess(
+  (value) => value == null || (typeof value === "string" && !value.trim()) ? null : value,
+  z.coerce.number().min(min).max(max).nullable(),
+);
+
+export const saveZoneSchema = createZoneSchema.extend({
+  id: z.string().uuid().or(z.literal("")),
+  address: z.string().trim().max(250).transform((value) => value || null),
+  latitude: optionalCoordinate(-90, 90),
+  longitude: optionalCoordinate(-180, 180),
+  mapColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+}).refine((value) => (value.latitude === null) === (value.longitude === null), {
+  path: ["latitude"],
+  message: "Ingresa latitud y longitud, o deja ambas vacías.",
+});
+
 export const updateZoneVisibilitySchema = z.object({
   id: z.string().uuid(),
   publicVisible: z.boolean(),

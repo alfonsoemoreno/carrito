@@ -165,6 +165,10 @@ model Zone {
   description   String?
   status        ZoneStatus      @default(ACTIVE)
   publicVisible Boolean         @default(true) @map("public_visible")
+  address       String?         @db.VarChar(250)
+  latitude      Float?
+  longitude     Float?
+  mapColor      String          @default("#2563eb") @map("map_color") @db.VarChar(7)
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
   templates     ShiftTemplate[]

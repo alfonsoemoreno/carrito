@@ -43,6 +43,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
                       <Typography variant="h5">Elige tu nombre</Typography>
                     </Stack>
                     <PublicRequestJourney
+                      initialZoneId={state.filters.zoneId}
                       key={state.sessionResetKey || "public-request-journey"}
                       people={state.people.map((person) => ({ id: person.id, label: `${person.firstName} ${person.lastName}` }))}
                     />

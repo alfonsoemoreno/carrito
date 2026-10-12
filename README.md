@@ -154,6 +154,18 @@ npm run test
 
 ## Despliegue
 
+### Mapa de lugares
+
+- El mapa público está en `/mapa`; muestra únicamente lugares activos y visibles.
+- En Administración → Más → Lugares se pueden crear o editar dirección, coordenadas y color.
+- Para ubicar un lugar, pincha el minimapa, arrastra el pin o pega `latitud, longitud`. Las coordenadas son opcionales, pero deben ingresarse juntas.
+- Administración → Más → Mapa de lugares incluye también lugares ocultos e inactivos.
+- El mapa usa MapLibre y OpenFreeMap, sin clave API. Requiere acceso del navegador a `tiles.openfreemap.org`; la atribución del proveedor permanece visible. Si falla la carga, el listado sigue disponible.
+- El worker de MapLibre se publica como un recurso del propio sitio durante la compilación.
+- Antes de desplegar esta versión en otra base, ejecuta `npm run db:migrate:deploy` y `npm run db:generate`. La migración `202610120001_zone_map` agrega campos opcionales y conserva los lugares existentes.
+
+### Publicación
+
 - Sube este repositorio a GitHub e impórtalo como un proyecto nuevo en Vercel.
 - Desde la integración Neon del Marketplace de Vercel, crea y conecta una base nueva. Usa la conexión pooled como `DATABASE_URL` y la conexión directa/unpooled como `DIRECT_URL`.
 - Habilita Neon Auth para la rama de producción. Configura `NEON_AUTH_BASE_URL` con la URL que entrega Neon y crea `NEON_AUTH_COOKIE_SECRET` con `openssl rand -base64 32`.

@@ -21,6 +21,11 @@ const adminSections: AppShellSection[] = [
         description: "Puntos de actividad del evento.",
       },
       {
+        href: "/admin/mapa",
+        label: "Mapa de lugares",
+        description: "Ubicaciones y detalles de todos los puntos.",
+      },
+      {
         href: "/admin/relaciones",
         label: "Relaciones",
         description: "Parejas y excepciones.",

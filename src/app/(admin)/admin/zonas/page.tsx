@@ -1,5 +1,4 @@
 import {
-  createZoneAction,
   deleteZoneAction,
   updateZoneVisibilityAction,
 } from "@/features/admin/master-data/actions";
@@ -7,12 +6,10 @@ import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import {
   EmptyState,
-  FieldGrid,
-  FormCard,
-  SelectField,
-  SubmitButton,
-  SwitchField,
 } from "@/components/admin/master-data-cards";
+import Link from "next/link";
+import { ZoneEditor } from "@/components/admin/zone-editor";
+import { hasCoordinates } from "@/lib/places-map";
 import { prisma } from "@/lib/prisma";
 import {
   Box,
@@ -20,8 +17,9 @@ import {
   CardContent,
   Chip,
   Container,
-  TextField,
   Typography,
+  Button,
+  Stack,
 } from "@mui/material";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 
@@ -47,39 +45,20 @@ export default async function AdminZonesPage() {
         title="Gestion de lugares"
         description="Define los lugares principales y su visibilidad publica."
       >
-        <form action={createZoneAction}>
-          <FormCard
-            title="Nuevo lugar"
-            description="Los lugares son la entidad operativa principal del sistema."
-          >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <FieldGrid>
-                <TextField name="name" label="Nombre" required />
-                <SelectField
-                  name="status"
-                  label="Estado"
-                  defaultValue="ACTIVE"
-                  options={[
-                    { value: "ACTIVE", label: "Activa" },
-                    { value: "INACTIVE", label: "Inactiva" },
-                  ]}
-                />
-              </FieldGrid>
-              <TextField
-                name="description"
-                label="Descripcion"
-                multiline
-                minRows={2}
-              />
-              <SwitchField
-                name="publicVisible"
-                label="Visible publicamente"
-                defaultChecked
-              />
-              <SubmitButton label="Crear lugar" />
-            </Box>
-          </FormCard>
-        </form>
+        <Card>
+          <CardContent>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
+              <Box>
+                <Typography variant="h5">Ubica los puntos del evento</Typography>
+                <Typography color="text.secondary">Agrega un lugar y sitúalo en el mapa con un clic o arrastrando el pin.</Typography>
+              </Box>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                <ZoneEditor />
+                <Button component={Link} href="/admin/mapa" variant="outlined">Ver mapa</Button>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
 
         {zones.length === 0 ? (
           <EmptyState
@@ -128,6 +107,18 @@ export default async function AdminZonesPage() {
                         color={zone.status === "ACTIVE" ? "success" : "default"}
                       />
                     </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {zone.address || "Sin dirección de referencia"}
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: zone.mapColor }} />
+                      <Typography variant="caption" color="text.secondary">
+                        {hasCoordinates(zone) ? `${zone.latitude}, ${zone.longitude}` : "Ubicación pendiente"}
+                      </Typography>
+                    </Stack>
+                    <ZoneEditor zone={{ id: zone.id, name: zone.name, description: zone.description,
+                      address: zone.address, latitude: zone.latitude, longitude: zone.longitude,
+                      mapColor: zone.mapColor, status: zone.status, publicVisible: zone.publicVisible }} />
                     <Typography variant="body2" color="text.secondary">
                       {zone.publicVisible ? "Visible" : "Oculta"} ·{" "}
                       {zone._count.templates} plantillas · {zone._count.shifts}{" "}

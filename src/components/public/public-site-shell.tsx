@@ -25,6 +25,7 @@ export async function PublicSiteShell({ children }: { children: ReactNode }) {
           { label: "Inicio", href: "/" },
           { label: "Solicitar turnos", href: "/solicitar" },
           { label: "Mis turnos", href: "/asignaciones" },
+          { label: "Mapa de lugares", href: "/mapa" },
         ]}
       />
 
