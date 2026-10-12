@@ -6,11 +6,9 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import {
   Box,
   Button,
-  Collapse,
   Container,
   Divider,
   IconButton,
@@ -55,7 +53,7 @@ function isDropdownSection(
 }
 
 function splitIntoColumns<T>(items: readonly T[]) {
-  const columns = items.length >= 8 ? 3 : items.length >= 4 ? 2 : 1;
+  const columns = items.length >= 10 ? 3 : items.length >= 4 ? 2 : 1;
   const perColumn = Math.ceil(items.length / columns);
   return Array.from({ length: columns }, (_, index) =>
     items.slice(index * perColumn, index * perColumn + perColumn),
@@ -74,7 +72,6 @@ function DesktopDropdownPanel({
   panelRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const columns = splitIntoColumns(items);
-  const panelInset = 28;
   const handleNavigate = (href: string) => {
     window.location.assign(href);
   };
@@ -86,23 +83,20 @@ function DesktopDropdownPanel({
         position: "absolute",
         top: "100%",
         left: 0,
-        right: 0,
         zIndex: 50,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ mx: 0, px: "0 !important" }}>
         <Box
-          style={{
-            marginLeft: `${panelInset}px`,
-            marginRight: `${panelInset}px`,
-          }}
           sx={{
             position: "relative",
             backgroundColor: "var(--app-surface)",
             border: "1px solid var(--app-border)",
-            borderRadius: "0 0 20px 20px",
-            boxShadow: "0 14px 32px rgba(60, 64, 67, 0.16)",
-            overflow: "visible",
+            borderRadius: 0,
+            boxShadow: "0 12px 28px rgba(31, 41, 55, 0.14)",
+            width: { md: 620, lg: 720 },
+            maxWidth: "calc(100vw - 32px)",
+            overflow: "hidden",
           }}
         >
           <IconButton
@@ -132,7 +126,7 @@ function DesktopDropdownPanel({
           >
             <Typography
               sx={{
-                color: "var(--app-accent)",
+                color: "var(--app-accent-deep)",
                 fontSize: "1.5rem",
                 lineHeight: 1.1,
                 fontWeight: 650,
@@ -182,7 +176,7 @@ function DesktopDropdownPanel({
                           paddingBottom: "12px",
                         }}
                         sx={{
-                          borderRadius: "12px",
+                          borderRadius: 0,
                           "&:hover": {
                             backgroundColor: "var(--app-surface-muted)",
                           },
@@ -190,7 +184,7 @@ function DesktopDropdownPanel({
                       >
                         <Typography
                           sx={{
-                            color: "var(--app-accent)",
+                            color: "var(--app-accent-deep)",
                             fontSize: "1rem",
                             fontWeight: 650,
                             lineHeight: 1.35,
@@ -221,139 +215,203 @@ function DesktopDropdownPanel({
 }
 
 function MobileMenu({
+  open,
   sections,
-  onNavigate,
+  onClose,
   pathname,
+  publicUser,
+  mode,
+  onToggleMode,
 }: {
+  open: boolean;
   sections: ReadonlyArray<AppShellSection>;
-  onNavigate: () => void;
+  onClose: () => void;
   pathname: string;
+  publicUser?: { firstName: string; lastName: string } | null;
+  mode: "light" | "dark";
+  onToggleMode: () => void;
 }) {
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  const trapTabKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const focusable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])',
+      ),
+    ).filter((element) => element.tabIndex !== -1);
+    const first = focusable[0];
+    const last = focusable.at(-1);
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
+  };
+
   const isActiveHref = (href: string) =>
     href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
+  const requestSection = sections.find((section) => section.href === "/solicitar");
+  const primarySections = sections.filter((section) => section !== requestSection);
+  const handleClose = () => {
+    setExpandedSection(null);
+    onClose();
+  };
 
   return (
     <Box
-      style={{
-        paddingLeft: "16px",
-        paddingRight: "16px",
-        paddingBottom: "12px",
-      }}
-      sx={{
-        position: "absolute",
-        top: "100%",
-        left: 0,
-        right: 0,
-        zIndex: 60,
-        backgroundColor: "var(--app-surface)",
-        borderTop: "1px solid var(--app-border)",
-        borderBottom: "1px solid var(--app-border)",
-        boxShadow: "0 16px 40px rgba(15, 22, 36, 0.18)",
-        backdropFilter: "blur(8px)",
-      }}
+      aria-hidden={!open}
+      className={`official-mobile-menu${open ? " is-open" : ""}`}
     >
-      <Container maxWidth="lg" sx={{ px: "0 !important" }}>
-        <Stack spacing={1.5} sx={{ py: 2.25 }}>
-          {sections.map((section) => (
-            <Box
-              key={section.label}
-              sx={{
-                border: "1px solid var(--app-border)",
-                borderRadius: "10px",
-                backgroundColor: "var(--app-surface)",
-                overflow: "hidden",
-              }}
-            >
-              {section.href ? (
-                <Link href={section.href as never} onClick={onNavigate}>
-                  <Typography
-                    sx={{
-                      display: "block",
-                      px: 2.5,
-                      py: 2,
-                      fontWeight: 700,
-                      color: isActiveHref(section.href)
-                        ? "var(--app-accent-deep)"
-                        : "var(--app-ink)",
-                      fontSize: "1rem",
-                      backgroundColor: isActiveHref(section.href)
-                        ? "rgba(74, 109, 167, 0.08)"
-                        : "transparent",
-                    }}
-                  >
-                    {section.label}
-                  </Typography>
-                </Link>
-              ) : null}
+      <Box
+        aria-hidden="true"
+        className="official-mobile-menu__scrim"
+        component="div"
+        onClick={handleClose}
+      />
+      <Box
+        aria-label="Menú principal"
+        aria-modal={open || undefined}
+        className="official-mobile-menu__panel"
+        id="mobile-navigation-menu"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={trapTabKey}
+        role="dialog"
+      >
+        <Box
+          aria-label="Cerrar menú"
+          className="official-mobile-menu__close"
+          component="button"
+          id="mobile-navigation-close"
+          onClick={handleClose}
+          tabIndex={open ? 0 : -1}
+          type="button"
+        >
+          <CloseRoundedIcon aria-hidden="true" />
+        </Box>
 
-              {isDropdownSection(section) ? (
-                <Box sx={{ p: 1.25 }}>
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      color: "var(--app-form-label)",
-                      fontSize: "0.78rem",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      px: 1.25,
-                      pt: 0.5,
-                      pb: 1,
-                    }}
+        <Box className="official-mobile-menu__content">
+          <Box component="nav" aria-label="Navegación principal">
+            {primarySections.map((section) =>
+              section.href ? (
+                <Link
+                  aria-current={isActiveHref(section.href) ? "page" : undefined}
+                  className={`official-mobile-menu__row${isActiveHref(section.href) ? " is-active" : ""}`}
+                  href={section.href as never}
+                  key={section.href}
+                  onClick={handleClose}
+                  tabIndex={open ? 0 : -1}
+                >
+                  {section.label}
+                </Link>
+              ) : isDropdownSection(section) ? (
+                <Box className="official-mobile-menu__group" key={section.label}>
+                  <Box
+                    aria-controls={`mobile-submenu-${section.label.replace(/\W+/g, "-").toLowerCase()}`}
+                    aria-expanded={expandedSection === section.label}
+                    className="official-mobile-menu__row official-mobile-menu__group-button"
+                    component="button"
+                    onClick={() =>
+                      setExpandedSection((current) =>
+                        current === section.label ? null : section.label,
+                      )
+                    }
+                    type="button"
                   >
                     {section.label}
-                  </Typography>
-                  <Stack spacing={1}>
-                    {section.items.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href as never}
-                        onClick={onNavigate}
-                      >
-                        <Box
-                          sx={{
-                            px: 1.25,
-                            py: 1.4,
-                            borderRadius: "8px",
-                            backgroundColor: isActiveHref(item.href)
-                              ? "rgba(74, 109, 167, 0.1)"
-                              : "var(--app-surface-muted)",
-                            border: isActiveHref(item.href)
-                              ? "1px solid rgba(74, 109, 167, 0.22)"
-                              : "1px solid transparent",
-                          }}
+                    <ExpandMoreRoundedIcon
+                      aria-hidden="true"
+                      className={expandedSection === section.label ? "is-expanded" : ""}
+                    />
+                  </Box>
+                  {expandedSection === section.label ? (
+                    <Box
+                      className="official-mobile-menu__submenu"
+                      id={`mobile-submenu-${section.label.replace(/\W+/g, "-").toLowerCase()}`}
+                    >
+                      {section.items.map((item) => (
+                        <Link
+                          aria-current={isActiveHref(item.href) ? "page" : undefined}
+                          className={isActiveHref(item.href) ? "is-active" : ""}
+                          href={item.href as never}
+                          key={item.href}
+                          onClick={handleClose}
+                          tabIndex={open ? 0 : -1}
                         >
-                          <Typography
-                            sx={{
-                              color: isActiveHref(item.href)
-                                ? "var(--app-accent-deep)"
-                                : "var(--app-accent)",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {item.label}
-                          </Typography>
-                          <Typography
-                            sx={{
-                              color: "var(--app-muted)",
-                              fontSize: "0.94rem",
-                              mt: 0.45,
-                              lineHeight: 1.5,
-                            }}
-                          >
-                            {item.description}
-                          </Typography>
-                        </Box>
-                      </Link>
-                    ))}
-                  </Stack>
+                          {item.label}
+                        </Link>
+                      ))}
+                    </Box>
+                  ) : null}
                 </Box>
-              ) : null}
+              ) : null,
+            )}
+          </Box>
+
+          {requestSection?.href ? (
+            <Box component="nav" aria-label="Acción principal">
+              <Link
+                aria-current={isActiveHref(requestSection.href) ? "page" : undefined}
+                className="official-mobile-menu__cta"
+                href={requestSection.href as never}
+                onClick={handleClose}
+                tabIndex={open ? 0 : -1}
+              >
+                {requestSection.label}
+              </Link>
             </Box>
-          ))}
-        </Stack>
-      </Container>
+          ) : null}
+        </Box>
+
+        <Box className="official-mobile-menu__utilities">
+          {publicUser ? (
+            <Box className="official-mobile-menu__account">
+              <Typography component="span" className="official-mobile-menu__account-name">
+                {publicUser.firstName} {publicUser.lastName}
+              </Typography>
+              <Box
+                action="/public/logout"
+                component="form"
+                data-suppress-global-feedback="true"
+                method="post"
+                onSubmit={() => window.dispatchEvent(new Event("public-session-ending"))}
+              >
+                <Box
+                  className="official-mobile-menu__utility-link"
+                  component="button"
+                  onClick={handleClose}
+                  tabIndex={open ? 0 : -1}
+                  type="submit"
+                >
+                  Cerrar sesión
+                </Box>
+              </Box>
+            </Box>
+          ) : null}
+          <Box
+            aria-label={mode === "light" ? "Activar modo oscuro" : "Activar modo claro"}
+            className="official-mobile-menu__utility-link"
+            component="button"
+            onClick={onToggleMode}
+            type="button"
+          >
+            {mode === "light" ? (
+              <DarkModeOutlinedIcon aria-hidden="true" />
+            ) : (
+              <LightModeOutlinedIcon aria-hidden="true" />
+            )}
+            {mode === "light" ? "Modo oscuro" : "Modo claro"}
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -378,6 +436,9 @@ export function AppShellHeader({
   const closeAll = () => {
     setMobileOpen(false);
     setDesktopOpenLabel(null);
+    if (mobileOpen) {
+      document.querySelector<HTMLButtonElement>(".app-mobile-menu-toggle")?.focus();
+    }
   };
 
   const isActiveHref = (href: string) =>
@@ -392,7 +453,7 @@ export function AppShellHeader({
     return section.items?.some((item) => isActiveHref(item.href)) ?? false;
   };
   const hasSections = sections.length > 0;
-  const showPublicUserMenu = !hasSections && pathname !== "/" && !!publicUser;
+  const showPublicUserMenu = pathname !== "/" && !!publicUser;
   const themeToggleButton = (
     <Tooltip title={mode === "light" ? "Activar modo oscuro" : "Activar modo claro"}>
       <IconButton
@@ -426,6 +487,28 @@ export function AppShellHeader({
   );
 
   useEffect(() => {
+    if (!mobileOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        setDesktopOpenLabel(null);
+        document.querySelector<HTMLButtonElement>(".app-mobile-menu-toggle")?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
     if (!desktopOpenLabel) {
       return;
     }
@@ -452,7 +535,7 @@ export function AppShellHeader({
   }, [desktopOpenLabel]);
 
   return (
-    <Box component="header" sx={{ position: "relative", zIndex: 30 }}>
+    <Box component="header" sx={{ position: { xs: "sticky", lg: "relative" }, top: 0, zIndex: 30 }}>
       <Box
         sx={{
           backgroundColor: "var(--app-header)",
@@ -471,58 +554,38 @@ export function AppShellHeader({
         >
           <Box
             sx={{
-              minHeight: { xs: 72, md: 74 },
+              minHeight: { xs: hasSections ? 70 : 72, md: 74 },
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               gap: 2.5,
-              py: { xs: 1.4, md: 0.8 },
+              py: { xs: hasSections ? 0 : 1.4, md: 0.8 },
             }}
           >
             <Link href={homeHref as never}>
               <Box
+                aria-label={`${brandTitle} · ${brandSubtitle}`}
+                className="app-brand-lockup"
+                component="span"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
                   minWidth: 0,
-                  columnGap: "8px",
                 }}
               >
-                <Box className="app-brand-mark">
-                  <Box
-                    component="img"
-                    src="/icons/app-icon-192.png"
-                    alt={`${brandTitle} logo`}
-                    sx={{
-                      width: { xs: 40, md: 36, lg: 40 },
-                      height: { xs: 40, md: 36, lg: 40 },
-                      display: "block",
-                      borderRadius: "13px",
-                      boxShadow: "0 2px 7px rgba(60, 64, 67, 0.18)",
-                      backgroundColor: "var(--app-surface)",
-                    }}
-                  />
-                </Box>
-                <Box style={{ marginLeft: "0px" }} sx={{ minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      color: "var(--app-ink)",
-                      fontSize: { xs: "1.3rem", md: "1.14rem", lg: "1.34rem" },
-                      lineHeight: 1.08,
-                      fontWeight: 650,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {brandTitle}
+                <Box aria-hidden="true" className="app-brand-rule" />
+                <Typography component="span" className="app-brand-title">
+                  {brandTitle.replace(/\s+Amateur$/i, "")}
+                </Typography>
+                <Box className="app-brand-detail">
+                  <Typography component="span" className="app-brand-category">
+                    Amateur
                   </Typography>
                   <Typography
-                    sx={{
-                      color: "var(--app-muted)",
-                      fontSize: "0.82rem",
-                      lineHeight: 1.2,
-                      mt: 0.2,
-                      display: { xs: "none", md: "block" },
-                    }}
+                    component="span"
+                    className="app-brand-subtitle"
+                    sx={{ display: { xs: "none", sm: "inline" } }}
                   >
                     {brandSubtitle}
                   </Typography>
@@ -531,20 +594,40 @@ export function AppShellHeader({
             </Link>
 
             {hasSections ? (
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", display: { xs: "none", lg: "flex" } }}>
                 {themeToggleButton}
-                <IconButton
-                  aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-                  onClick={() => setMobileOpen((current) => !current)}
-                  sx={{
-                    display: { xs: "inline-flex", md: "none" },
-                    color: "var(--app-muted)",
-                    border: "1px solid var(--app-border)",
-                    borderRadius: 12,
-                  }}
-                >
-                  {mobileOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
-                </IconButton>
+                {showPublicUserMenu ? (
+                  <>
+                    <Button
+                      variant="outlined"
+                      aria-label="Abrir menú de usuario"
+                      onClick={(event) => setPublicUserAnchor(event.currentTarget)}
+                      sx={{ minWidth: 0, width: 44, height: 44, px: 0 }}
+                    >
+                      <AccountCircleOutlinedIcon fontSize="small" />
+                    </Button>
+                    <Menu
+                      anchorEl={publicUserAnchor}
+                      open={Boolean(publicUserAnchor)}
+                      onClose={() => setPublicUserAnchor(null)}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      transformOrigin={{ vertical: "top", horizontal: "right" }}
+                    >
+                      <MenuItem disabled sx={{ opacity: "1 !important", color: "text.secondary !important", fontWeight: 650, cursor: "default" }}>
+                        {publicUser?.firstName} {publicUser?.lastName}
+                      </MenuItem>
+                      <Box
+                        component="form"
+                        action="/public/logout"
+                        method="post"
+                        data-suppress-global-feedback="true"
+                        onSubmit={() => window.dispatchEvent(new Event("public-session-ending"))}
+                      >
+                        <MenuItem component="button" type="submit">Cerrar sesión</MenuItem>
+                      </Box>
+                    </Menu>
+                  </>
+                ) : null}
               </Stack>
             ) : (
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -607,6 +690,33 @@ export function AppShellHeader({
                 ) : null}
               </Stack>
             )}
+            {hasSections ? (
+              <Box
+                aria-controls="mobile-navigation-menu"
+                aria-expanded={mobileOpen}
+                aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+                className="app-mobile-menu-toggle"
+                component="button"
+                onClick={() => {
+                  if (mobileOpen) {
+                    closeAll();
+                    return;
+                  }
+                  setMobileOpen(true);
+                  window.setTimeout(() => {
+                    document.getElementById("mobile-navigation-close")?.focus();
+                  }, 0);
+                }}
+                sx={{ display: { xs: "inline-flex", lg: "none" } }}
+                type="button"
+              >
+                <span aria-hidden="true" className="app-mobile-menu-toggle__bars">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </Box>
+            ) : null}
           </Box>
         </Container>
       </Box>
@@ -618,13 +728,14 @@ export function AppShellHeader({
             backgroundColor: "var(--app-header)",
             borderBottom: "1px solid var(--app-border)",
             boxShadow: "0 1px 2px rgba(60, 64, 67, 0.04)",
+            display: { xs: "none", lg: "block" },
           }}
         >
-          <Container maxWidth="lg">
+      <Container maxWidth="lg">
             <Box
               ref={desktopNavRef}
               sx={{
-                display: { xs: "none", md: "flex" },
+                display: { xs: "none", lg: "flex" },
                 alignItems: "stretch",
                 minHeight: 56,
                 position: "relative",
@@ -653,13 +764,16 @@ export function AppShellHeader({
                           gap: 1.1,
                           flexWrap: "nowrap",
                           color: "var(--app-muted)",
-                          borderRadius: "999px",
-                          backgroundColor: active ? "rgba(11, 87, 208, 0.11)" : "transparent",
+                          position: "relative",
+                          borderRadius: 0,
+                          borderBottom: active ? "2px solid var(--app-accent)" : "2px solid transparent",
+                          backgroundColor: "transparent",
                           "& .MuiTypography-root, & .MuiSvgIcon-root": {
                             color: active ? "var(--app-accent-deep)" : "var(--app-muted)",
                           },
                           "&:hover": {
-                            backgroundColor: "var(--app-surface-muted)",
+                            color: "var(--app-ink)",
+                            borderBottomColor: active ? "var(--app-accent)" : "var(--app-border)",
                           },
                         }}
                       >
@@ -715,8 +829,10 @@ export function AppShellHeader({
                         color: "var(--app-muted)",
                         border: 0,
                         outline: 0,
-                        borderRadius: "999px",
-                        backgroundColor: active ? "rgba(11, 87, 208, 0.11)" : "transparent",
+                        position: "relative",
+                        borderRadius: 0,
+                        borderBottom: active ? "2px solid var(--app-accent)" : "2px solid transparent",
+                        backgroundColor: "transparent",
                         "& .MuiTypography-root, & .MuiSvgIcon-root": {
                           color: active ? "var(--app-accent-deep)" : "var(--app-muted)",
                         },
@@ -724,7 +840,8 @@ export function AppShellHeader({
                           flexShrink: 0,
                         },
                         "&:hover": {
-                          backgroundColor: "var(--app-surface-muted)",
+                          color: "var(--app-ink)",
+                          borderBottomColor: active ? "var(--app-accent)" : "var(--app-border)",
                         },
                       }}
                     >
@@ -766,101 +883,18 @@ export function AppShellHeader({
             />
           ) : null}
 
-          <Box
-            style={{
-              paddingLeft: "16px",
-              paddingRight: "16px",
-              paddingTop: "8px",
-              paddingBottom: "8px",
-            }}
-            sx={{
-              display: { xs: "flex", md: "none" },
-              px: 0,
-              py: 0,
-            }}
-          >
-            <Box
-              component="button"
-              type="button"
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-navigation-menu"
-              aria-label={mobileOpen ? "Cerrar navegación" : "Abrir navegación"}
-              onClick={() => setMobileOpen((current) => !current)}
-              style={{
-                width: "100%",
-                minHeight: "54px",
-                paddingLeft: "22px",
-                paddingRight: "22px",
-                border: "1px solid var(--app-border)",
-                borderRadius: "14px",
-                color: "var(--app-ink)",
-                background: mobileOpen
-                  ? "var(--app-surface-muted)"
-                  : "var(--app-surface)",
-              }}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                transition:
-                  "background-color 180ms ease, border-color 180ms ease, transform 180ms ease",
-                "&:hover": {
-                  backgroundColor: "var(--app-surface-muted)",
-                  borderColor: "var(--app-form-border)",
-                },
-              }}
-            >
-              <Typography
-                sx={{
-                  color: "var(--app-ink)",
-                  fontSize: "0.93rem",
-                  letterSpacing: 0,
-                  textTransform: "none",
-                  fontWeight: 650,
-                  pl: 0.9,
-                }}
-              >
-                Navegación
-              </Typography>
-              <ExpandMoreRoundedIcon
-                sx={{
-                  color: "var(--app-muted)",
-                  fontSize: 22,
-                  mr: 0.25,
-                  transform: mobileOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-                }}
-              />
-            </Box>
-          </Box>
-
-          <Collapse
-            in={mobileOpen}
-            timeout={220}
-            unmountOnExit
-            easing={{
-              enter: "cubic-bezier(0.2, 0.8, 0.2, 1)",
-              exit: "cubic-bezier(0.4, 0, 1, 1)",
-            }}
-          >
-            <Box
-              id="mobile-navigation-menu"
-              sx={{
-                transformOrigin: "top center",
-                animation: mobileOpen
-                  ? "mobileMenuFadeIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
-                  : "none",
-              }}
-            >
-              <MobileMenu
-                sections={sections}
-                onNavigate={closeAll}
-                pathname={pathname}
-              />
-            </Box>
-          </Collapse>
         </Box>
+      ) : null}
+      {hasSections ? (
+        <MobileMenu
+          open={mobileOpen}
+          sections={sections}
+          onClose={closeAll}
+          pathname={pathname}
+          publicUser={showPublicUserMenu ? publicUser : null}
+          mode={mode}
+          onToggleMode={toggleMode}
+        />
       ) : null}
     </Box>
   );

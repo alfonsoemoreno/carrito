@@ -1,7 +1,6 @@
 import {
   AssignmentStatus,
   PersonStatus,
-  RelationshipType,
   ShiftRequestStatus,
   ShiftStatus,
 } from "@prisma/client";
@@ -9,11 +8,11 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getPublicSession } from "@/features/public/session";
+import { clampToEventDateRange, getEventDateRange, hasEventEnded } from "@/lib/event";
 import {
-  buildVisibleDateRange,
   formatDate,
+  formatLongDate,
   formatTime,
-  getHistoryCutoffDate,
   parseDateInput,
   readFirstSearchParam,
   toDateOnlyString,
@@ -25,7 +24,6 @@ const DEFAULT_CONFIG = {
   pinMaxLength: 8,
   pinMaxAttempts: 5,
   pinLockMinutes: 15,
-  maxRequestsPerWeek: 4,
   maxConfirmedPerWeek: 2,
   maxConfirmedPerMonth: 6,
   allowConsecutiveDays: false,
@@ -173,71 +171,6 @@ export async function searchActivePeople(query: string) {
   });
 }
 
-export async function getSuggestedPartners(personId: string) {
-  const [config, currentPerson, candidates, relationships] = await Promise.all([
-    getPublicConfig(),
-    prisma.person.findUnique({
-      where: { id: personId },
-      select: { id: true, gender: true },
-    }),
-    prisma.person.findMany({
-      where: {
-        status: PersonStatus.ACTIVE,
-        id: { not: personId },
-      },
-      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        gender: true,
-      },
-    }),
-    prisma.relationship.findMany({
-      where: {
-        OR: [{ personAId: personId }, { personBId: personId }],
-      },
-      select: {
-        personAId: true,
-        personBId: true,
-        type: true,
-      },
-    }),
-  ]);
-
-  if (!currentPerson) {
-    return [];
-  }
-
-  return candidates
-    .filter((candidate) => {
-      const sameGenderAllowed =
-        config.allowSameSexPairing && candidate.gender === currentPerson.gender;
-      const hasRelationship = relationships.some((relationship) => {
-        const matchesPair =
-          (relationship.personAId === currentPerson.id &&
-            relationship.personBId === candidate.id) ||
-          (relationship.personBId === currentPerson.id &&
-            relationship.personAId === candidate.id);
-
-        return (
-          matchesPair &&
-          [
-            RelationshipType.MARRIAGE,
-            RelationshipType.PARENT_CHILD,
-            RelationshipType.ADMIN_EXCEPTION,
-          ].includes(relationship.type)
-        );
-      });
-
-      return sameGenderAllowed || hasRelationship;
-    })
-    .map((candidate) => ({
-      id: candidate.id,
-      label: `${candidate.firstName} ${candidate.lastName}`,
-    }));
-}
-
 async function getUncachedPublicShiftBoard(input: {
   currentPersonId?: string | null;
   zoneId?: string;
@@ -245,9 +178,10 @@ async function getUncachedPublicShiftBoard(input: {
   to?: string;
 }) {
   const config = await getPublicConfig();
-  const defaultRange = buildVisibleDateRange(config.visibleWeeks);
-  const from = parseDateInput(input.from) ?? defaultRange.from;
-  const to = parseDateInput(input.to) ?? defaultRange.to;
+  const { from, to } = clampToEventDateRange(
+    parseDateInput(input.from),
+    parseDateInput(input.to),
+  );
 
   const shifts = await prisma.shift.findMany({
     where: {
@@ -345,6 +279,7 @@ async function getUncachedPublicShiftBoard(input: {
         zoneName: shift.zone.name,
         shiftDate: shift.shiftDate,
         dateLabel: formatDate(shift.shiftDate),
+        fullDateLabel: formatLongDate(shift.shiftDate),
         startLabel: formatTime(shift.startTime),
         endLabel: formatTime(shift.endTime),
         status: shift.status,
@@ -488,8 +423,7 @@ export async function getPublicAssignmentsSnapshot(
   currentPersonId?: string | null,
 ) {
   const config = await getPublicConfig();
-  const { from, to } = buildVisibleDateRange(config.visibleWeeks);
-  const historyCutoff = getHistoryCutoffDate(config.historyVisibility);
+  const { from, to } = getEventDateRange();
 
   const [publicAssignments, publicRequests, ownAssignments, ownRequests] =
     await Promise.all([
@@ -498,10 +432,7 @@ export async function getPublicAssignmentsSnapshot(
           status: AssignmentStatus.CONFIRMED,
           shift: {
             shiftDate: {
-              gte:
-                config.showHistoryPublicly && historyCutoff
-                  ? historyCutoff
-                  : from,
+              gte: from,
               lte: to,
             },
             zone: {
@@ -571,15 +502,9 @@ export async function getPublicAssignmentsSnapshot(
                 { person1Id: currentPersonId },
                 { person2Id: currentPersonId },
               ],
-              ...(historyCutoff
-                ? {
-                    shift: {
-                      shiftDate: {
-                        gte: historyCutoff,
-                      },
-                    },
-                  }
-                : {}),
+              shift: {
+                shiftDate: { gte: from, lte: to },
+              },
             },
             orderBy: [
               { shift: { shiftDate: "desc" } },
@@ -618,13 +543,9 @@ export async function getPublicAssignmentsSnapshot(
         ? prisma.shiftRequest.findMany({
             where: {
               personId: currentPersonId,
-              ...(historyCutoff
-                ? {
-                    createdAt: {
-                      gte: historyCutoff,
-                    },
-                  }
-                : {}),
+              shift: {
+                shiftDate: { gte: from, lte: to },
+              },
             },
             orderBy: [
               { shift: { shiftDate: "desc" } },
@@ -708,40 +629,43 @@ export async function getSolicitarPageState(
   ]);
   const people = currentPerson ? [] : await listActivePeople();
 
-  const defaultRange = buildVisibleDateRange(config.visibleWeeks);
+  const defaultRange = getEventDateRange();
   const scheduleView =
     requestedScheduleView === "confirmed" ||
     requestedScheduleView === "calendar"
       ? requestedScheduleView
       : "available";
-  const selectedDate = parseDateInput(requestedSelectedDate)
-    ? requestedSelectedDate
-    : "";
+  const parsedSelectedDate = parseDateInput(requestedSelectedDate);
+  const selectedDate = parsedSelectedDate &&
+    parsedSelectedDate >= defaultRange.from &&
+    parsedSelectedDate <= defaultRange.to
+      ? requestedSelectedDate
+      : "";
+  const boundedRange = clampToEventDateRange(
+    parseDateInput(from),
+    parseDateInput(to),
+  );
 
-  const [shiftBoard, partnerOptions] =
-    currentPerson
-      ? await Promise.all([
-        getPublicShiftBoard({
-          currentPersonId: currentPerson.id,
-          from,
-          to,
-        }),
-        getSuggestedPartners(currentPerson.id),
-      ])
-      : [[], []];
+  const shiftBoard = currentPerson
+    ? await getPublicShiftBoard({
+        currentPersonId: currentPerson.id,
+        from: toDateOnlyString(boundedRange.from),
+        to: toDateOnlyString(boundedRange.to),
+      })
+    : [];
 
   return {
     config,
+    eventEnded: hasEventEnded(),
     currentPerson,
     people,
     zones,
     shiftBoard,
-    partnerOptions,
     filters: {
       personQuery,
       zoneId,
-      from: from || toDateOnlyString(defaultRange.from),
-      to: to || toDateOnlyString(defaultRange.to),
+      from: toDateOnlyString(boundedRange.from),
+      to: toDateOnlyString(boundedRange.to),
       selectedDate,
     },
     scheduleView,
@@ -758,9 +682,16 @@ export async function getAsignacionesPageState(
   const searchParams = await rawSearchParams;
   const currentPerson = await getCurrentPublicPerson();
   const snapshot = await getPublicAssignmentsSnapshot(currentPerson?.id);
+  const people = currentPerson
+    ? []
+    : (await listActivePeople()).map((person) => ({
+        id: person.id,
+        label: `${person.firstName} ${person.lastName}`,
+      }));
 
   return {
     currentPerson,
+    people,
     notice: readFirstSearchParam(searchParams.notice),
     requestError: readFirstSearchParam(searchParams.requestError),
     ...snapshot,
@@ -768,11 +699,8 @@ export async function getAsignacionesPageState(
 }
 
 export async function getAsignacionesCalendarPageState() {
-  const [config, currentPerson] = await Promise.all([
-    getPublicConfig(),
-    getCurrentPublicPerson(),
-  ]);
-  const { from, to } = buildVisibleDateRange(config.visibleWeeks);
+  const currentPerson = await getCurrentPublicPerson();
+  const { from, to } = getEventDateRange();
 
   const assignments = currentPerson
     ? await prisma.assignment.findMany({

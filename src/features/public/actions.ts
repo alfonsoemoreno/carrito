@@ -3,7 +3,6 @@
 import {
   AssignmentStatus,
   PersonStatus,
-  RelationshipType,
   ShiftRequestStatus,
   ShiftStatus,
 } from "@prisma/client";
@@ -15,15 +14,13 @@ import {
   createPublicSession,
   getPublicSession,
 } from "@/features/public/session";
+import { getEventDateRange, hasEventEnded } from "@/lib/event";
 import {
   getPublicConfig,
   getPublicShiftBoard,
-  getSuggestedPartners,
   listPublicZonesForFlow,
 } from "@/features/public/queries";
 import {
-  buildVisibleDateRange,
-  getWeekKey,
   isConsecutiveUtcDate,
   isSameUtcDate,
   overlapsTimeRange,
@@ -53,13 +50,12 @@ export async function startPublicSessionAction(personId: string) {
   });
 
   const config = await getPublicConfig();
-  const range = buildVisibleDateRange(config.visibleWeeks);
+  const range = getEventDateRange();
   const from = toDateOnlyString(range.from);
   const to = toDateOnlyString(range.to);
-  const [zones, shifts, partners] = await Promise.all([
+  const [zones, shifts] = await Promise.all([
     listPublicZonesForFlow(),
     getPublicShiftBoard({ currentPersonId: person.id, from, to }),
-    getSuggestedPartners(person.id),
   ]);
 
   return {
@@ -67,10 +63,9 @@ export async function startPublicSessionAction(personId: string) {
     person,
     zones,
     shifts,
-    partners,
     from,
     to,
-    maintenanceModeEnabled: config.maintenanceModeEnabled,
+    maintenanceModeEnabled: config.maintenanceModeEnabled || hasEventEnded(),
   };
 }
 
@@ -121,55 +116,6 @@ async function requireSessionPerson() {
   return person;
 }
 
-async function isValidSuggestedPartner(
-  personId: string,
-  partnerId: string,
-  allowSameSexPairing: boolean,
-) {
-  const [person, partner, relationships] = await Promise.all([
-    prisma.person.findUnique({
-      where: { id: personId },
-      select: { id: true, gender: true, status: true },
-    }),
-    prisma.person.findUnique({
-      where: { id: partnerId },
-      select: { id: true, gender: true, status: true },
-    }),
-    prisma.relationship.findMany({
-      where: {
-        OR: [
-          { personAId: personId, personBId: partnerId },
-          { personAId: partnerId, personBId: personId },
-        ],
-      },
-      select: {
-        type: true,
-      },
-    }),
-  ]);
-
-  if (
-    !person ||
-    !partner ||
-    partner.status !== PersonStatus.ACTIVE ||
-    person.id === partner.id
-  ) {
-    return false;
-  }
-
-  if (allowSameSexPairing && person.gender === partner.gender) {
-    return true;
-  }
-
-  return relationships.some((relationship) =>
-    [
-      RelationshipType.MARRIAGE,
-      RelationshipType.PARENT_CHILD,
-      RelationshipType.ADMIN_EXCEPTION,
-    ].includes(relationship.type),
-  );
-}
-
 export async function logoutPublicPersonAction() {
   await clearPublicSession();
   redirectTo("/solicitar?notice=Sesion%20cerrada.");
@@ -186,68 +132,41 @@ export async function submitShiftRequestsAction(formData: FormData) {
         .filter(Boolean),
     ),
   );
-  const suggestedPartnerByShift = new Map<string, string>();
   const comments = String(formData.get("comments") ?? "").trim();
   const redirectWithRequestError = (message: string): never =>
     redirectTo(buildRedirect(returnTo, { requestError: message }));
-
-  for (const [key, value] of formData.entries()) {
-    if (!key.startsWith("suggestedPartnerByShift:")) {
-      continue;
-    }
-
-    const shiftId = key.slice("suggestedPartnerByShift:".length);
-    const partnerId = String(value).trim();
-
-    if (shiftId && partnerId) {
-      suggestedPartnerByShift.set(shiftId, partnerId);
-    }
-  }
 
   if (selectedShiftIds.length === 0) {
     redirectWithRequestError("Selecciona al menos un turno.");
   }
 
+  if (hasEventEnded()) {
+    redirectWithRequestError("El período de solicitudes para este evento ya finalizó.");
+  }
+
   const config = await prisma.systemConfig.findFirst({
     orderBy: { createdAt: "asc" },
     select: {
-      maxRequestsPerWeek: true,
       allowConsecutiveDays: true,
       allowMultiplePerDay: true,
       allowOverlapping: true,
-      allowSameSexPairing: true,
     },
   });
 
   const policy = {
-    maxRequestsPerWeek: config?.maxRequestsPerWeek ?? 4,
     allowConsecutiveDays: config?.allowConsecutiveDays ?? false,
     allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
     allowOverlapping: config?.allowOverlapping ?? false,
-    allowSameSexPairing: config?.allowSameSexPairing ?? true,
   };
-
-  for (const shiftId of selectedShiftIds) {
-    const suggestedPartnerId = suggestedPartnerByShift.get(shiftId);
-
-    if (
-      suggestedPartnerId &&
-      !(await isValidSuggestedPartner(
-        currentPerson.id,
-        suggestedPartnerId,
-        policy.allowSameSexPairing,
-      ))
-    ) {
-      redirectWithRequestError(
-        "Una de las parejas sugeridas no cumple las reglas vigentes.",
-      );
-    }
-  }
 
   const shifts = await prisma.shift.findMany({
     where: {
       id: {
         in: selectedShiftIds,
+      },
+      shiftDate: {
+        gte: getEventDateRange().from,
+        lte: getEventDateRange().to,
       },
     },
     include: {
@@ -366,12 +285,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
       }),
     ]);
 
-  const weeklyCounts = new Map<string, number>();
-  for (const request of existingRequests) {
-    const key = getWeekKey(request.shift.shiftDate);
-    weeklyCounts.set(key, (weeklyCounts.get(key) ?? 0) + 1);
-  }
-
   const selectedDates = new Map<
     string,
     { shiftDate: Date; startTime: Date; endTime: Date }[]
@@ -423,17 +336,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
         "Ya existe una solicitud activa o asignacion para ese turno.",
       );
     }
-
-    const weekKey = getWeekKey(shift.shiftDate);
-    const nextWeeklyCount = (weeklyCounts.get(weekKey) ?? 0) + 1;
-
-    if (nextWeeklyCount > policy.maxRequestsPerWeek) {
-      redirectWithRequestError(
-        "La seleccion supera el maximo de solicitudes por semana.",
-      );
-    }
-
-    weeklyCounts.set(weekKey, nextWeeklyCount);
 
     const currentDateKey = toDateOnlyString(shift.shiftDate);
     const sameDaySelected = selectedDates.get(currentDateKey) ?? [];
@@ -550,12 +452,11 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     for (const shift of shifts) {
-      const suggestedPartnerId = suggestedPartnerByShift.get(shift.id) ?? null;
       const created = await tx.shiftRequest.create({
         data: {
           shiftId: shift.id,
           personId: currentPerson.id,
-          suggestedPartnerId,
+          suggestedPartnerId: null,
           comments: comments || null,
           status: ShiftRequestStatus.PENDING,
         },
@@ -570,7 +471,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
           action: "PUBLIC_REQUEST_CREATED",
           afterData: {
             shiftId: shift.id,
-            suggestedPartnerId,
+            suggestedPartnerId: null,
           },
         },
       });

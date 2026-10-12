@@ -99,11 +99,13 @@ export function AppShellFooter({
                     >
                       <Typography
                         sx={{
-                          color: "var(--app-accent)",
+                          color: "var(--app-accent-deep)",
                           fontSize: "0.95rem",
                           lineHeight: 1.45,
                           "&:hover": {
-                            color: "var(--app-accent-strong)",
+                            color: "var(--app-accent-deep)",
+                            textDecoration: "underline",
+                            textDecorationColor: "var(--app-accent)",
                           },
                         }}
                       >

@@ -29,7 +29,7 @@ export default async function AdminPrintableCalendarPage({ searchParams }: Props
           </Box>
 
           {state.shifts.map((shift) => (
-            <Card key={shift.id} sx={{ borderRadius: 4, border: "1px solid", borderColor: "divider", "@media print": { boxShadow: "none", breakInside: "avoid" } }}>
+            <Card key={shift.id} sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider", "@media print": { boxShadow: "none", breakInside: "avoid" } }}>
               <CardContent>
                 <Stack spacing={1}>
                   <Typography variant="h5">{shift.zoneName}</Typography>

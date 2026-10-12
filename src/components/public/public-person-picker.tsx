@@ -23,13 +23,14 @@ type PublicPersonPickerProps = {
   people: PersonOption[];
   selectedPersonId: string;
   onContinue?: (personId: string) => Promise<void>;
+  returnTo?: string;
 };
 
 function initials(label: string) {
   return label.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("");
 }
 
-export function PublicPersonPicker({ people, selectedPersonId, onContinue }: PublicPersonPickerProps) {
+export function PublicPersonPicker({ people, selectedPersonId, onContinue, returnTo = "/solicitar" }: PublicPersonPickerProps) {
   const [personId, setPersonId] = useState(selectedPersonId);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -81,7 +82,7 @@ export function PublicPersonPicker({ people, selectedPersonId, onContinue }: Pub
               minHeight: 64,
               justifyContent: "flex-start",
               px: 2.25,
-              borderRadius: 3,
+              borderRadius: 0,
               fontSize: "1rem",
               color: selectedPerson ? "text.primary" : "text.secondary",
               backgroundColor: "background.default",
@@ -96,7 +97,7 @@ export function PublicPersonPicker({ people, selectedPersonId, onContinue }: Pub
         </Box>
 
         <input type="hidden" name="personId" value={personId} />
-        <input type="hidden" name="returnTo" value="/solicitar" />
+        <input type="hidden" name="returnTo" value={returnTo} />
         {error ? <Alert severity="error">{error}</Alert> : null}
         <Button
           type="submit"
@@ -120,7 +121,7 @@ export function PublicPersonPicker({ people, selectedPersonId, onContinue }: Pub
               width: "min(100% - 32px, 620px)",
               maxHeight: "min(760px, calc(100dvh - 48px))",
               overflow: "hidden",
-              borderRadius: "28px !important",
+              borderRadius: 0,
               boxShadow: "0 24px 72px rgba(31, 31, 31, 0.28) !important",
             },
           },
@@ -167,13 +168,13 @@ export function PublicPersonPicker({ people, selectedPersonId, onContinue }: Pub
                     justifyContent: "flex-start",
                     gap: 1.75,
                     px: 1.5,
-                    borderRadius: 3.5,
+                    borderRadius: 0,
                     color: "text.primary",
-                    backgroundColor: isSelected ? "rgba(11, 87, 208, 0.1)" : "transparent",
-                    "&:hover": { backgroundColor: isSelected ? "rgba(11, 87, 208, 0.14)" : "var(--app-surface-muted)" },
+                    backgroundColor: isSelected ? "action.selected" : "transparent",
+                    "&:hover": { backgroundColor: isSelected ? "action.selected" : "var(--app-surface-muted)" },
                   }}
                 >
-                  <Box sx={{ width: 38, height: 38, display: "grid", placeItems: "center", flexShrink: 0, borderRadius: "50%", backgroundColor: "rgba(11, 87, 208, 0.1)", color: "primary.main", fontSize: "0.82rem", fontWeight: 700 }}>
+                  <Box sx={{ width: 38, height: 38, display: "grid", placeItems: "center", flexShrink: 0, borderRadius: "50%", backgroundColor: "action.selected", color: "primary.main", fontSize: "0.82rem", fontWeight: 700 }}>
                     {initials(person.label)}
                   </Box>
                   <Typography sx={{ flex: 1, textAlign: "left", fontWeight: 600 }}>{person.label}</Typography>

@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Noto_Sans } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { AppProviders } from "@/components/providers/app-providers";
+import { EVENT } from "@/lib/event";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import "./globals.css";
-
-const sans = Noto_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
 
 const mono = IBM_Plex_Mono({
   variable: "--font-mono",
@@ -14,20 +12,37 @@ const mono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+const galibier = localFont({
+  src: [
+    { path: "./fonts/galibier-regular.woff", weight: "400", style: "normal" },
+    { path: "./fonts/galibier-bold.woff", weight: "800", style: "normal" },
+  ],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const galibierEtroit = localFont({
+  src: [
+    { path: "./fonts/galibier-etroit-regular.woff", weight: "400", style: "normal" },
+    { path: "./fonts/galibier-etroit-bold.woff", weight: "800", style: "normal" },
+  ],
+  variable: "--font-condensed",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://carrito.vercel.app"),
+  metadataBase: getPublicSiteUrl(),
   title: {
-    default: "Carrito",
-    template: "%s | Carrito",
+    default: EVENT.name,
+    template: `%s | ${EVENT.name}`,
   },
-  description:
-    "Sistema de gestion de turnos para lugares de predicacion publica de una congregacion.",
-  applicationName: "Carrito",
+  description: `${EVENT.name} en ${EVENT.location}, del 26 de octubre al 1 de noviembre de 2026.`,
+  applicationName: EVENT.name,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Carrito",
+    title: EVENT.name,
   },
   icons: {
     icon: [
@@ -56,7 +71,7 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable}`}
+      className={`${mono.variable} ${galibier.variable} ${galibierEtroit.variable}`}
     >
       <body>
         <a href="#main-content" className="skip-link">

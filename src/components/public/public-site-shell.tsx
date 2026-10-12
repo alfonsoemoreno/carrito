@@ -2,16 +2,16 @@ import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import { AppShellHeader } from "@/components/navigation/app-shell-header";
 import { getCurrentPublicPerson } from "@/features/public/queries";
+import { EVENT, EVENT_BRAND_SUBTITLE } from "@/lib/event";
 
 export async function PublicSiteShell({ children }: { children: ReactNode }) {
-  const congregationName = process.env.CONGREGATION_NAME ?? "Sin configurar";
   const currentPerson = await getCurrentPublicPerson();
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <AppShellHeader
-        brandTitle="Predicación pública"
-        brandSubtitle={`Congregación ${congregationName}`}
+        brandTitle={EVENT.name}
+        brandSubtitle={EVENT_BRAND_SUBTITLE}
         homeHref="/"
         publicUser={
           currentPerson
@@ -21,7 +21,11 @@ export async function PublicSiteShell({ children }: { children: ReactNode }) {
               }
             : null
         }
-        sections={[]}
+        sections={[
+          { label: "Inicio", href: "/" },
+          { label: "Solicitar turnos", href: "/solicitar" },
+          { label: "Mis turnos", href: "/asignaciones" },
+        ]}
       />
 
       <Box

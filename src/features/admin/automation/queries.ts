@@ -10,7 +10,6 @@ export async function getAutomationDashboardData() {
       visibleWeeks: true,
       generateFutureWeeks: true,
       maintenanceModeEnabled: true,
-      maxRequestsPerWeek: true,
       maxConfirmedPerWeek: true,
       maxConfirmedPerMonth: true,
       allowConsecutiveDays: true,

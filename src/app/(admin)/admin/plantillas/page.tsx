@@ -88,7 +88,7 @@ export default async function AdminTemplatesPage() {
                     style={{
                       width: "100%",
                       minHeight: 56,
-                      borderRadius: 18,
+                      borderRadius: 0,
                       border: "1px solid rgba(29, 36, 32, 0.12)",
                       padding: "0 14px",
                     }}
@@ -105,7 +105,7 @@ export default async function AdminTemplatesPage() {
                     style={{
                       width: "100%",
                       minHeight: 56,
-                      borderRadius: 18,
+                      borderRadius: 0,
                       border: "1px solid rgba(29, 36, 32, 0.12)",
                       padding: "0 14px",
                     }}
@@ -146,7 +146,7 @@ export default async function AdminTemplatesPage() {
               <Card
                 key={template.id}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 0,
                   border: "1px solid",
                   borderColor: "divider",
                 }}

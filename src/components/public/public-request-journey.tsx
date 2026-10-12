@@ -9,10 +9,9 @@ type Person = { id: string; label: string };
 type FlowData = {
   zones: Array<{ id: string; name: string }>;
   shifts: Array<{
-    id: string; zoneId: string; zoneName: string; dateLabel: string; startLabel: string; endLabel: string;
+    id: string; zoneId: string; zoneName: string; dateLabel: string; fullDateLabel: string; startLabel: string; endLabel: string;
     status: string; ownLatestRequest: { status: string } | null; publicAssignments: Array<{ id: string; label: string }>;
   }>;
-  partners: Array<{ id: string; label: string }>;
   from: string;
   to: string;
   maintenanceModeEnabled: boolean;
@@ -28,7 +27,7 @@ export function PublicRequestJourney({ people }: { people: Person[] }) {
   }, []);
 
   if (flow) {
-    return <ShiftRequestFlow zones={flow.zones} shifts={flow.shifts} partners={flow.partners} initialZoneId="" from={flow.from} to={flow.to} maintenanceModeEnabled={flow.maintenanceModeEnabled} requestError="" />;
+    return <ShiftRequestFlow zones={flow.zones} shifts={flow.shifts} initialZoneId="" from={flow.from} to={flow.to} maintenanceModeEnabled={flow.maintenanceModeEnabled} requestError="" />;
   }
 
   return (

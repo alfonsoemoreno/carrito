@@ -43,6 +43,16 @@ export async function requireCurrentAdminActor() {
   return adminUser;
 }
 
+export async function requireCurrentSuperadminActor() {
+  const adminUser = await requireCurrentAdminActor();
+
+  if (adminUser.role !== "SUPERADMIN") {
+    throw new Error("Only a superadministrator can manage administrator access.");
+  }
+
+  return adminUser;
+}
+
 export async function requireCurrentAdminPageAccess() {
   const { data: session, error } = await auth.getSession();
 

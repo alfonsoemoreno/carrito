@@ -47,7 +47,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
         >
           <Card
             sx={{
-              borderRadius: 5,
+              borderRadius: 0,
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -203,7 +203,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
 
           <Card
             sx={{
-              borderRadius: 5,
+              borderRadius: 0,
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -232,7 +232,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                       <Box
                         key={entry.id}
                         sx={{
-                          borderRadius: 4,
+                          borderRadius: 0,
                           border: "1px solid",
                           borderColor: "divider",
                           p: 2,

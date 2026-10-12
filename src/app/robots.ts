@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
+import { getPublicSiteUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = getPublicSiteUrl();
+
   return {
     rules: [
       {
@@ -9,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/", "/account/"],
       },
     ],
-    sitemap: "https://carrito.vercel.app/sitemap.xml",
-    host: "https://carrito.vercel.app",
+    sitemap: new URL("/sitemap.xml", siteUrl).toString(),
+    host: siteUrl.origin,
   };
 }

@@ -95,7 +95,7 @@ export function SwitchField({
         py: 1.5,
         border: "1px solid",
         borderColor: "var(--app-form-border)",
-        borderRadius: "14px",
+        borderRadius: 0,
         backgroundColor: "var(--app-form-fill)",
         boxShadow: "none",
       }}
@@ -159,7 +159,7 @@ export function SwitchField({
               whiteSpace: "nowrap",
               border: 0,
               "&:focus-visible + .switch-track": {
-                outline: "3px solid rgba(74, 109, 167, 0.28)",
+                outline: "3px solid color-mix(in srgb, var(--app-accent-deep) 42%, transparent)",
                 outlineOffset: 2,
               },
               "&:checked + .switch-track": {
@@ -176,7 +176,7 @@ export function SwitchField({
             sx={{
               width: 48,
               height: 28,
-              borderRadius: 999,
+              borderRadius: 0,
               border: "1px solid var(--app-form-border)",
               backgroundColor: "var(--app-form-border-strong)",
               p: "2px",
@@ -209,7 +209,7 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
   return (
     <Box
       sx={{
-        borderRadius: 4,
+        borderRadius: 0,
         border: "1px dashed",
         borderColor: "divider",
         p: { xs: 3, md: 4 },
@@ -248,7 +248,7 @@ export function ModuleLinkCard({
             label={badge}
             size="small"
             variant="outlined"
-            sx={{ alignSelf: "flex-start", color: "primary.main", borderColor: "rgba(11, 87, 208, 0.28)", backgroundColor: "rgba(11, 87, 208, 0.06)" }}
+            sx={{ alignSelf: "flex-start", color: "primary.main", borderColor: "color-mix(in srgb, var(--app-accent) 42%, transparent)", backgroundColor: "color-mix(in srgb, var(--app-accent) 14%, transparent)" }}
           />
           <Typography variant="h5">{title}</Typography>
           <Typography color="text.secondary">{description}</Typography>
@@ -266,11 +266,13 @@ export function SelectField({
   label,
   defaultValue,
   options,
+  required = false,
 }: {
   name: string;
   label: string;
   defaultValue?: string | number;
   options: Array<{ value: string | number; label: string }>;
+  required?: boolean;
 }) {
   return (
     <TextField
@@ -278,6 +280,7 @@ export function SelectField({
       name={name}
       label={label}
       defaultValue={defaultValue ?? ""}
+      required={required}
       fullWidth
     >
       {options.map((option) => (

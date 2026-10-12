@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
+import { PublicPersonPicker } from "@/components/public/public-person-picker";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
 import { cancelOwnPendingRequestAction } from "@/features/public/actions";
 import { getAsignacionesPageState } from "@/features/public/queries";
@@ -76,11 +77,28 @@ export default async function AsignacionesPage({ searchParams }: Props) {
             </Box>
 
             {!state.currentPerson ? (
-              <Alert severity="info">
-                Si quieres ver tus solicitudes y asignaciones personales,
-                primero selecciona tu nombre en{" "}
-                <Link href="/solicitar">/solicitar</Link>.
-              </Alert>
+              <Card
+                elevation={0}
+                sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}
+              >
+                <CardContent>
+                  <Stack spacing={1.5}>
+                    <Typography variant="h5">Accede a tus turnos</Typography>
+                    <Typography color="text.secondary">
+                      Selecciona tu nombre para consultar tus asignaciones y solicitudes.
+                    </Typography>
+                    {state.people.length > 0 ? (
+                      <PublicPersonPicker
+                        people={state.people}
+                        selectedPersonId=""
+                        returnTo="/asignaciones"
+                      />
+                    ) : (
+                      <Alert severity="info">No hay participantes activos disponibles.</Alert>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
             ) : null}
             {state.notice ? <Alert severity="success">{state.notice}</Alert> : null}
             {state.requestError ? <Alert severity="error">{state.requestError}</Alert> : null}
@@ -89,7 +107,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 0,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -112,7 +130,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                               key={assignment.id}
                               elevation={0}
                               sx={{
-                                borderRadius: 4,
+                                borderRadius: 0,
                                 border: "1px solid",
                                 borderColor: "divider",
                                 backgroundColor: "background.default",
@@ -156,7 +174,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 0,
                   border: "1px solid",
                   borderColor: "divider",
                 }}
@@ -186,7 +204,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                                 key={request.id}
                                 elevation={0}
                                 sx={{
-                                  borderRadius: 4,
+                                  borderRadius: 0,
                                   border: "1px solid",
                                   borderColor: "divider",
                                   backgroundColor: "background.default",
@@ -278,7 +296,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 0,
                   border: "1px solid",
                   borderColor: "divider",
                 }}

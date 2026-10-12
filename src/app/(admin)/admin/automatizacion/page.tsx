@@ -180,10 +180,6 @@ export default async function AdminAutomationPage() {
             >
               <Stack spacing={1}>
                 <Typography variant="body2">
-                  Maximo solicitudes por semana:{" "}
-                  {data.config?.maxRequestsPerWeek ?? 4}
-                </Typography>
-                <Typography variant="body2">
                   Maximo confirmados por semana:{" "}
                   {data.config?.maxConfirmedPerWeek ?? 2}
                 </Typography>
@@ -234,7 +230,7 @@ export default async function AdminAutomationPage() {
                       key={shift.id}
                       elevation={0}
                       sx={{
-                        borderRadius: 4,
+                        borderRadius: 0,
                         border: "1px solid",
                         borderColor: "divider",
                         backgroundColor: "background.default",
@@ -293,7 +289,7 @@ export default async function AdminAutomationPage() {
                     <Box
                       key={gap.templateId}
                       sx={{
-                        borderRadius: 4,
+                        borderRadius: 0,
                         border: "1px solid",
                         borderColor: "divider",
                         p: 2,

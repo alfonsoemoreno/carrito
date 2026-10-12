@@ -38,7 +38,7 @@ export default async function AdminStatsPage({ searchParams }: Props) {
         >
           <Card
             sx={{
-              borderRadius: 5,
+              borderRadius: 0,
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -222,7 +222,7 @@ export default async function AdminStatsPage({ searchParams }: Props) {
                     key={row.id}
                     elevation={0}
                     sx={{
-                      borderRadius: 4,
+                      borderRadius: 0,
                       border: "1px solid",
                       borderColor: "divider",
                       backgroundColor: "background.default",

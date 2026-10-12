@@ -69,7 +69,7 @@ export default async function AdminAvailabilityPage() {
         ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
             {records.map((record) => (
-              <Card key={record.id} sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+              <Card key={record.id} sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                     <Typography variant="h5">

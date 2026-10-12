@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="72" fill="#f5ed00" />
+  <path d="M72 88h210l-20 24H72zm0 38h166l-20 24H72z" fill="#111" />
+  <g fill="#111" font-family="Impact, 'Arial Narrow', sans-serif" font-style="italic" font-weight="900" text-anchor="middle">
+    <text x="256" y="290" font-size="174" letter-spacing="-14">TDF</text>
+    <text x="256" y="366" font-size="48" letter-spacing="8">AMATEUR</text>
+  </g>
+  <path d="M72 402h368v42H72z" fill="#111" />
+  <text x="256" y="433" fill="#f5ed00" font-family="Arial, sans-serif" font-size="25" font-weight="800" letter-spacing="8" text-anchor="middle">VALDIVIA</text>
+</svg>

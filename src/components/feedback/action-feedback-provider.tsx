@@ -149,6 +149,7 @@ export function ActionFeedbackProvider({ children }: { children: ReactNode }) {
                 }}
               >
                 <Box
+                  className="action-feedback-ring"
                   sx={{
                     position: "absolute",
                     inset: 0,
@@ -167,6 +168,7 @@ export function ActionFeedbackProvider({ children }: { children: ReactNode }) {
                   }}
                 />
                 <Box
+                  className="action-feedback-ring"
                   sx={{
                     position: "absolute",
                     inset: 0,

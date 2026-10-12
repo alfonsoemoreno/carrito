@@ -41,6 +41,16 @@ export function formatDate(value: Date) {
   }).format(value);
 }
 
+export function formatLongDate(value: Date) {
+  return new Intl.DateTimeFormat("es-CL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(value);
+}
+
 export function formatTime(value: Date) {
   return new Intl.DateTimeFormat("es-CL", {
     hour: "2-digit",

@@ -15,23 +15,27 @@ export default async function SolicitarPage({ searchParams }: Props) {
   return (
     <PublicSiteShell>
       <Box component="main" sx={{ py: { xs: 5, md: 6 } }}>
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           <Stack spacing={{ xs: 3.5, md: 4.5 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, maxWidth: 700 }}>
               <Typography variant="h3">Solicitar turnos</Typography>
               <Typography variant="body1" color="text.secondary">
-                Selecciona tu usuario, elige un lugar y pide tus turnos en pocos pasos.
+                {state.currentPerson
+                  ? "Elige un lugar y marca los horarios que te sirven."
+                  : "Selecciona tu nombre y sigue los pasos para pedir tus turnos."}
               </Typography>
             </Box>
 
             {state.notice && state.currentPerson ? <Alert severity="success">{state.notice}</Alert> : null}
             {state.authError ? <Alert severity="error">{state.authError}</Alert> : null}
-            {state.config.maintenanceModeEnabled ? (
+            {state.eventEnded ? (
+              <Alert severity="info">El período del evento ya finalizó. Puedes consultar aquí tus turnos y solicitudes.</Alert>
+            ) : state.config.maintenanceModeEnabled ? (
               <Alert severity="warning">El sistema está en modo mantenimiento. Puedes consultar los turnos, pero no registrar nuevas solicitudes.</Alert>
             ) : null}
 
             {!state.currentPerson ? (
-              <Card elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
+              <Card elevation={0} sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
                   <Stack spacing={{ xs: 3.25, md: 4 }}>
                     <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
@@ -49,11 +53,10 @@ export default async function SolicitarPage({ searchParams }: Props) {
               <ShiftRequestFlow
                 zones={state.zones}
                 shifts={state.shiftBoard}
-                partners={state.partnerOptions}
                 initialZoneId={state.filters.zoneId}
                 from={state.filters.from}
                 to={state.filters.to}
-                maintenanceModeEnabled={state.config.maintenanceModeEnabled}
+                maintenanceModeEnabled={state.config.maintenanceModeEnabled || state.eventEnded}
                 requestError={state.requestError}
               />
             )}

@@ -65,7 +65,7 @@ export default async function AdminShiftAssignmentPage({
 
           <Card
             sx={{
-              borderRadius: 5,
+              borderRadius: 0,
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -132,7 +132,7 @@ export default async function AdminShiftAssignmentPage({
                       key={request.id}
                       elevation={0}
                       sx={{
-                        borderRadius: 4,
+                        borderRadius: 0,
                         border: "1px solid",
                         borderColor: "divider",
                         backgroundColor: "background.default",
@@ -317,7 +317,7 @@ export default async function AdminShiftAssignmentPage({
                         <Box
                           key={assignment.id}
                           sx={{
-                            borderRadius: 4,
+                            borderRadius: 0,
                             border: "1px solid",
                             borderColor: "divider",
                             p: 2,

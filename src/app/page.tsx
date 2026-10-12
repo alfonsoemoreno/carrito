@@ -1,88 +1,90 @@
-import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
+import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Container,
+  Stack,
   Typography,
 } from "@mui/material";
-import Link from "next/link";
+import { RouteButton } from "@/components/navigation/route-button";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
+import { getCurrentPublicPerson } from "@/features/public/queries";
+import { EVENT } from "@/lib/event";
 
-const entryPoint = {
-  href: "/solicitar",
-  icon: <EventAvailableRoundedIcon />,
-  title: "Solicitar turnos",
-  body: "Revise los turnos disponibles y envíe una solicitud en pocos pasos.",
-} as const;
+export default async function HomePage() {
+  const currentPerson = await getCurrentPublicPerson();
 
-export default function HomePage() {
   return (
     <PublicSiteShell>
-      <Box component="main" sx={{ py: { xs: 6, md: 9 } }}>
-        <Container maxWidth="sm">
-          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>
-            <Box sx={{ maxWidth: 580 }}>
-              <Typography variant="overline" color="primary.main">
-                Predicación pública
+      <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
+        <Container maxWidth="md">
+          <Stack spacing={{ xs: 3, md: 4 }}>
+            <Box sx={{ maxWidth: 720 }}>
+              <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800 }}>
+                Coordinación del evento
               </Typography>
-              <Typography variant="h2" sx={{ mt: 0.75 }}>
-                Organiza tus turnos con tranquilidad.
+              <Typography variant="h2" sx={{ mt: 0.5, fontSize: { xs: "2.1rem", md: "3rem" }, lineHeight: 1.12 }}>
+                {EVENT.name}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
-                Consulta disponibilidad, solicita un turno y revisa tus
-                asignaciones desde un mismo lugar.
+              <Typography variant="h6" color="text.secondary" sx={{ mt: 1 }}>
+                {EVENT.location} · {EVENT.dateLabel}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 2, maxWidth: 620 }}>
+                Solicita tus turnos o revisa las asignaciones del evento en un solo lugar.
               </Typography>
             </Box>
-            <Card
-              elevation={0}
+
+            <Box
               sx={{
-                border: "1px solid var(--app-border)",
-                background:
-                  "linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 94%, var(--app-accent) 6%), var(--app-surface-muted))",
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+                gap: 2,
               }}
             >
-              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      display: "grid",
-                      placeItems: "center",
-                      borderRadius: 3,
-                      color: "primary.main",
-                      backgroundColor: "rgba(11, 87, 208, 0.12)",
-                    }}
-                  >
-                    {entryPoint.icon}
-                  </Box>
-                  <Typography variant="h5">{entryPoint.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {entryPoint.body}
+              <Card elevation={0} sx={{ height: "100%", border: "1px solid var(--app-border)", borderRadius: 0 }}>
+                <CardContent sx={{ height: "100%", p: { xs: 2.5, md: 3 }, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1.5 }}>
+                  <EventAvailableRoundedIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Typography variant="h5">Solicitar turnos</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                    Elige tu nombre, selecciona un lugar y marca los horarios que te sirven.
                   </Typography>
-                  <Link href={entryPoint.href}>
-                    <Button variant="contained" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
-                      Ver turnos disponibles
-                    </Button>
-                  </Link>
-                  <Link href="/admin">
-                    <Button variant="outlined" fullWidth>
-                      Acceso administrativo
-                    </Button>
-                  </Link>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
+                  <RouteButton href="/solicitar" variant="contained" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
+                    {currentPerson ? "Elegir turnos" : "Comenzar"}
+                  </RouteButton>
+                </CardContent>
+              </Card>
+
+              <Card elevation={0} sx={{ height: "100%", border: "1px solid var(--app-border)", borderRadius: 0 }}>
+                <CardContent sx={{ height: "100%", p: { xs: 2.5, md: 3 }, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1.5 }}>
+                  <ManageSearchRoundedIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Typography variant="h5">Mis turnos</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                    {currentPerson
+                      ? `Consulta las solicitudes y asignaciones de ${currentPerson.firstName}.`
+                      : "Consulta tus solicitudes y asignaciones confirmadas."}
+                  </Typography>
+                  <RouteButton href="/asignaciones" variant="outlined" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
+                    Ver mis turnos
+                  </RouteButton>
+                </CardContent>
+              </Card>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, color: "text.secondary" }}>
+              <CalendarMonthRoundedIcon fontSize="small" color="action" />
+              <Typography variant="body2">Actividad programada del 26 de octubre al 1 de noviembre.</Typography>
+            </Box>
+
+            <Box sx={{ pt: 1 }}>
+              <RouteButton href="/admin" color="inherit" size="small">
+                Acceso para coordinadores
+              </RouteButton>
+            </Box>
+          </Stack>
         </Container>
       </Box>
     </PublicSiteShell>

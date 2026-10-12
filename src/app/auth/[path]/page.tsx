@@ -2,6 +2,7 @@ import { AuthView } from "@neondatabase/auth/react";
 import { Alert, Box, Button, Card, CardContent, Container, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
+import { EmailVerificationFlow } from "@/components/auth/email-verification-flow";
 
 export default async function AuthPage({
   params,
@@ -32,9 +33,23 @@ export default async function AuthPage({
                     <Button variant="outlined">Ir a solicitar turnos</Button>
                   </Link>
                 </Box>
-                <Box className="auth-panel">
-                  <AuthView path={path} />
-                </Box>
+                {path === "verify-email" ? (
+                  <EmailVerificationFlow />
+                ) : (
+                  <>
+                    <Box className="auth-panel">
+                      <AuthView path={path} />
+                    </Box>
+                    {path === "sign-in" ? (
+                      <Box sx={{ textAlign: "center" }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
+                          ¿Tu cuenta indica que el correo no está verificado?
+                        </Typography>
+                        <Link href="/auth/verify-email">Verificar correo con un código</Link>
+                      </Box>
+                    ) : null}
+                  </>
+                )}
               </Stack>
             </CardContent>
           </Card>

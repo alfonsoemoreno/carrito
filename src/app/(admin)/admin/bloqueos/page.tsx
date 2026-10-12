@@ -127,7 +127,7 @@ export default async function AdminBlocksPage() {
               <Card
                 key={block.id}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 0,
                   border: "1px solid",
                   borderColor: "divider",
                 }}

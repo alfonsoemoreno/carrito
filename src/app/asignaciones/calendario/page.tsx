@@ -170,7 +170,7 @@ export default async function AsignacionesCalendarioPage({
                 <Card
                   elevation={0}
                   sx={{
-                    borderRadius: 5,
+                    borderRadius: 0,
                     border: "1px solid",
                     borderColor: "divider",
                     background:
@@ -229,7 +229,7 @@ export default async function AsignacionesCalendarioPage({
                                 key={assignment.id}
                                 sx={{
                                   p: 1.5,
-                                  borderRadius: 3,
+                                  borderRadius: 0,
                                   backgroundColor: style.bg,
                                   border: `1px solid ${style.border}`,
                                   display: "flex",
@@ -269,7 +269,7 @@ export default async function AsignacionesCalendarioPage({
                 <Card
                   elevation={0}
                   sx={{
-                    borderRadius: 5,
+                    borderRadius: 0,
                     border: "1px solid",
                     borderColor: "divider",
                     background:
@@ -338,7 +338,7 @@ export default async function AsignacionesCalendarioPage({
                         elevation={0}
                         sx={{
                           minHeight: 220,
-                          borderRadius: 5,
+                          borderRadius: 0,
                           border: "1px solid",
                           borderColor:
                             dayKey === selectedDayKey
@@ -412,7 +412,7 @@ export default async function AsignacionesCalendarioPage({
                                       key={assignment.id}
                                       sx={{
                                         p: 1.25,
-                                        borderRadius: 3,
+                                        borderRadius: 0,
                                         backgroundColor: style.bg,
                                         border: `1px solid ${style.border}`,
                                         display: "flex",

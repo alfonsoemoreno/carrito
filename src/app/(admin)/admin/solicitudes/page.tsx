@@ -82,7 +82,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
 
           <Card
             sx={{
-              borderRadius: 5,
+              borderRadius: 0,
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -147,7 +147,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                 <Card
                   key={shift.id}
                   sx={{
-                    borderRadius: 5,
+                    borderRadius: 0,
                     border: "1px solid",
                     borderColor: "divider",
                   }}

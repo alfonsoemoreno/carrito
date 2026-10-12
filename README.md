@@ -49,7 +49,7 @@ Sistema de gestion de turnos para zonas de publicaciones. El proyecto combina un
 1. Instala dependencias:
 
 ```bash
-npm install
+npm ci
 ```
 
 2. Crea tu archivo de entorno:
@@ -64,7 +64,7 @@ cp .env.example .env
 - `DIRECT_URL`: conexion directa para operaciones administrativas de Prisma.
 - `NEON_AUTH_BASE_URL`: base URL del stack de Neon Auth para `sign-in` y sesion.
 - `NEON_AUTH_COOKIE_SECRET`: secreto usado para firmar la cookie de sesion.
-- `NEXT_PUBLIC_APP_NAME`: nombre visible de la aplicacion.
+- `NEXT_PUBLIC_SITE_URL`: URL pública de la aplicación; en desarrollo usa `http://localhost:3000`.
 
 4. Genera Prisma Client:
 
@@ -78,7 +78,7 @@ npm run db:generate
 npm run db:push
 ```
 
-Tambien puedes aplicar la migracion SQL inicial ubicada en `prisma/migrations/202606130001_init/migration.sql`.
+Para desarrollo local puedes aplicar las migraciones con `npm run db:migrate:dev`.
 
 6. Carga datos demo:
 
@@ -103,6 +103,7 @@ npm run dev
 - `npm run db:generate`: regenera Prisma Client.
 - `npm run db:push`: sincroniza el esquema con la base.
 - `npm run db:migrate:dev`: crea/aplica migraciones en desarrollo.
+- `npm run db:migrate:deploy`: aplica migraciones existentes en un entorno remoto.
 - `npm run db:seed`: carga datos demo.
 - `npm run db:studio`: abre Prisma Studio.
 
@@ -153,14 +154,15 @@ npm run test
 
 ## Despliegue
 
-- Destino previsto: Vercel.
-- Base de datos: Neon PostgreSQL.
-- Autenticacion administrativa: Neon Auth.
-- Antes de desplegar, valida:
-  - variables de entorno correctas en el entorno remoto.
-  - `npm run build` sin errores.
-  - esquema Prisma aplicado a la base objetivo.
-  - existencia de al menos una persona administrativa activa vinculable.
+- Sube este repositorio a GitHub e impórtalo como un proyecto nuevo en Vercel.
+- Desde la integración Neon del Marketplace de Vercel, crea y conecta una base nueva. Usa la conexión pooled como `DATABASE_URL` y la conexión directa/unpooled como `DIRECT_URL`.
+- Habilita Neon Auth para la rama de producción. Configura `NEON_AUTH_BASE_URL` con la URL que entrega Neon y crea `NEON_AUTH_COOKIE_SECRET` con `openssl rand -base64 32`.
+- Añade `NEXT_PUBLIC_SITE_URL` con el dominio `https://...vercel.app` que Vercel asigna al proyecto. Si cambias el dominio después, actualiza la variable y vuelve a desplegar.
+- Define estas variables para **Production** en Vercel; agrega también valores separados para Preview si vas a probar ahí.
+- Antes del primer uso, aplica las migraciones contra la base nueva con `npm run db:migrate:deploy` usando las variables de producción.
+- No ejecutes `npm run db:seed` en producción: ese script borra las tablas operativas y carga personas y administradores de demostración.
+- Abre `/auth/sign-up` para crear tu usuario administrativo, inicia sesión y visita `/admin/cuenta` para reclamarlo como superadministrador inicial.
+- En Neon Auth, verifica que el dominio de producción figure entre los orígenes permitidos. Después carga participantes, lugares y horarios desde el backoffice.
 
 ## Riesgos conocidos
 

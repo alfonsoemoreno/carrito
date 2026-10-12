@@ -14,7 +14,7 @@ export default async function AdminAccountPage() {
         title="Sesion y enlace administrativo"
         description="Verifica qué usuario de Neon Auth está autenticado y si ya quedó vinculado con `admin_users`."
       >
-        <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+        <Card sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}>
           <CardContent>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography variant="h5">Sesion actual de Neon Auth</Typography>
@@ -36,7 +36,7 @@ export default async function AdminAccountPage() {
           </CardContent>
         </Card>
 
-        <Card sx={{ borderRadius: 5, border: "1px solid", borderColor: "divider" }}>
+        <Card sx={{ borderRadius: 0, border: "1px solid", borderColor: "divider" }}>
           <CardContent>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography variant="h5">Estado del enlace</Typography>

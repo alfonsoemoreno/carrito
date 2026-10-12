@@ -1,15 +1,15 @@
 import type { MetadataRoute } from "next";
+import { EVENT } from "@/lib/event";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Carrito",
-    short_name: "Carrito",
-    description:
-      "Sistema de gestion de turnos para lugares de predicacion publica.",
+    name: `${EVENT.name} – ${EVENT.location}`,
+    short_name: EVENT.name,
+    description: `${EVENT.name} en ${EVENT.location}, del 26 de octubre al 1 de noviembre de 2026.`,
     start_url: "/",
     display: "standalone",
-    background_color: "#f4efe6",
-    theme_color: "#146356",
+    background_color: "#ffffff",
+    theme_color: "#f5ed00",
     lang: "es-CL",
     icons: [
       {
