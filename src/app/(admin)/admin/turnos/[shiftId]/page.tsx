@@ -7,19 +7,18 @@ import {
   CardContent,
   Chip,
   Container,
-  MenuItem,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { AssignmentConfirmationForm } from "@/components/admin/assignment-confirmation-form";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
   cancelShiftAssignmentAction,
-  confirmShiftAssignmentAction,
   rejectShiftRequestAction,
 } from "@/features/admin/assignment/actions";
 import { getShiftAssignmentPageState } from "@/features/admin/assignment/queries";
@@ -199,57 +198,12 @@ export default async function AdminShiftAssignmentPage({
                   title="Confirmar o reemplazar asignacion"
                   description="Si hay advertencias de reglas, debes ingresar motivo de excepcion administrativa."
                 >
-                  <form action={confirmShiftAssignmentAction}>
-                    <Stack spacing={2}>
-                      <input
-                        type="hidden"
-                        name="shiftId"
-                        value={state.shift.id}
-                      />
-                      <TextField
-                        select
-                        name="person1Id"
-                        label="Persona 1"
-                        defaultValue={state.defaults.person1Id}
-                        fullWidth
-                      >
-                        {state.activePeople.map((person) => (
-                          <MenuItem key={person.id} value={person.id}>
-                            {person.label}
-                            {person.requested ? " · con solicitud" : ""}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                      <TextField
-                        select
-                        name="person2Id"
-                        label="Persona 2"
-                        defaultValue={state.defaults.person2Id}
-                        fullWidth
-                      >
-                        {state.activePeople.map((person) => (
-                          <MenuItem key={person.id} value={person.id}>
-                            {person.label}
-                            {person.requested ? " · con solicitud" : ""}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                      <TextField
-                        name="exceptionReason"
-                        label="Motivo de excepcion o reemplazo"
-                        placeholder="Obligatorio si se incumple una regla o si decides reemplazar manualmente"
-                        multiline
-                        minRows={3}
-                        fullWidth
-                      />
-                      <ActionSubmitButton
-                        variant="contained"
-                        loadingMessage="Estamos confirmando la asignación."
-                      >
-                        Confirmar pareja para este turno
-                      </ActionSubmitButton>
-                    </Stack>
-                  </form>
+                  <AssignmentConfirmationForm
+                    shift={state.shift}
+                    people={state.activePeople}
+                    assignments={state.sameDayAssignments}
+                    defaults={state.defaults}
+                  />
                 </FormCard>
               </Box>
 

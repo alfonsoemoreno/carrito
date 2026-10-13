@@ -214,7 +214,7 @@ export async function getShiftAssignmentPageState(
     return null;
   }
 
-  const [activePeople, config] = await Promise.all([
+  const [activePeople, config, sameDayAssignments] = await Promise.all([
     prisma.person.findMany({
       where: {
         status: "ACTIVE",
@@ -234,6 +234,26 @@ export async function getShiftAssignmentPageState(
         maxConfirmedPerMonth: true,
         allowMultiplePerDay: true,
         allowOverlapping: true,
+      },
+    }),
+    prisma.assignment.findMany({
+      where: {
+        status: AssignmentStatus.CONFIRMED,
+        shiftId: { not: shift.id },
+        shift: { shiftDate: shift.shiftDate },
+      },
+      orderBy: [{ shift: { startTime: "asc" } }],
+      select: {
+        person1Id: true,
+        person2Id: true,
+        shift: {
+          select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            zone: { select: { name: true } },
+          },
+        },
       },
     }),
   ]);
@@ -259,6 +279,8 @@ export async function getShiftAssignmentPageState(
       zoneName: shift.zone.name,
       dateLabel: formatDate(shift.shiftDate),
       timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
+      startTime: formatTime(shift.startTime),
+      endTime: formatTime(shift.endTime),
       status: shift.status,
       blocks: shift.blocks.map((block) => block.reason),
     },
@@ -311,6 +333,14 @@ export async function getShiftAssignmentPageState(
       id: person.id,
       label: `${person.firstName} ${person.lastName}`,
       requested: selectedPendingIds.includes(person.id),
+    })),
+    sameDayAssignments: sameDayAssignments.map((assignment) => ({
+      shiftId: assignment.shift.id,
+      person1Id: assignment.person1Id,
+      person2Id: assignment.person2Id,
+      startTime: formatTime(assignment.shift.startTime),
+      endTime: formatTime(assignment.shift.endTime),
+      zoneName: assignment.shift.zone.name,
     })),
     defaults: {
       person1Id: defaultPendingPersonIds[0] ?? "",
