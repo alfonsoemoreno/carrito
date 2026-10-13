@@ -26,7 +26,6 @@ const DEFAULT_CONFIG = {
   pinLockMinutes: 15,
   maxConfirmedPerWeek: 2,
   maxConfirmedPerMonth: 6,
-  allowConsecutiveDays: false,
   allowMultiplePerDay: true,
   allowOverlapping: false,
   allowSameSexPairing: true,

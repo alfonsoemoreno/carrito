@@ -188,10 +188,6 @@ export default async function AdminAutomationPage() {
                   {data.config?.maxConfirmedPerMonth ?? 6}
                 </Typography>
                 <Typography variant="body2">
-                  Permite dias consecutivos:{" "}
-                  {data.config?.allowConsecutiveDays ? "Si" : "No"}
-                </Typography>
-                <Typography variant="body2">
                   Permite multiples por dia:{" "}
                   {data.config?.allowMultiplePerDay ? "Si" : "No"}
                 </Typography>

@@ -22,7 +22,7 @@ Se implemento el flujo publico inicial sobre datos reales de Neon:
   - no solicitar turnos bloqueados o no publicos
   - respetar indisponibilidad personal
   - respetar maximo semanal de solicitudes
-  - respetar reglas configuradas de mismo dia, dias consecutivos y superposicion
+  - respetar reglas configuradas de mismo dia y superposicion
 - Sugerencia opcional de pareja compatible para solicitudes multiples.
 - Auditoria base para autenticacion publica, alta y cancelacion de solicitudes.
 

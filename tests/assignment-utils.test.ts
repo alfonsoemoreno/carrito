@@ -16,7 +16,6 @@ test("buildAssignmentWarnings detecta reglas operativas por persona", () => {
   const warnings = buildAssignmentWarnings({
     config: {
       allowSameSexPairing: false,
-      allowConsecutiveDays: false,
       allowMultiplePerDay: false,
       allowOverlapping: false,
       maxConfirmedPerWeek: 1,
@@ -58,7 +57,6 @@ test("buildAssignmentWarnings detecta reglas operativas por persona", () => {
     "Ana ya alcanzo el maximo semanal de turnos confirmados.",
     "Ana ya alcanzo el maximo mensual de turnos confirmados.",
     "Ana ya tiene otro turno confirmado el mismo dia.",
-    "Ana quedaria con dias consecutivos.",
     "Ana tiene superposicion horaria con otro turno confirmado.",
   ]);
 });
@@ -67,7 +65,6 @@ test("buildAssignmentWarnings exige dos personas distintas", () => {
   const warnings = buildAssignmentWarnings({
     config: {
       allowSameSexPairing: true,
-      allowConsecutiveDays: true,
       allowMultiplePerDay: true,
       allowOverlapping: true,
       maxConfirmedPerWeek: 10,
@@ -102,7 +99,6 @@ test("buildAssignmentWarnings permite multiples turnos el mismo dia cuando la re
   const warnings = buildAssignmentWarnings({
     config: {
       allowSameSexPairing: true,
-      allowConsecutiveDays: true,
       allowMultiplePerDay: true,
       allowOverlapping: false,
       maxConfirmedPerWeek: 10,

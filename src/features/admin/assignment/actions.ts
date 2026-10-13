@@ -131,7 +131,6 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
         orderBy: { createdAt: "asc" },
         select: {
           allowSameSexPairing: true,
-          allowConsecutiveDays: true,
           allowMultiplePerDay: true,
           allowOverlapping: true,
           maxConfirmedPerWeek: true,
@@ -288,7 +287,6 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
   const warnings = buildAssignmentWarnings({
     config: {
       allowSameSexPairing: config?.allowSameSexPairing ?? true,
-      allowConsecutiveDays: config?.allowConsecutiveDays ?? false,
       allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
       allowOverlapping: config?.allowOverlapping ?? false,
       maxConfirmedPerWeek: config?.maxConfirmedPerWeek ?? 2,

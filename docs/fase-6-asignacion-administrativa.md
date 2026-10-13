@@ -25,7 +25,6 @@ Se implemento la primera capa operativa del despacho administrativo:
   - persona inactiva
   - indisponibilidad personal
   - maximos semanales y mensuales de confirmaciones
-  - dias consecutivos
   - multiples turnos en el mismo dia
   - superposiciones horarias
   - turnos bloqueados o cerrados

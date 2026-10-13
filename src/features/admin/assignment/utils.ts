@@ -1,7 +1,6 @@
 import { RelationshipType } from "@prisma/client";
 import {
   getWeekKey,
-  isConsecutiveUtcDate,
   isSameUtcDate,
   overlapsTimeRange,
   toDateOnlyString,
@@ -17,7 +16,6 @@ type LightweightShift = {
 type AssignmentRuleContext = {
   config: {
     allowSameSexPairing: boolean;
-    allowConsecutiveDays: boolean;
     allowMultiplePerDay: boolean;
     allowOverlapping: boolean;
     maxConfirmedPerWeek: number;
@@ -111,13 +109,6 @@ function buildPersonWarnings(
   for (const assignment of assignments) {
     if (!config.allowMultiplePerDay && isSameUtcDate(assignment.shiftDate, shift.shiftDate)) {
       warnings.push(`${person.label} ya tiene otro turno confirmado el mismo dia.`);
-      break;
-    }
-  }
-
-  for (const assignment of assignments) {
-    if (!config.allowConsecutiveDays && isConsecutiveUtcDate(assignment.shiftDate, shift.shiftDate)) {
-      warnings.push(`${person.label} quedaria con dias consecutivos.`);
       break;
     }
   }

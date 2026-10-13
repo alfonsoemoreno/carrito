@@ -12,7 +12,6 @@ export async function getAutomationDashboardData() {
       maintenanceModeEnabled: true,
       maxConfirmedPerWeek: true,
       maxConfirmedPerMonth: true,
-      allowConsecutiveDays: true,
       allowMultiplePerDay: true,
       allowOverlapping: true,
       allowSameSexPairing: true,

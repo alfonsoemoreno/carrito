@@ -397,7 +397,6 @@ El sistema debe advertir o bloquear segun configuracion:
 - maximo de solicitudes por semana
 - maximo de turnos confirmados por semana
 - maximo de turnos confirmados por mes
-- dias consecutivos
 - mas de un turno por dia
 - superposiciones horarias
 - indisponibilidad personal

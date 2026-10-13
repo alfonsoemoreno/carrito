@@ -21,7 +21,6 @@ import {
   listPublicZonesForFlow,
 } from "@/features/public/queries";
 import {
-  isConsecutiveUtcDate,
   isSameUtcDate,
   overlapsTimeRange,
   toDateOnlyString,
@@ -147,14 +146,12 @@ export async function submitShiftRequestsAction(formData: FormData) {
   const config = await prisma.systemConfig.findFirst({
     orderBy: { createdAt: "asc" },
     select: {
-      allowConsecutiveDays: true,
       allowMultiplePerDay: true,
       allowOverlapping: true,
     },
   });
 
   const policy = {
-    allowConsecutiveDays: config?.allowConsecutiveDays ?? false,
     allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
     allowOverlapping: config?.allowOverlapping ?? false,
   };
@@ -357,15 +354,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
       }
 
       if (
-        !policy.allowConsecutiveDays &&
-        isConsecutiveUtcDate(request.shift.shiftDate, shift.shiftDate)
-      ) {
-        redirectWithRequestError(
-          "La configuracion actual bloquea dias consecutivos.",
-        );
-      }
-
-      if (
         !policy.allowOverlapping &&
         isSameUtcDate(request.shift.shiftDate, shift.shiftDate) &&
         overlapsTimeRange(
@@ -392,15 +380,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
       }
 
       if (
-        !policy.allowConsecutiveDays &&
-        isConsecutiveUtcDate(assignment.shift.shiftDate, shift.shiftDate)
-      ) {
-        redirectWithRequestError(
-          "La configuracion actual bloquea dias consecutivos.",
-        );
-      }
-
-      if (
         !policy.allowOverlapping &&
         isSameUtcDate(assignment.shift.shiftDate, shift.shiftDate) &&
         overlapsTimeRange(
@@ -418,15 +397,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
     for (const otherDay of selectedDates.values()) {
       for (const other of otherDay) {
-        if (
-          !policy.allowConsecutiveDays &&
-          isConsecutiveUtcDate(other.shiftDate, shift.shiftDate)
-        ) {
-          redirectWithRequestError(
-            "La seleccion incluye dias consecutivos no permitidos.",
-          );
-        }
-
         if (
           !policy.allowOverlapping &&
           isSameUtcDate(other.shiftDate, shift.shiftDate) &&

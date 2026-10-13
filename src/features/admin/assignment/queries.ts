@@ -256,7 +256,6 @@ export async function getShiftAssignmentPageState(
         allowSameSexPairing: true,
         maxConfirmedPerWeek: true,
         maxConfirmedPerMonth: true,
-        allowConsecutiveDays: true,
         allowMultiplePerDay: true,
         allowOverlapping: true,
       },
