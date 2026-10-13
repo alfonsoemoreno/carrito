@@ -9,7 +9,8 @@ import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PersonEditor } from "@/components/admin/person-editor";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
-import { Box, Card, CardContent, Chip, Container, Divider, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, Container, Divider, TextField, Typography } from "@mui/material";
+import Link from "next/link";
 
 export default async function AdminPeoplePage() {
   await requireCurrentAdminPageAccess();
@@ -93,6 +94,13 @@ export default async function AdminPeoplePage() {
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                       <PersonEditor person={{ id: person.id, firstName: person.firstName, lastName: person.lastName,
                         gender: person.gender, phone: person.phone, email: person.email, notes: person.notes }} />
+                      <Button
+                        component={Link}
+                        href={`/admin/personas/${person.id}/turnos`}
+                        variant="outlined"
+                      >
+                        Ver turnos asignados
+                      </Button>
                       <form action={updatePersonStatusAction}>
                         <input type="hidden" name="id" value={person.id} />
                         <input
