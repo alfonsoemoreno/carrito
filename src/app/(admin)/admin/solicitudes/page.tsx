@@ -197,16 +197,27 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                         </Typography>
                       ) : null}
 
-                      {shift.pairHints.length > 0 ? (
-                        <Stack spacing={0.5}>
-                          {shift.pairHints.map((hint) => (
-                            <Typography
-                              key={hint.id}
-                              variant="body2"
-                              color="text.secondary"
+                      {shift.requesters.length > 0 ? (
+                        <Stack spacing={1}>
+                          <Typography variant="subtitle1">
+                            Personas solicitantes
+                          </Typography>
+                          {shift.requesters.map((requester) => (
+                            <Box
+                              key={requester.id}
+                              sx={{
+                                borderLeft: "3px solid",
+                                borderColor: "primary.main",
+                                pl: 1.5,
+                              }}
                             >
-                              {hint.label}
-                            </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {requester.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {requester.comments || "Sin comentario"}
+                              </Typography>
+                            </Box>
                           ))}
                         </Stack>
                       ) : null}

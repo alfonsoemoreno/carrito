@@ -8,17 +8,6 @@ import {
   readFirstSearchParam,
 } from "@/features/public/utils";
 
-function buildRequestPairHint(request: {
-  person: { firstName: string; lastName: string };
-  suggestedPartner: { firstName: string; lastName: string } | null;
-}) {
-  if (!request.suggestedPartner) {
-    return "Sin pareja sugerida";
-  }
-
-  return `${request.person.firstName} ${request.person.lastName} sugiere a ${request.suggestedPartner.firstName} ${request.suggestedPartner.lastName}`;
-}
-
 export async function getAdminAssignmentOverview() {
   const [pendingShifts, pendingRequests, confirmedAssignments] =
     await Promise.all([
@@ -99,12 +88,6 @@ export async function getAdminRequestsPageState(
                 lastName: true,
               },
             },
-            suggestedPartner: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
-            },
           },
         },
         assignments: {
@@ -154,14 +137,14 @@ export async function getAdminRequestsPageState(
         timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
         pendingCount: pending.length,
         resolvedCount: resolved.length,
-        pending,
+        requesters: pending.map((request) => ({
+          id: request.id,
+          name: `${request.person.firstName} ${request.person.lastName}`,
+          comments: request.comments,
+        })),
         currentAssignmentLabel: shift.assignments[0]
           ? `${shift.assignments[0].person1.firstName} ${shift.assignments[0].person1.lastName} + ${shift.assignments[0].person2.firstName} ${shift.assignments[0].person2.lastName}`
           : null,
-        pairHints: pending.map((request) => ({
-          id: request.id,
-          label: buildRequestPairHint(request),
-        })),
       };
     }),
   };
@@ -192,13 +175,6 @@ export async function getShiftAssignmentPageState(
               lastName: true,
               gender: true,
               status: true,
-            },
-          },
-          suggestedPartner: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
             },
           },
         },
@@ -268,7 +244,7 @@ export async function getShiftAssignmentPageState(
   const selectedPendingIds = pendingRequests.map(
     (request) => request.person.id,
   );
-  const suggestedDefaults = pendingRequests
+  const defaultPendingPersonIds = pendingRequests
     .slice(0, 2)
     .map((request) => request.person.id);
   const activeAssignment = shift.assignments.find(
@@ -293,10 +269,6 @@ export async function getShiftAssignmentPageState(
       personLabel: `${request.person.firstName} ${request.person.lastName}`,
       gender: request.person.gender,
       comments: request.comments,
-      suggestedPartnerLabel: request.suggestedPartner
-        ? `${request.suggestedPartner.firstName} ${request.suggestedPartner.lastName}`
-        : null,
-      suggestedPartnerId: request.suggestedPartner?.id ?? null,
     })),
     resolvedRequests: shift.requests
       .filter((request) => request.status !== ShiftRequestStatus.PENDING)
@@ -341,12 +313,8 @@ export async function getShiftAssignmentPageState(
       requested: selectedPendingIds.includes(person.id),
     })),
     defaults: {
-      person1Id: suggestedDefaults[0] ?? "",
-      person2Id:
-        pendingRequests.find((request) => request.suggestedPartnerId)
-          ?.suggestedPartnerId ??
-        suggestedDefaults[1] ??
-        "",
+      person1Id: defaultPendingPersonIds[0] ?? "",
+      person2Id: defaultPendingPersonIds[1] ?? "",
     },
   };
 }

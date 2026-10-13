@@ -64,14 +64,11 @@ export default async function AdminPersonAssignmentsPage({ params }: Props) {
           title={`Turnos asignados: ${person.firstName} ${person.lastName}`}
           description="Turnos con asignación confirmada, incluidos los que ya ocurrieron."
         >
-          <Button
-            component={Link}
-            href="/admin/personas"
-            startIcon={<ArrowBackRoundedIcon />}
-            sx={{ alignSelf: "flex-start" }}
-          >
-            Volver a participantes
-          </Button>
+          <Link href="/admin/personas">
+            <Button startIcon={<ArrowBackRoundedIcon />} sx={{ alignSelf: "flex-start" }}>
+              Volver a participantes
+            </Button>
+          </Link>
 
           <Stack direction="row" spacing={1}>
             <Chip
@@ -120,14 +117,11 @@ export default async function AdminPersonAssignmentsPage({ params }: Props) {
                         <Typography>
                           <strong>Compañero/a:</strong> {partner.firstName} {partner.lastName}
                         </Typography>
-                        <Button
-                          component={Link}
-                          href={`/admin/turnos/${assignment.shift.id}`}
-                          variant="outlined"
-                          sx={{ alignSelf: "flex-start" }}
-                        >
-                          Ver turno
-                        </Button>
+                        <Link href={`/admin/turnos/${assignment.shift.id}`}>
+                          <Button variant="outlined" sx={{ alignSelf: "flex-start" }}>
+                            Ver turno
+                          </Button>
+                        </Link>
                       </Stack>
                     </CardContent>
                   </Card>

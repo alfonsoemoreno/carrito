@@ -150,15 +150,6 @@ export default async function AdminShiftAssignmentPage({
                             </Typography>
                             <Chip label={request.gender} size="small" />
                           </Stack>
-                          {request.suggestedPartnerLabel ? (
-                            <Typography variant="body2" color="text.secondary">
-                              Pareja sugerida: {request.suggestedPartnerLabel}
-                            </Typography>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">
-                              Sin pareja sugerida.
-                            </Typography>
-                          )}
                           {request.comments ? (
                             <Typography variant="body2" color="text.secondary">
                               Nota: {request.comments}

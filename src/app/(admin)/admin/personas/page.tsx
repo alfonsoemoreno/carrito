@@ -94,13 +94,9 @@ export default async function AdminPeoplePage() {
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                       <PersonEditor person={{ id: person.id, firstName: person.firstName, lastName: person.lastName,
                         gender: person.gender, phone: person.phone, email: person.email, notes: person.notes }} />
-                      <Button
-                        component={Link}
-                        href={`/admin/personas/${person.id}/turnos`}
-                        variant="outlined"
-                      >
-                        Ver turnos asignados
-                      </Button>
+                      <Link href={`/admin/personas/${person.id}/turnos`}>
+                        <Button variant="outlined">Ver turnos asignados</Button>
+                      </Link>
                       <form action={updatePersonStatusAction}>
                         <input type="hidden" name="id" value={person.id} />
                         <input
