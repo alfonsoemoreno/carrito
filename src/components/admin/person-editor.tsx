@@ -31,7 +31,7 @@ function PersonEditForm({ person, onClose }: { person: PersonDetails; onClose: (
             <MenuItem value="FEMALE">Femenino</MenuItem>
           </TextField>
           <TextField name="phone" label="Teléfono" type="tel" defaultValue={person.phone ?? ""}
-            helperText="Para WhatsApp, incluye el código de país. Ej.: +56 9 1234 5678." fullWidth />
+            helperText="Celular chileno; se guarda como +56 9 1234 5678." fullWidth />
           <TextField name="email" label="Correo" type="email" defaultValue={person.email ?? ""} fullWidth />
           <TextField name="notes" label="Observaciones" defaultValue={person.notes ?? ""} multiline minRows={2} fullWidth />
         </Stack>

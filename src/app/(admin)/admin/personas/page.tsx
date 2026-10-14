@@ -52,7 +52,8 @@ export default async function AdminPeoplePage() {
                     { value: "INACTIVE", label: "Inactivo" },
                   ]}
                 />
-                <TextField name="phone" label="Telefono" />
+                <TextField name="phone" label="Teléfono" type="tel"
+                  helperText="Celular chileno; se guarda como +56 9 1234 5678." />
                 <TextField name="email" label="Correo" type="email" />
               </FieldGrid>
               <TextField name="notes" label="Observaciones" multiline minRows={2} />

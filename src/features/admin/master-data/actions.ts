@@ -74,7 +74,7 @@ export async function updatePersonAction(
     notes: formData.get("notes"),
   });
   if (!parsed.success) {
-    return { error: "Revisa nombre y apellido (2 a 80 caracteres), correo y teléfono (máximo 30 caracteres).", success: false };
+    return { error: "Revisa nombre y apellido, correo y teléfono. El teléfono debe ser un celular chileno de 9 dígitos, por ejemplo +56 9 1234 5678.", success: false };
   }
   const { id, ...data } = parsed.data;
   const result = await prisma.person.updateMany({ where: { id }, data });

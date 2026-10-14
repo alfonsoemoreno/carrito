@@ -7,6 +7,15 @@ export function normalizeWhatsAppPhone(phone: string | null | undefined) {
   return /^[1-9]\d{9,14}$/.test(digits) ? digits : null;
 }
 
+export function formatChileanMobilePhone(phone: string | null | undefined) {
+  if (!phone || !/^[+\d\s().-]+$/.test(phone.trim())) return null;
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (/^0?9\d{8}$/.test(digits)) digits = `56${digits.replace(/^0/, "")}`;
+  if (!/^569\d{8}$/.test(digits)) return null;
+  return `+56 9 ${digits.slice(3, 7)} ${digits.slice(7)}`;
+}
+
 export function assignmentNotice(status: string) {
   if (status === "CANCELLED") return "El administrador canceló tu asignación";
   if (status === "REPLACED") return "El administrador reemplazó tu asignación; esta pareja ya no está confirmada";

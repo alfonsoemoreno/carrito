@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { assignmentNotice, normalizeWhatsAppPhone } from "@/lib/assignment-notifications";
+import { assignmentNotice, formatChileanMobilePhone, normalizeWhatsAppPhone } from "@/lib/assignment-notifications";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PublicPersonPicker } from "@/components/public/public-person-picker";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
@@ -179,10 +179,10 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                                     Compañero(a): {assignment.partner.name}
                                   </Typography>
                                   <Typography variant="body2" color="text.secondary">
-                                    Congregación: {assignment.congregationName || "No informada"}
+                                    Congregación: {assignment.congregationName?.trim() || "No informada"}
                                   </Typography>
                                   <Typography variant="body2" color="text.secondary">
-                                    Teléfono: {assignment.partner.phone || "No informado"}
+                                    Teléfono: {formatChileanMobilePhone(assignment.partner.phone) || assignment.partner.phone || "No informado"}
                                   </Typography>
                                   {(() => {
                                     const phone = normalizeWhatsAppPhone(assignment.partner.phone);

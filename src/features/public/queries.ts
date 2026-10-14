@@ -530,6 +530,7 @@ export async function getPublicAssignmentsSnapshot(
                   firstName: true,
                   lastName: true,
                   phone: true,
+                  notes: true,
                 },
               },
               person2: {
@@ -537,6 +538,7 @@ export async function getPublicAssignmentsSnapshot(
                   firstName: true,
                   lastName: true,
                   phone: true,
+                  notes: true,
                 },
               },
             },
@@ -593,22 +595,21 @@ export async function getPublicAssignmentsSnapshot(
         : "Participacion confirmada",
     })),
     publicPendingByShift: publicRequests,
-    ownAssignments: ownAssignments.map((item) => ({
-      id: item.id,
-      zoneName: item.shift.zone.name,
-      dateLabel: formatDate(item.shift.shiftDate),
-      timeLabel: `${formatTime(item.shift.startTime)} - ${formatTime(item.shift.endTime)}`,
-      partner: item.person1Id === currentPersonId
-        ? {
-            name: `${item.person2.firstName} ${item.person2.lastName}`,
-            phone: item.person2.phone,
-          }
-        : {
-            name: `${item.person1.firstName} ${item.person1.lastName}`,
-            phone: item.person1.phone,
-          },
-      congregationName: config.congregationName,
-    })),
+    ownAssignments: ownAssignments.map((item) => {
+      const partner = item.person1Id === currentPersonId ? item.person2 : item.person1;
+
+      return {
+        id: item.id,
+        zoneName: item.shift.zone.name,
+        dateLabel: formatDate(item.shift.shiftDate),
+        timeLabel: `${formatTime(item.shift.startTime)} - ${formatTime(item.shift.endTime)}`,
+        partner: {
+          name: `${partner.firstName} ${partner.lastName}`,
+          phone: partner.phone,
+        },
+        congregationName: partner.notes,
+      };
+    }),
     ownRequests: ownRequests.map((item) => ({
       id: item.id,
       status: item.status,

@@ -8,6 +8,7 @@ import {
   ZoneStatus,
 } from "@prisma/client";
 import { z } from "zod";
+import { formatChileanMobilePhone } from "@/lib/assignment-notifications";
 
 const optionalText = z
   .string()
@@ -21,12 +22,22 @@ const optionalText = z
     return value;
   });
 
+const optionalChileanMobilePhone = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) => value || undefined)
+  .refine((value) => !value || formatChileanMobilePhone(value) !== null, {
+    message: "Ingresa un celular chileno con 9 dígitos, por ejemplo +56 9 1234 5678.",
+  })
+  .transform((value) => value ? formatChileanMobilePhone(value)! : undefined);
+
 export const createPersonSchema = z.object({
   firstName: z.string().trim().min(2).max(80),
   lastName: z.string().trim().min(2).max(80),
   gender: z.nativeEnum(PersonGender),
   status: z.nativeEnum(PersonStatus).default(PersonStatus.ACTIVE),
-  phone: optionalText,
+  phone: optionalChileanMobilePhone,
   email: z
     .email()
     .optional()
@@ -42,7 +53,11 @@ export const updatePersonStatusSchema = z.object({
 
 export const updatePersonSchema = createPersonSchema.omit({ status: true }).extend({
   id: z.string().uuid(),
-  phone: z.string().trim().max(30).transform((value) => value || null),
+  phone: z.string().trim().max(30).transform((value) => value || null)
+    .refine((value) => !value || formatChileanMobilePhone(value) !== null, {
+      message: "Ingresa un celular chileno con 9 dígitos, por ejemplo +56 9 1234 5678.",
+    })
+    .transform((value) => value ? formatChileanMobilePhone(value)! : null),
   email: z.string().trim().max(255).email().or(z.literal(""))
     .transform((value) => value || null),
   notes: z.string().trim().transform((value) => value || null),
