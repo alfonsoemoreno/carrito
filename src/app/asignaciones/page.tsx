@@ -1,6 +1,7 @@
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
+import ChatRoundedIcon from "@mui/icons-material/ChatRounded";
 import {
   Alert,
   Box,
@@ -13,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { assignmentNotice } from "@/lib/assignment-notifications";
+import { assignmentNotice, normalizeWhatsAppPhone } from "@/lib/assignment-notifications";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PublicPersonPicker } from "@/components/public/public-person-picker";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
@@ -163,7 +164,7 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                               }}
                             >
                               <CardContent>
-                                <Stack spacing={1}>
+                                <Stack spacing={1.25}>
                                   <Typography variant="h6">
                                     {assignment.zoneName}
                                   </Typography>
@@ -175,8 +176,32 @@ export default async function AsignacionesPage({ searchParams }: Props) {
                                     variant="body2"
                                     color="text.secondary"
                                   >
-                                    Pareja confirmada: {assignment.pairLabel}
+                                    Compañero(a): {assignment.partner.name}
                                   </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Congregación: {assignment.congregationName || "No informada"}
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Teléfono: {assignment.partner.phone || "No informado"}
+                                  </Typography>
+                                  {(() => {
+                                    const phone = normalizeWhatsAppPhone(assignment.partner.phone);
+                                    if (!phone) return null;
+                                    const message = `Hola ${assignment.partner.name}, te contacto por nuestro turno de ${assignment.zoneName} del ${assignment.dateLabel} (${assignment.timeLabel}).`;
+                                    return (
+                                      <Button
+                                        component="a"
+                                        href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        variant="outlined"
+                                        startIcon={<ChatRoundedIcon />}
+                                        sx={{ alignSelf: "flex-start", mt: 0.5 }}
+                                      >
+                                        Contactar por WhatsApp
+                                      </Button>
+                                    );
+                                  })()}
                                 </Stack>
                               </CardContent>
                             </Card>

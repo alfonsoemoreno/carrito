@@ -511,6 +511,8 @@ export async function getPublicAssignmentsSnapshot(
             ],
             select: {
               id: true,
+              person1Id: true,
+              person2Id: true,
               shift: {
                 select: {
                   shiftDate: true,
@@ -527,12 +529,14 @@ export async function getPublicAssignmentsSnapshot(
                 select: {
                   firstName: true,
                   lastName: true,
+                  phone: true,
                 },
               },
               person2: {
                 select: {
                   firstName: true,
                   lastName: true,
+                  phone: true,
                 },
               },
             },
@@ -594,7 +598,16 @@ export async function getPublicAssignmentsSnapshot(
       zoneName: item.shift.zone.name,
       dateLabel: formatDate(item.shift.shiftDate),
       timeLabel: `${formatTime(item.shift.startTime)} - ${formatTime(item.shift.endTime)}`,
-      pairLabel: `${item.person1.firstName} ${item.person1.lastName} + ${item.person2.firstName} ${item.person2.lastName}`,
+      partner: item.person1Id === currentPersonId
+        ? {
+            name: `${item.person2.firstName} ${item.person2.lastName}`,
+            phone: item.person2.phone,
+          }
+        : {
+            name: `${item.person1.firstName} ${item.person1.lastName}`,
+            phone: item.person1.phone,
+          },
+      congregationName: config.congregationName,
     })),
     ownRequests: ownRequests.map((item) => ({
       id: item.id,
