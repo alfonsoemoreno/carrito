@@ -441,7 +441,10 @@ export default async function AsignacionesCalendarioPage({
                                       >
                                         {assignment.zoneName}
                                       </Typography>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ color: style.text, fontWeight: 600 }}
+                                      >
                                         {assignment.participantNames.join(
                                           " + ",
                                         )}
