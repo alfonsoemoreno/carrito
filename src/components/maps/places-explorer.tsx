@@ -19,7 +19,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
   const selectPlace = useCallback((id: string) => setSelectedId(id), []);
   const visible = useMemo(() => places.filter((place) => {
     const term = query.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-    const searchable = `${place.name} ${place.address ?? ""}`.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    const searchable = `${place.name} ${place.address ?? ""} ${place.description ?? ""}`.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
     return searchable.includes(term) &&
       (filter !== "located" || hasCoordinates(place)) &&
       (filter !== "pending" || !hasCoordinates(place)) &&
@@ -71,7 +71,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
                 <Box component="span" sx={{ flexShrink: 0, width: 28, height: 28, display: "grid", placeItems: "center", bgcolor: getMapColor(place.mapColor), color: "#111", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>{place.number ?? index + 1}</Box>
                 <Box component="span" sx={{ minWidth: 0 }}>
                   <Typography component="span" sx={{ display: "block", fontWeight: 700, fontSize: 15 }}>{place.name}</Typography>
-                  <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>{place.address || "Sin dirección de referencia"}</Typography>
+                  <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>{place.address || place.description || "Sin dirección de referencia"}</Typography>
                   {!hasCoordinates(place) ? <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>Ubicación pendiente</Typography> : null}
                   {admin && (!place.publicVisible || place.status !== "ACTIVE") ? <Typography component="span" variant="caption" sx={{ display: "block", mt: 0.5 }}>{!place.publicVisible ? "Oculto" : "Visible"} · {place.status === "ACTIVE" ? "Activo" : "Inactivo"}</Typography> : null}
                 </Box>
@@ -101,7 +101,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
                   <IconButton aria-label="Cerrar detalle" size="small" onClick={() => setSelectedId(null)}><CloseRoundedIcon fontSize="small" /></IconButton>
                 </Stack>
                 {selected.description ? <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line", maxHeight: 100, overflowY: "auto" }}>{selected.description}</Typography> : null}
-                <Typography variant="body2">{selected.address || "Sin dirección de referencia"}</Typography>
+                {selected.address ? <Typography variant="body2">{selected.address}</Typography> : !selected.description ? <Typography variant="body2">Sin dirección de referencia</Typography> : null}
                 {hasCoordinates(selected) ? (
                   <Button component="a" href={directionsUrl(selected.latitude, selected.longitude)} target="_blank" rel="noopener noreferrer"
                     startIcon={<NearMeOutlinedIcon />} sx={{ bgcolor: "#f5ed00", color: "#111", "&:hover": { bgcolor: "#ddd500" } }}>Cómo llegar</Button>
