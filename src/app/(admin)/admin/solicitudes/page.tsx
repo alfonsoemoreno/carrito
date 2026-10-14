@@ -211,9 +211,20 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                                 pl: 1.5,
                               }}
                             >
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {requester.name}
-                              </Typography>
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}
+                              >
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {requester.name}
+                                </Typography>
+                                <Chip
+                                  size="small"
+                                  variant="outlined"
+                                  label={`${requester.confirmedAssignmentCount} turnos confirmados`}
+                                />
+                              </Stack>
                               <Typography variant="body2" color="text.secondary">
                                 {requester.comments || "Sin comentario"}
                               </Typography>

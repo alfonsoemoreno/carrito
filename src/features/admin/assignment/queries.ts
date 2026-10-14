@@ -97,6 +97,7 @@ export async function getAdminRequestsPageState(
           orderBy: [{ createdAt: "asc" }],
           select: {
             id: true,
+            personId: true,
             status: true,
             comments: true,
             person: {
@@ -131,6 +132,41 @@ export async function getAdminRequestsPageState(
     }),
   ]);
 
+  const requesterPersonIds = Array.from(
+    new Set(
+      shifts.flatMap((shift) =>
+        shift.requests
+          .filter((request) => request.status === ShiftRequestStatus.PENDING)
+          .map((request) => request.personId),
+      ),
+    ),
+  );
+  const confirmedAssignmentsByRequester = new Map<string, number>();
+
+  if (requesterPersonIds.length > 0) {
+    const confirmedAssignments = await prisma.assignment.findMany({
+      where: {
+        status: AssignmentStatus.CONFIRMED,
+        OR: [
+          { person1Id: { in: requesterPersonIds } },
+          { person2Id: { in: requesterPersonIds } },
+        ],
+      },
+      select: { person1Id: true, person2Id: true },
+    });
+
+    for (const assignment of confirmedAssignments) {
+      confirmedAssignmentsByRequester.set(
+        assignment.person1Id,
+        (confirmedAssignmentsByRequester.get(assignment.person1Id) ?? 0) + 1,
+      );
+      confirmedAssignmentsByRequester.set(
+        assignment.person2Id,
+        (confirmedAssignmentsByRequester.get(assignment.person2Id) ?? 0) + 1,
+      );
+    }
+  }
+
   return {
     filters: {
       zoneId,
@@ -163,6 +199,8 @@ export async function getAdminRequestsPageState(
           id: request.id,
           name: `${request.person.firstName} ${request.person.lastName}`,
           comments: request.comments,
+          confirmedAssignmentCount:
+            confirmedAssignmentsByRequester.get(request.personId) ?? 0,
         })),
         currentAssignmentLabel: currentAssignment
           ? `${currentAssignment.person1.firstName} ${currentAssignment.person1.lastName} + ${currentAssignment.person2.firstName} ${currentAssignment.person2.lastName}`
