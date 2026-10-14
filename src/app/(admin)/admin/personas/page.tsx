@@ -9,12 +9,34 @@ import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { PersonEditor } from "@/components/admin/person-editor";
 import { EmptyState, FieldGrid, FormCard, SelectField, SubmitButton } from "@/components/admin/master-data-cards";
 import { prisma } from "@/lib/prisma";
-import { Box, Button, Card, CardContent, Chip, Container, Divider, TextField, Typography } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { Box, Button, Card, CardContent, Chip, Container, Divider, Stack, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 
-export default async function AdminPeoplePage() {
+type AdminPeoplePageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function AdminPeoplePage({ searchParams }: AdminPeoplePageProps) {
   await requireCurrentAdminPageAccess();
+  const params = await searchParams;
+  const rawQuery = params.q;
+  const query = (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery ?? "").trim();
+  const searchTerms = query.split(/\s+/).filter(Boolean);
+  const where = searchTerms.length
+    ? {
+        AND: searchTerms.map((term) => ({
+          OR: [
+            { firstName: { contains: term, mode: "insensitive" as const } },
+            { lastName: { contains: term, mode: "insensitive" as const } },
+            { email: { contains: term, mode: "insensitive" as const } },
+            { phone: { contains: term, mode: "insensitive" as const } },
+          ],
+        })),
+      }
+    : undefined;
   const people = await prisma.person.findMany({
+    where,
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   });
 
@@ -62,10 +84,37 @@ export default async function AdminPeoplePage() {
           </FormCard>
         </form>
 
+        <Box component="form" action="/admin/personas" method="get" sx={{ mb: 3 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+            <TextField
+              name="q"
+              label="Buscar participantes"
+              placeholder="Nombre, apellido, correo o teléfono"
+              defaultValue={query}
+              fullWidth
+            />
+            <Button type="submit" variant="contained" startIcon={<SearchRoundedIcon />}>
+              Buscar
+            </Button>
+            {query ? (
+              <Button component={Link} href="/admin/personas" variant="outlined">
+                Limpiar
+              </Button>
+            ) : null}
+          </Stack>
+          {query ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+              {people.length} {people.length === 1 ? "participante encontrado" : "participantes encontrados"}
+            </Typography>
+          ) : null}
+        </Box>
+
         {people.length === 0 ? (
           <EmptyState
-            title="Sin personas"
-            body="Cuando agregues personas apareceran aqui con acciones de estado."
+            title={query ? "Sin resultados" : "Sin personas"}
+            body={query
+              ? "No encontramos participantes que coincidan con la búsqueda. Prueba con otro nombre, correo o teléfono."
+              : "Cuando agregues personas apareceran aqui con acciones de estado."}
           />
         ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
