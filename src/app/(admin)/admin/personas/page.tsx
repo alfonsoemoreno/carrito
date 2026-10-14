@@ -97,9 +97,9 @@ export default async function AdminPeoplePage({ searchParams }: AdminPeoplePageP
               Buscar
             </Button>
             {query ? (
-              <Button component={Link} href="/admin/personas" variant="outlined">
-                Limpiar
-              </Button>
+              <Link href="/admin/personas">
+                <Button variant="outlined">Limpiar</Button>
+              </Link>
             ) : null}
           </Stack>
           {query ? (
