@@ -202,6 +202,11 @@ export default async function AdminShiftAssignmentPage({
                     shift={state.shift}
                     people={state.activePeople}
                     assignments={state.sameDayAssignments}
+                    pendingRequests={state.sameDayRequests}
+                    rules={{
+                      allowMultiplePerDay: state.config?.allowMultiplePerDay ?? true,
+                      allowOverlapping: state.config?.allowOverlapping ?? false,
+                    }}
                     defaults={state.defaults}
                   />
                 </FormCard>

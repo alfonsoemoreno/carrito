@@ -20,6 +20,14 @@ type SameDayAssignment = {
   zoneName: string;
 };
 
+type SameDayRequest = {
+  personId: string;
+  shiftId: string;
+  startTime: string;
+  endTime: string;
+  zoneName: string;
+};
+
 type Props = {
   shift: {
     id: string;
@@ -30,6 +38,11 @@ type Props = {
   };
   people: PersonOption[];
   assignments: SameDayAssignment[];
+  pendingRequests: SameDayRequest[];
+  rules: {
+    allowMultiplePerDay: boolean;
+    allowOverlapping: boolean;
+  };
   defaults: {
     person1Id: string;
     person2Id: string;
@@ -45,6 +58,8 @@ export function AssignmentConfirmationForm({
   shift,
   people,
   assignments,
+  pendingRequests,
+  rules,
   defaults,
 }: Props) {
   const [person1Id, setPerson1Id] = useState(defaults.person1Id);
@@ -59,6 +74,7 @@ export function AssignmentConfirmationForm({
     const targetEnd = toMinutes(shift.endTime);
     const overlaps: string[] = [];
     const consecutive: string[] = [];
+    const requestConflicts: string[] = [];
 
     for (const assignment of assignments) {
       const assignedPersonIds = new Set([assignment.person1Id, assignment.person2Id]);
@@ -89,8 +105,31 @@ export function AssignmentConfirmationForm({
       }
     }
 
-    return { overlaps: [...new Set(overlaps)], consecutive: [...new Set(consecutive)] };
-  }, [assignments, people, person1Id, person2Id, shift]);
+    for (const request of pendingRequests) {
+      const personLabel = selectedPeople.get(request.personId);
+      if (!personLabel) continue;
+
+      const overlapping =
+        toMinutes(request.startTime) < targetEnd &&
+        toMinutes(request.endTime) > targetStart;
+
+      if (overlapping && !rules.allowOverlapping) {
+        requestConflicts.push(
+          `${personLabel}: tiene otra solicitud pendiente que se superpone con este turno (${request.startTime}–${request.endTime} en ${request.zoneName}).`,
+        );
+      } else if (!rules.allowMultiplePerDay) {
+        requestConflicts.push(
+          `${personLabel}: tiene otra solicitud pendiente el mismo día (${request.startTime}–${request.endTime} en ${request.zoneName}).`,
+        );
+      }
+    }
+
+    return {
+      overlaps: [...new Set(overlaps)],
+      consecutive: [...new Set(consecutive)],
+      requestConflicts: [...new Set(requestConflicts)],
+    };
+  }, [assignments, pendingRequests, people, person1Id, person2Id, rules, shift]);
 
   return (
     <form action={confirmShiftAssignmentAction}>
@@ -128,7 +167,7 @@ export function AssignmentConfirmationForm({
         </TextField>
 
         {scheduleAlerts.overlaps.length > 0 ? (
-          <Alert severity="error">
+          <Alert severity="warning">
             <AlertTitle>Superposición horaria</AlertTitle>
             <ul>
               {scheduleAlerts.overlaps.map((message) => (
@@ -143,6 +182,17 @@ export function AssignmentConfirmationForm({
             <AlertTitle>Turnos seguidos el mismo día</AlertTitle>
             <ul>
               {scheduleAlerts.consecutive.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </Alert>
+        ) : null}
+
+        {scheduleAlerts.requestConflicts.length > 0 ? (
+          <Alert severity="warning">
+            <AlertTitle>Otra solicitud pendiente</AlertTitle>
+            <ul>
+              {scheduleAlerts.requestConflicts.map((message) => (
                 <li key={message}>{message}</li>
               ))}
             </ul>

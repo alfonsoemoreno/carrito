@@ -222,14 +222,16 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                         </Stack>
                       ) : null}
 
-                      <Link href={`/admin/turnos/${shift.id}`}>
-                        <Button
-                          variant="contained"
-                          startIcon={<AssignmentTurnedInRoundedIcon />}
-                        >
-                          Resolver turno
-                        </Button>
-                      </Link>
+                      {!shift.currentAssignmentLabel ? (
+                        <Link href={`/admin/turnos/${shift.id}`}>
+                          <Button
+                            variant="contained"
+                            startIcon={<AssignmentTurnedInRoundedIcon />}
+                          >
+                            Resolver turno
+                          </Button>
+                        </Link>
+                      ) : null}
                     </Stack>
                   </CardContent>
                 </Card>

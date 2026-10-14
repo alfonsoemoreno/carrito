@@ -145,17 +145,20 @@ export default async function AdminStatsPage({ searchParams }: Props) {
             }}
           >
             <FormCard
-              title="Top participantes"
-              description="Personas con mas participaciones confirmadas dentro del rango."
+              title="Participantes y contadores"
+              description="Total de participantes registrados y sus asignaciones confirmadas dentro del rango."
             >
-              {state.topPeople.length === 0 ? (
+              {state.participantCounts.length === 0 ? (
                 <EmptyState
-                  title="Sin datos"
-                  body="Todavia no hay asignaciones confirmadas dentro del rango seleccionado."
+                  title="Sin participantes"
+                  body="Todavía no hay participantes registrados."
                 />
               ) : (
                 <Stack spacing={1.5}>
-                  {state.topPeople.map((person) => (
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Total de participantes: {state.totalParticipants}
+                  </Typography>
+                  {state.participantCounts.map((person) => (
                     <Box
                       key={person.label}
                       sx={{

@@ -18,11 +18,23 @@ export async function getAdminAssignmentOverview() {
               status: ShiftRequestStatus.PENDING,
             },
           },
+          assignments: {
+            none: {
+              status: AssignmentStatus.CONFIRMED,
+            },
+          },
         },
       }),
       prisma.shiftRequest.count({
         where: {
           status: ShiftRequestStatus.PENDING,
+          shift: {
+            assignments: {
+              none: {
+                status: AssignmentStatus.CONFIRMED,
+              },
+            },
+          },
         },
       }),
       prisma.assignment.count({
@@ -63,6 +75,11 @@ export async function getAdminRequestsPageState(
               requests: {
                 some: {
                   status: ShiftRequestStatus.PENDING,
+                },
+              },
+              assignments: {
+                none: {
+                  status: AssignmentStatus.CONFIRMED,
                 },
               },
             }
@@ -123,12 +140,17 @@ export async function getAdminRequestsPageState(
     error: readFirstSearchParam(searchParams.error),
     zones,
     shifts: shifts.map((shift) => {
-      const pending = shift.requests.filter(
-        (request) => request.status === ShiftRequestStatus.PENDING,
-      );
-      const resolved = shift.requests.filter(
-        (request) => request.status !== ShiftRequestStatus.PENDING,
-      );
+      const currentAssignment = shift.assignments[0] ?? null;
+      const pending = currentAssignment
+        ? []
+        : shift.requests.filter(
+            (request) => request.status === ShiftRequestStatus.PENDING,
+          );
+      const resolved = currentAssignment
+        ? shift.requests
+        : shift.requests.filter(
+            (request) => request.status !== ShiftRequestStatus.PENDING,
+          );
 
       return {
         id: shift.id,
@@ -142,8 +164,8 @@ export async function getAdminRequestsPageState(
           name: `${request.person.firstName} ${request.person.lastName}`,
           comments: request.comments,
         })),
-        currentAssignmentLabel: shift.assignments[0]
-          ? `${shift.assignments[0].person1.firstName} ${shift.assignments[0].person1.lastName} + ${shift.assignments[0].person2.firstName} ${shift.assignments[0].person2.lastName}`
+        currentAssignmentLabel: currentAssignment
+          ? `${currentAssignment.person1.firstName} ${currentAssignment.person1.lastName} + ${currentAssignment.person2.firstName} ${currentAssignment.person2.lastName}`
           : null,
       };
     }),
@@ -214,7 +236,7 @@ export async function getShiftAssignmentPageState(
     return null;
   }
 
-  const [activePeople, config, sameDayAssignments] = await Promise.all([
+  const [activePeople, config, sameDayAssignments, sameDayRequests] = await Promise.all([
     prisma.person.findMany({
       where: {
         status: "ACTIVE",
@@ -246,6 +268,25 @@ export async function getShiftAssignmentPageState(
       select: {
         person1Id: true,
         person2Id: true,
+        shift: {
+          select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            zone: { select: { name: true } },
+          },
+        },
+      },
+    }),
+    prisma.shiftRequest.findMany({
+      where: {
+        status: ShiftRequestStatus.PENDING,
+        shiftId: { not: shift.id },
+        shift: { shiftDate: shift.shiftDate },
+      },
+      orderBy: [{ createdAt: "asc" }],
+      select: {
+        personId: true,
         shift: {
           select: {
             id: true,
@@ -341,6 +382,13 @@ export async function getShiftAssignmentPageState(
       startTime: formatTime(assignment.shift.startTime),
       endTime: formatTime(assignment.shift.endTime),
       zoneName: assignment.shift.zone.name,
+    })),
+    sameDayRequests: sameDayRequests.map((request) => ({
+      personId: request.personId,
+      shiftId: request.shift.id,
+      startTime: formatTime(request.shift.startTime),
+      endTime: formatTime(request.shift.endTime),
+      zoneName: request.shift.zone.name,
     })),
     defaults: {
       person1Id: defaultPendingPersonIds[0] ?? "",

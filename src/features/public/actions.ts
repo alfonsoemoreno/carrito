@@ -20,11 +20,7 @@ import {
   getPublicShiftBoard,
   listPublicZonesForFlow,
 } from "@/features/public/queries";
-import {
-  isSameUtcDate,
-  overlapsTimeRange,
-  toDateOnlyString,
-} from "@/features/public/utils";
+import { toDateOnlyString } from "@/features/public/utils";
 
 export async function startPublicSessionAction(personId: string) {
   const person = await prisma.person.findFirst({
@@ -143,19 +139,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
     redirectWithRequestError("El período de solicitudes para este evento ya finalizó.");
   }
 
-  const config = await prisma.systemConfig.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: {
-      allowMultiplePerDay: true,
-      allowOverlapping: true,
-    },
-  });
-
-  const policy = {
-    allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
-    allowOverlapping: config?.allowOverlapping ?? false,
-  };
-
   const shifts = await prisma.shift.findMany({
     where: {
       id: {
@@ -219,74 +202,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
     redirectWithRequestError("Uno o mas turnos ya no estan disponibles.");
   }
 
-  const rangeStart = new Date();
-  rangeStart.setUTCDate(rangeStart.getUTCDate() - 1);
-
-  const [availabilityBlocks, existingRequests, existingAssignments] =
-    await Promise.all([
-      prisma.availabilityException.findMany({
-        where: {
-          personId: currentPerson.id,
-        },
-        select: {
-          startDate: true,
-          endDate: true,
-        },
-      }),
-      prisma.shiftRequest.findMany({
-        where: {
-          personId: currentPerson.id,
-          status: {
-            in: [ShiftRequestStatus.PENDING, ShiftRequestStatus.CONFIRMED],
-          },
-          shift: {
-            shiftDate: {
-              gte: rangeStart,
-            },
-          },
-        },
-        select: {
-          shiftId: true,
-          shift: {
-            select: {
-              shiftDate: true,
-              startTime: true,
-              endTime: true,
-            },
-          },
-        },
-      }),
-      prisma.assignment.findMany({
-        where: {
-          status: AssignmentStatus.CONFIRMED,
-          OR: [
-            { person1Id: currentPerson.id },
-            { person2Id: currentPerson.id },
-          ],
-          shift: {
-            shiftDate: {
-              gte: rangeStart,
-            },
-          },
-        },
-        select: {
-          shiftId: true,
-          shift: {
-            select: {
-              shiftDate: true,
-              startTime: true,
-              endTime: true,
-            },
-          },
-        },
-      }),
-    ]);
-
-  const selectedDates = new Map<
-    string,
-    { shiftDate: Date; startTime: Date; endTime: Date }[]
-  >();
-
   for (const shift of shifts) {
     if (
       shift.status !== ShiftStatus.OPEN ||
@@ -295,20 +210,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
     ) {
       redirectWithRequestError(
         "Solo puedes solicitar turnos publicos y abiertos.",
-      );
-    }
-
-    const blockedByAvailability = availabilityBlocks.some((block) => {
-      const target = toDateOnlyString(shift.shiftDate);
-      return (
-        target >= toDateOnlyString(block.startDate) &&
-        target <= toDateOnlyString(block.endDate)
-      );
-    });
-
-    if (blockedByAvailability) {
-      redirectWithRequestError(
-        "Tienes una indisponibilidad registrada para uno de los turnos seleccionados.",
       );
     }
 
@@ -334,90 +235,6 @@ export async function submitShiftRequestsAction(formData: FormData) {
       );
     }
 
-    const currentDateKey = toDateOnlyString(shift.shiftDate);
-    const sameDaySelected = selectedDates.get(currentDateKey) ?? [];
-
-    if (!policy.allowMultiplePerDay && sameDaySelected.length > 0) {
-      redirectWithRequestError(
-        "La configuracion actual no permite mas de un turno por dia.",
-      );
-    }
-
-    for (const request of existingRequests) {
-      if (
-        !policy.allowMultiplePerDay &&
-        isSameUtcDate(request.shift.shiftDate, shift.shiftDate)
-      ) {
-        redirectWithRequestError(
-          "Ya tienes una solicitud activa para ese dia.",
-        );
-      }
-
-      if (
-        !policy.allowOverlapping &&
-        isSameUtcDate(request.shift.shiftDate, shift.shiftDate) &&
-        overlapsTimeRange(
-          request.shift.startTime,
-          request.shift.endTime,
-          shift.startTime,
-          shift.endTime,
-        )
-      ) {
-        redirectWithRequestError(
-          "Uno de los turnos se superpone con otra solicitud tuya.",
-        );
-      }
-    }
-
-    for (const assignment of existingAssignments) {
-      if (
-        !policy.allowMultiplePerDay &&
-        isSameUtcDate(assignment.shift.shiftDate, shift.shiftDate)
-      ) {
-        redirectWithRequestError(
-          "Ya tienes una asignacion confirmada para ese dia.",
-        );
-      }
-
-      if (
-        !policy.allowOverlapping &&
-        isSameUtcDate(assignment.shift.shiftDate, shift.shiftDate) &&
-        overlapsTimeRange(
-          assignment.shift.startTime,
-          assignment.shift.endTime,
-          shift.startTime,
-          shift.endTime,
-        )
-      ) {
-        redirectWithRequestError(
-          "Uno de los turnos se superpone con otra asignacion tuya.",
-        );
-      }
-    }
-
-    for (const otherDay of selectedDates.values()) {
-      for (const other of otherDay) {
-        if (
-          !policy.allowOverlapping &&
-          isSameUtcDate(other.shiftDate, shift.shiftDate) &&
-          overlapsTimeRange(
-            other.startTime,
-            other.endTime,
-            shift.startTime,
-            shift.endTime,
-          )
-        ) {
-          redirectWithRequestError("La seleccion incluye turnos superpuestos.");
-        }
-      }
-    }
-
-    sameDaySelected.push({
-      shiftDate: shift.shiftDate,
-      startTime: shift.startTime,
-      endTime: shift.endTime,
-    });
-    selectedDates.set(currentDateKey, sameDaySelected);
   }
 
   await prisma.$transaction(async (tx) => {

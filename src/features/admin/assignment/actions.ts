@@ -125,7 +125,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
 
   const admin = await requireCurrentAdminActor();
 
-  const [config, shift, person1, person2, relationships, person1Assignments, person2Assignments, person1Availability, person2Availability] =
+  const [config, shift, person1, person2, relationships, person1Assignments, person2Assignments, person1Availability, person2Availability, person1PendingRequests, person2PendingRequests] =
     await Promise.all([
       prisma.systemConfig.findFirst({
         orderBy: { createdAt: "asc" },
@@ -266,6 +266,40 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
           endDate: true,
         },
       }),
+      prisma.shiftRequest.findMany({
+        where: {
+          personId: parsed.person1Id,
+          status: ShiftRequestStatus.PENDING,
+          shiftId: { not: parsed.shiftId },
+        },
+        select: {
+          shift: {
+            select: {
+              id: true,
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
+            },
+          },
+        },
+      }).then((rows) => rows.map((row) => row.shift)),
+      prisma.shiftRequest.findMany({
+        where: {
+          personId: parsed.person2Id,
+          status: ShiftRequestStatus.PENDING,
+          shiftId: { not: parsed.shiftId },
+        },
+        select: {
+          shift: {
+            select: {
+              id: true,
+              shiftDate: true,
+              startTime: true,
+              endTime: true,
+            },
+          },
+        },
+      }).then((rows) => rows.map((row) => row.shift)),
     ]);
 
   if (!shift || !person1 || !person2) {
@@ -315,6 +349,8 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
     relationshipTypes: relationships.map((relationship) => relationship.type),
     person1Assignments,
     person2Assignments,
+    person1PendingRequests,
+    person2PendingRequests,
     person1Availability,
     person2Availability,
     activeAssignmentId: shift.assignments[0]?.id ?? null,
@@ -371,23 +407,30 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
     });
 
     for (const personId of [person1.id, person2.id]) {
-      const existingRequest = await tx.shiftRequest.findFirst({
+      const resolvedRequests = await tx.shiftRequest.updateMany({
         where: {
           shiftId: shift.id,
           personId,
+          status: ShiftRequestStatus.PENDING,
+        },
+        data: {
+          status: ShiftRequestStatus.CONFIRMED,
+          resolvedAt: now,
+          cancelledAt: null,
         },
       });
 
-      if (existingRequest) {
-        await tx.shiftRequest.update({
-          where: { id: existingRequest.id },
-          data: {
+      if (resolvedRequests.count === 0) {
+        const existingConfirmedRequest = await tx.shiftRequest.findFirst({
+          where: {
+            shiftId: shift.id,
+            personId,
             status: ShiftRequestStatus.CONFIRMED,
-            resolvedAt: now,
-            cancelledAt: null,
           },
         });
-      } else {
+
+        if (existingConfirmedRequest) continue;
+
         await tx.shiftRequest.create({
           data: {
             shiftId: shift.id,

@@ -27,7 +27,7 @@ export async function getAdminStatsPageState(rawSearchParams: Promise<{ [key: st
     shift: shiftWhere,
   };
 
-  const [zones, shifts, requests, assignments, topPeople, topZones] = await Promise.all([
+  const [zones, shifts, requests, assignments, participantAssignments, topZones, participants] = await Promise.all([
     prisma.zone.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -143,6 +143,14 @@ export async function getAdminStatsPageState(rawSearchParams: Promise<{ [key: st
         },
       },
     }),
+    prisma.person.findMany({
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    }),
   ]);
 
   const totalShifts = shifts.length;
@@ -157,7 +165,13 @@ export async function getAdminStatsPageState(rawSearchParams: Promise<{ [key: st
   const replacedAssignments = assignments.filter((assignment) => assignment.status === AssignmentStatus.REPLACED).length;
 
   const peopleCounter = new Map<string, { label: string; count: number }>();
-  for (const assignment of topPeople) {
+  for (const person of participants) {
+    peopleCounter.set(person.id, {
+      label: `${person.firstName} ${person.lastName}`,
+      count: 0,
+    });
+  }
+  for (const assignment of participantAssignments) {
     for (const person of [assignment.person1, assignment.person2]) {
       const current = peopleCounter.get(person.id) ?? {
         label: `${person.firstName} ${person.lastName}`,
@@ -195,6 +209,7 @@ export async function getAdminStatsPageState(rawSearchParams: Promise<{ [key: st
       to: range.toValue,
     },
     zones,
+    totalParticipants: participants.length,
     kpis: {
       totalShifts,
       openShifts,
@@ -208,7 +223,9 @@ export async function getAdminStatsPageState(rawSearchParams: Promise<{ [key: st
       replacedAssignments,
       coverageRate,
     },
-    topPeople: [...peopleCounter.values()].sort((a, b) => b.count - a.count).slice(0, 8),
+    participantCounts: [...peopleCounter.values()].sort(
+      (a, b) => b.count - a.count || a.label.localeCompare(b.label, "es"),
+    ),
     zoneSummary: [...zoneCounter.values()].sort((a, b) => a.label.localeCompare(b.label)),
     reportRows: shifts.map((shift) => ({
       id: shift.id,

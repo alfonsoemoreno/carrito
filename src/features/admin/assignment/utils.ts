@@ -39,6 +39,8 @@ type AssignmentRuleContext = {
   relationshipTypes: RelationshipType[];
   person1Assignments: LightweightShift[];
   person2Assignments: LightweightShift[];
+  person1PendingRequests?: LightweightShift[];
+  person2PendingRequests?: LightweightShift[];
   person1Availability: Array<{ startDate: Date; endDate: Date }>;
   person2Availability: Array<{ startDate: Date; endDate: Date }>;
   activeAssignmentId?: string | null;
@@ -83,6 +85,7 @@ function buildPersonWarnings(
   person: AssignmentRuleContext["pair"]["person1"],
   shift: LightweightShift,
   assignments: LightweightShift[],
+  pendingRequests: LightweightShift[] | undefined,
   availability: Array<{ startDate: Date; endDate: Date }>,
   config: AssignmentRuleContext["config"],
 ) {
@@ -129,6 +132,24 @@ function buildPersonWarnings(
     }
   }
 
+  for (const request of pendingRequests ?? []) {
+    const sameDay = isSameUtcDate(request.shiftDate, shift.shiftDate);
+    if (!sameDay) continue;
+
+    const overlaps = overlapsTimeRange(
+      request.startTime,
+      request.endTime,
+      shift.startTime,
+      shift.endTime,
+    );
+
+    if (overlaps && !config.allowOverlapping) {
+      warnings.push(`${person.label} tiene otra solicitud pendiente con superposición horaria.`);
+    } else if (!config.allowMultiplePerDay) {
+      warnings.push(`${person.label} tiene otra solicitud pendiente el mismo día.`);
+    }
+  }
+
   return warnings;
 }
 
@@ -153,6 +174,7 @@ export function buildAssignmentWarnings(context: AssignmentRuleContext) {
       context.pair.person1,
       context.shift,
       context.person1Assignments,
+      context.person1PendingRequests,
       context.person1Availability,
       context.config,
     ),
@@ -162,6 +184,7 @@ export function buildAssignmentWarnings(context: AssignmentRuleContext) {
       context.pair.person2,
       context.shift,
       context.person2Assignments,
+      context.person2PendingRequests,
       context.person2Availability,
       context.config,
     ),
