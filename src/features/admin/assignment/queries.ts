@@ -104,6 +104,7 @@ export async function getAdminRequestsPageState(
               select: {
                 firstName: true,
                 lastName: true,
+                notes: true,
               },
             },
           },
@@ -199,6 +200,7 @@ export async function getAdminRequestsPageState(
           id: request.id,
           name: `${request.person.firstName} ${request.person.lastName}`,
           comments: request.comments,
+          participantNotes: request.person.notes,
           confirmedAssignmentCount:
             confirmedAssignmentsByRequester.get(request.personId) ?? 0,
         })),

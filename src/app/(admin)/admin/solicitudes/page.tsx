@@ -228,6 +228,9 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                               <Typography variant="body2" color="text.secondary">
                                 {requester.comments || "Sin comentario"}
                               </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Observaciones: {requester.participantNotes || "Sin observaciones."}
+                              </Typography>
                             </Box>
                           ))}
                         </Stack>
