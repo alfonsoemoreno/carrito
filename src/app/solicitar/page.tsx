@@ -43,6 +43,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                       <Typography variant="h5">Elige tu nombre</Typography>
                     </Stack>
                     <PublicRequestJourney
+                  initialSelectedDate={state.filters.selectedDate}
+                  initialSelectedShiftId={state.filters.selectedShiftId}
                       initialZoneId={state.filters.zoneId}
                       key={state.sessionResetKey || "public-request-journey"}
                       people={state.people.map((person) => ({ id: person.id, label: `${person.firstName} ${person.lastName}` }))}
@@ -55,6 +57,8 @@ export default async function SolicitarPage({ searchParams }: Props) {
                 zones={state.zones}
                 shifts={state.shiftBoard}
                 initialZoneId={state.filters.zoneId}
+                initialSelectedDate={state.filters.selectedDate}
+                initialSelectedShiftId={state.filters.selectedShiftId}
                 from={state.filters.from}
                 to={state.filters.to}
                 maintenanceModeEnabled={state.config.maintenanceModeEnabled || state.eventEnded}

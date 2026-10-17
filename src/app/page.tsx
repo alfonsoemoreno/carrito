@@ -2,14 +2,8 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
-import {
-  Box,
-  Card,
-  CardContent,
-  Container,
-  Stack,
-  Typography,
-} from "@mui/material";
+import MapRoundedIcon from "@mui/icons-material/MapRounded";
+import { Box, Card, CardContent, Container, Stack, Typography } from "@mui/material";
 import { RouteButton } from "@/components/navigation/route-button";
 import { PublicSiteShell } from "@/components/public/public-site-shell";
 import { getCurrentPublicPerson } from "@/features/public/queries";
@@ -21,9 +15,9 @@ export default async function HomePage() {
   return (
     <PublicSiteShell>
       <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           <Stack spacing={{ xs: 3, md: 4 }}>
-            <Box sx={{ maxWidth: 720 }}>
+            <Box sx={{ maxWidth: 820 }}>
               <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800 }}>
                 Coordinación del evento
               </Typography>
@@ -34,7 +28,7 @@ export default async function HomePage() {
                 {EVENT.location} · {EVENT.dateLabel}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mt: 2, maxWidth: 620 }}>
-                Solicita tus turnos o revisa las asignaciones del evento en un solo lugar.
+                Explora el evento, solicita tus turnos y consulta los lugares disponibles.
               </Typography>
             </Box>
 
@@ -50,7 +44,7 @@ export default async function HomePage() {
                   <EventAvailableRoundedIcon color="primary" sx={{ fontSize: 32 }} />
                   <Typography variant="h5">Solicitar turnos</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                    Elige tu nombre, selecciona un lugar y marca los horarios que te sirven.
+                    Elige un lugar y los horarios que te acomodan.
                   </Typography>
                   <RouteButton href="/solicitar" variant="contained" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
                     {currentPerson ? "Elegir turnos" : "Comenzar"}
@@ -69,6 +63,32 @@ export default async function HomePage() {
                   </Typography>
                   <RouteButton href="/asignaciones" variant="outlined" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
                     Ver mis turnos
+                  </RouteButton>
+                </CardContent>
+              </Card>
+
+              <Card elevation={0} sx={{ height: "100%", border: "1px solid var(--app-border)", borderRadius: 0 }}>
+                <CardContent sx={{ height: "100%", p: { xs: 2.5, md: 3 }, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1.5 }}>
+                  <MapRoundedIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Typography variant="h5">Mapa de lugares</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                    Explora los puntos del evento y revisa cómo llegar a cada lugar.
+                  </Typography>
+                  <RouteButton href="/mapa" variant="outlined" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
+                    Ver mapa
+                  </RouteButton>
+                </CardContent>
+              </Card>
+
+              <Card elevation={0} sx={{ height: "100%", border: "1px solid var(--app-border)", borderRadius: 0 }}>
+                <CardContent sx={{ height: "100%", p: { xs: 2.5, md: 3 }, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1.5 }}>
+                  <CalendarMonthRoundedIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Typography variant="h5">Calendario de turnos</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                    Consulta los horarios disponibles y los lugares que puedes solicitar.
+                  </Typography>
+                  <RouteButton href="/calendario" variant="outlined" fullWidth endIcon={<ArrowForwardRoundedIcon />}>
+                    Ver calendario
                   </RouteButton>
                 </CardContent>
               </Card>

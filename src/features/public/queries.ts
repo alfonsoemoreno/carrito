@@ -207,6 +207,7 @@ async function getUncachedPublicShiftBoard(input: {
         select: {
           id: true,
           name: true,
+          mapColor: true,
           blocks: {
             select: {
               startDate: true,
@@ -276,7 +277,9 @@ async function getUncachedPublicShiftBoard(input: {
         id: shift.id,
         zoneId: shift.zone.id,
         zoneName: shift.zone.name,
+        zoneColor: shift.zone.mapColor,
         shiftDate: shift.shiftDate,
+        dateKey: toDateOnlyString(shift.shiftDate),
         dateLabel: formatDate(shift.shiftDate),
         fullDateLabel: formatLongDate(shift.shiftDate),
         startLabel: formatTime(shift.startTime),
@@ -634,6 +637,7 @@ export async function getSolicitarPageState(
   const to = readFirstSearchParam(searchParams.to);
   const requestedScheduleView = readFirstSearchParam(searchParams.scheduleView);
   const requestedSelectedDate = readFirstSearchParam(searchParams.selectedDate);
+  const selectedShiftId = readFirstSearchParam(searchParams.shiftId);
 
   const [config, currentPerson, zones] = await Promise.all([
     getPublicConfig(),
@@ -680,6 +684,7 @@ export async function getSolicitarPageState(
       from: toDateOnlyString(boundedRange.from),
       to: toDateOnlyString(boundedRange.to),
       selectedDate,
+      selectedShiftId,
     },
     scheduleView,
     authError: readFirstSearchParam(searchParams.authError),

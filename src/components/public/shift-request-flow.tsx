@@ -31,6 +31,7 @@ type Shift = {
   id: string;
   zoneId: string;
   zoneName: string;
+  dateKey: string;
   dateLabel: string;
   fullDateLabel: string;
   startLabel: string;
@@ -44,6 +45,8 @@ type ShiftRequestFlowProps = {
   zones: Zone[];
   shifts: Shift[];
   initialZoneId: string;
+  initialSelectedDate?: string;
+  initialSelectedShiftId?: string;
   from: string;
   to: string;
   maintenanceModeEnabled: boolean;
@@ -54,17 +57,27 @@ export function ShiftRequestFlow({
   zones,
   shifts,
   initialZoneId,
+  initialSelectedDate = "",
+  initialSelectedShiftId = "",
   from,
   to,
   maintenanceModeEnabled,
   requestError,
 }: ShiftRequestFlowProps) {
   const [zoneId, setZoneId] = useState(initialZoneId);
-  const [step, setStep] = useState<"zone" | "requests">(
-    initialZoneId ? "requests" : "zone",
+  const [step, setStep] = useState<"zone" | "requests">(initialZoneId ? "requests" : "zone");
+  const [selectedShiftIds, setSelectedShiftIds] = useState<string[]>(() =>
+    initialSelectedShiftId && shifts.some((shift) =>
+      shift.id === initialSelectedShiftId &&
+      shift.zoneId === initialZoneId &&
+      shift.dateKey === initialSelectedDate &&
+      shift.status === "OPEN" &&
+      shift.ownLatestRequest?.status !== "PENDING" &&
+      shift.ownLatestRequest?.status !== "CONFIRMED",
+    ) ? [initialSelectedShiftId] : [],
   );
-  const [selectedShiftIds, setSelectedShiftIds] = useState<string[]>([]);
   const selectedZone = zones.find((zone) => zone.id === zoneId);
+  const selectedDateLabel = shifts.find((shift) => shift.dateKey === initialSelectedDate)?.fullDateLabel;
   const availableShifts = useMemo(
     () => shifts.filter((shift) =>
       shift.zoneId === zoneId &&
@@ -74,6 +87,9 @@ export function ShiftRequestFlow({
     ),
     [shifts, zoneId],
   );
+  const dateFilteredShifts = initialSelectedDate
+    ? availableShifts.filter((shift) => shift.dateKey === initialSelectedDate)
+    : availableShifts;
   const shiftsByDate = useMemo(() => {
     const groups = new Map<string, Shift[]>();
 
@@ -94,6 +110,9 @@ export function ShiftRequestFlow({
       from,
       to,
     });
+    if (initialSelectedDate) {
+      params.set("selectedDate", initialSelectedDate);
+    }
     if (nextZoneId) {
       params.set("zoneId", nextZoneId);
     }
@@ -111,6 +130,7 @@ export function ShiftRequestFlow({
                 <EventAvailableRoundedIcon color="primary" />
                 <Typography variant="h5">1. Elige un lugar</Typography>
               </Stack>
+              {selectedDateLabel ? <Typography variant="body2" color="text.secondary">Día seleccionado: <strong>{selectedDateLabel}</strong></Typography> : null}
               <FormControl fullWidth>
                 <InputLabel id="zone-filter-label">Lugar</InputLabel>
                 <Select labelId="zone-filter-label" value={zoneId} label="Lugar" onChange={(event) => selectZone(event.target.value)}>
@@ -164,8 +184,8 @@ export function ShiftRequestFlow({
                   Cambiar lugar
                 </Button>
                 </Stack>
-                <input type="hidden" name="returnTo" value={`/solicitar?scheduleView=available&from=${from}&to=${to}&zoneId=${zoneId}`} />
-                {availableShifts.length > 0 ? (
+                <input type="hidden" name="returnTo" value={`/solicitar?scheduleView=available&from=${from}&to=${to}&zoneId=${zoneId}${initialSelectedDate ? `&selectedDate=${initialSelectedDate}` : ""}`} />
+                {dateFilteredShifts.length > 0 ? (
                   <>
                     <Typography variant="body2" color="text.secondary">
                       Toca los horarios que te sirven. Puedes elegir más de uno.
@@ -180,7 +200,7 @@ export function ShiftRequestFlow({
                     </Accordion>
                     <Divider />
                     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: { xs: 1.5, lg: 2 } }}>
-                      {shiftsByDate.map(({ dateLabel, shifts: dateShifts }, index) => {
+                      {shiftsByDate.filter((group) => !initialSelectedDate || group.shifts[0].dateKey === initialSelectedDate).map(({ dateLabel, shifts: dateShifts }, index) => {
                         const selectedForDate = dateShifts.filter((shift) => selectedShiftIds.includes(shift.id)).length;
 
                         return (
