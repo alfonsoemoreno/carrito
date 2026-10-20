@@ -20,7 +20,13 @@ type RelocationRequest = {
   id: string;
   personId: string;
   comments: string | null;
-  person: { firstName: string; lastName: string; phone: string | null; notes: string | null };
+  person: {
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    notes: string | null;
+    _count: { assignmentSlotsOne: number; assignmentSlotsTwo: number };
+  };
   shift: Slot & { zone: { name: string } };
 };
 
@@ -37,6 +43,8 @@ export function relocationCandidates(
     requestId: request.id,
     personId: request.personId,
     name: `${request.person.firstName} ${request.person.lastName}`,
+    confirmedAssignmentCount:
+      request.person._count.assignmentSlotsOne + request.person._count.assignmentSlotsTwo,
     sourceZone: request.shift.zone.name,
     comments: request.comments,
     notes: request.person.notes,

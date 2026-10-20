@@ -33,7 +33,13 @@ export async function getRelocationRequests(slots: {
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: {
       id: true, personId: true, comments: true,
-      person: { select: { firstName: true, lastName: true, phone: true, notes: true } },
+      person: { select: {
+        firstName: true, lastName: true, phone: true, notes: true,
+        _count: { select: {
+          assignmentSlotsOne: { where: { status: "CONFIRMED" } },
+          assignmentSlotsTwo: { where: { status: "CONFIRMED" } },
+        } },
+      } },
       shift: { select: { id: true, zoneId: true, shiftDate: true, startTime: true, endTime: true, zone: { select: { name: true } } } },
     },
   });

@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type { RelocationCandidate } from "@/features/admin/assignment/relocation";
 
 export function RelocationCandidates({ candidates }: { candidates: RelocationCandidate[] }) {
@@ -13,7 +13,10 @@ export function RelocationCandidates({ candidates }: { candidates: RelocationCan
       {candidates.map((candidate) => (
         <Box key={candidate.personId} sx={{ borderLeft: "3px solid", borderColor: "info.main", pl: 1.5 }}>
           <Stack spacing={0.5}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{candidate.name}</Typography>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{candidate.name}</Typography>
+              <Chip size="small" variant="outlined" label={`${candidate.confirmedAssignmentCount} turnos confirmados`} />
+            </Stack>
             <Typography variant="body2">Solicitó: {candidate.sourceZone}</Typography>
             {candidate.comments ? <Typography variant="body2">{candidate.comments}</Typography> : null}
             {candidate.notes ? <Typography variant="body2" color="text.secondary">Observaciones: {candidate.notes}</Typography> : null}

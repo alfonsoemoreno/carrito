@@ -14,7 +14,10 @@ const source = { ...target, id: "source", zoneId: "zone-b", zone: { name: "Hospi
 function request(id: string, personId: string, shift = source) {
   return {
     id, personId, shift, comments: "Comentario original",
-    person: { firstName: "María", lastName: "Pérez", phone: "9 1234 5678", notes: "Observaciones" },
+    person: {
+      firstName: "María", lastName: "Pérez", phone: "9 1234 5678", notes: "Observaciones",
+      _count: { assignmentSlotsOne: 2, assignmentSlotsTwo: 1 },
+    },
   };
 }
 
@@ -42,6 +45,7 @@ test("deduplica personas de varios lugares y excluye quienes ya solicitaron el d
   assert.equal(candidates[0].sourceZone, "Hospital");
   assert.equal(candidates[0].comments, "Comentario original");
   assert.equal(candidates[0].notes, "Observaciones");
+  assert.equal(candidates[0].confirmedAssignmentCount, 3);
 });
 
 test("WhatsApp propone el cambio con ambos lugares y pide aceptación sin anunciar una asignación confirmada", () => {
