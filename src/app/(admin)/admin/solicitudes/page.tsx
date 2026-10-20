@@ -1,12 +1,9 @@
-import { RelocationCandidates } from "@/components/admin/relocation-candidates";
-import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
+import { RequestsInbox } from "@/components/admin/requests-inbox";
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
   Container,
   FormControl,
   InputLabel,
@@ -15,10 +12,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
-import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
+import { EmptyState } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
   getAdminAssignmentOverview,
@@ -42,43 +38,24 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
         <AdminPageShell
           eyebrow="Operación"
           title="Bandeja de solicitudes"
-          description="Prioriza turnos con pendientes y entra a la vista centrada en resolver cada asignacion."
+          description="Encuentra los turnos que necesitan atención, compara solicitantes y coordina cambios de lugar por WhatsApp."
         >
           {state.notice ? (
             <Alert severity="success">{state.notice}</Alert>
           ) : null}
           {state.error ? <Alert severity="error">{state.error}</Alert> : null}
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "repeat(3, minmax(0, 1fr))",
-              },
-              gap: 2.5,
-            }}
-          >
-            <FormCard
-              title="Turnos con pendientes"
-              description="Cantidad de turnos que requieren decision administrativa."
-            >
-              <Typography variant="h3">{overview.pendingShifts}</Typography>
-            </FormCard>
-            <FormCard
-              title="Solicitudes pendientes"
-              description="Intenciones todavia no confirmadas ni rechazadas."
-            >
-              <Typography variant="h3">{overview.pendingRequests}</Typography>
-            </FormCard>
-            <FormCard
-              title="Asignaciones confirmadas"
-              description="Turnos ya cubiertos con pareja confirmada."
-            >
-              <Typography variant="h3">
-                {overview.confirmedAssignments}
-              </Typography>
-            </FormCard>
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: { xs: 1, md: 2 } }}>
+            {[
+              ["Turnos por resolver", overview.pendingShifts],
+              ["Solicitudes pendientes", overview.pendingRequests],
+              ["Turnos confirmados", overview.confirmedAssignments],
+            ].map(([label, count]) => (
+              <Box key={label} sx={{ p: { xs: 1.5, md: 2 }, border: "1px solid", borderColor: "divider", borderTop: "3px solid", borderTopColor: "primary.main" }}>
+                <Typography variant="h4" component="p">{count}</Typography>
+                <Typography variant="body2" color="text.secondary">{label}</Typography>
+              </Box>
+            ))}
           </Box>
 
           <Card
@@ -90,7 +67,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
           >
             <CardContent>
               <Stack spacing={2.5}>
-                <Typography variant="h5">Filtrar bandeja</Typography>
+                <Typography variant="subtitle1">Lugar y estado</Typography>
                 <form action="/admin/solicitudes">
                   <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                     <FormControl fullWidth>
@@ -110,12 +87,12 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                       </Select>
                     </FormControl>
                     <FormControl fullWidth>
-                      <InputLabel id="pending-filter-label">Filtro</InputLabel>
+                      <InputLabel id="pending-filter-label">Estado</InputLabel>
                       <Select
                         labelId="pending-filter-label"
                         name="onlyPending"
                         defaultValue={state.filters.onlyPending}
-                        label="Filtro"
+                        label="Estado"
                       >
                         <MenuItem value="true">
                           Solo turnos con pendientes
@@ -143,117 +120,7 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
               body="No hay solicitudes pendientes con los filtros actuales."
             />
           ) : (
-            <Stack spacing={2.5}>
-              {state.shifts.map((shift) => (
-                <Card
-                  key={shift.id}
-                  sx={{
-                    borderRadius: 0,
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <CardContent>
-                    <Stack spacing={2}>
-                      <Stack
-                        direction={{ xs: "column", md: "row" }}
-                        spacing={1.5}
-                        sx={{
-                          justifyContent: "space-between",
-                          alignItems: { xs: "flex-start", md: "center" },
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="h5">{shift.zoneName}</Typography>
-                          <Typography color="text.secondary">
-                            {shift.dateLabel} · {shift.timeLabel}
-                          </Typography>
-                        </Box>
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          sx={{ flexWrap: "wrap", rowGap: 1, justifyContent: { xs: "flex-start", md: "flex-end" } }}
-                        >
-                          <Chip
-                            label={`${shift.pendingCount} pendientes`}
-                            color="warning"
-                          />
-                          <Chip
-                            label={`${shift.resolvedCount} resueltas`}
-                            variant="outlined"
-                          />
-                          {shift.currentAssignmentLabel ? (
-                            <Chip
-                              label="Ya asignado"
-                              color="success"
-                              variant="outlined"
-                            />
-                          ) : null}
-                        </Stack>
-                      </Stack>
-
-                      {shift.currentAssignmentLabel ? (
-                        <Typography color="text.secondary">
-                          Asignacion actual: {shift.currentAssignmentLabel}
-                        </Typography>
-                      ) : null}
-
-                      {shift.requesters.length > 0 ? (
-                        <Stack spacing={1}>
-                          <Typography variant="subtitle1">
-                            Personas solicitantes
-                          </Typography>
-                          {shift.requesters.map((requester) => (
-                            <Box
-                              key={requester.id}
-                              sx={{
-                                borderLeft: "3px solid",
-                                borderColor: "primary.main",
-                                pl: 1.5,
-                              }}
-                            >
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}
-                              >
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                  {requester.name}
-                                </Typography>
-                                <Chip
-                                  size="small"
-                                  variant="outlined"
-                                  label={`${requester.confirmedAssignmentCount} turnos confirmados`}
-                                />
-                              </Stack>
-                              <Typography variant="body2" color="text.secondary">
-                                {requester.comments || "Sin comentario"}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Observaciones: {requester.participantNotes || "Sin observaciones."}
-                              </Typography>
-                            </Box>
-                          ))}
-                        </Stack>
-                      ) : null}
-
-                      {!shift.currentAssignmentLabel ? <RelocationCandidates candidates={shift.relocationCandidates} /> : null}
-
-                      {!shift.currentAssignmentLabel ? (
-                        <Link href={`/admin/turnos/${shift.id}`}>
-                          <Button
-                            variant="contained"
-                            startIcon={<AssignmentTurnedInRoundedIcon />}
-                          >
-                            Resolver turno
-                          </Button>
-                        </Link>
-                      ) : null}
-                    </Stack>
-                  </CardContent>
-                </Card>
-              ))}
-            </Stack>
+            <RequestsInbox key={`${state.filters.zoneId}-${state.filters.onlyPending}`} shifts={state.shifts} />
           )}
         </AdminPageShell>
       </Container>

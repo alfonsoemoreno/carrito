@@ -142,7 +142,10 @@ export function AssignmentConfirmationForm({
   return (
     <form action={confirmShiftAssignmentAction}>
       <Stack spacing={2}>
-        <RelocationCandidates candidates={relocationCandidates} />
+        <RelocationCandidates candidates={relocationCandidates} onSelect={(personId, slot) => {
+          if (slot === 1) setPerson1Id(personId);
+          else setPerson2Id(personId);
+        }} />
         <input type="hidden" name="shiftId" value={shift.id} />
         <TextField
           select

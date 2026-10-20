@@ -6,6 +6,7 @@ import { getPublicSiteUrl } from "@/lib/site-url";
 import { prisma } from "@/lib/prisma";
 import {
   formatDate,
+  toDateOnlyString,
   formatTime,
   readFirstSearchParam,
 } from "@/features/public/utils";
@@ -196,6 +197,7 @@ export async function getAdminRequestsPageState(
       return {
         id: shift.id,
         zoneName: shift.zone.name,
+        dateKey: toDateOnlyString(shift.shiftDate),
         dateLabel: formatDate(shift.shiftDate),
         timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
         pendingCount: pending.length,
