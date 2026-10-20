@@ -1,3 +1,4 @@
+import { RelocationCandidates } from "@/components/admin/relocation-candidates";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import {
   Alert,
@@ -235,6 +236,8 @@ export default async function AdminRequestsPage({ searchParams }: Props) {
                           ))}
                         </Stack>
                       ) : null}
+
+                      {!shift.currentAssignmentLabel ? <RelocationCandidates candidates={shift.relocationCandidates} /> : null}
 
                       {!shift.currentAssignmentLabel ? (
                         <Link href={`/admin/turnos/${shift.id}`}>

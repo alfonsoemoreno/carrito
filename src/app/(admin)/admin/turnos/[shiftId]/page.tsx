@@ -203,6 +203,7 @@ export default async function AdminShiftAssignmentPage({
                     people={state.activePeople}
                     assignments={state.sameDayAssignments}
                     pendingRequests={state.sameDayRequests}
+                    relocationCandidates={state.relocationCandidates}
                     rules={{
                       allowMultiplePerDay: state.config?.allowMultiplePerDay ?? true,
                       allowOverlapping: state.config?.allowOverlapping ?? false,

@@ -1,3 +1,5 @@
+import { getRelocationRequests } from "./relocation-queries";
+import { relocationCandidates } from "./relocation";
 import { AssignmentStatus, ShiftRequestStatus } from "@prisma/client";
 import { buildAssignmentWhatsAppLink } from "@/lib/assignment-notifications";
 import { getPublicSiteUrl } from "@/lib/site-url";
@@ -133,6 +135,8 @@ export async function getAdminRequestsPageState(
     }),
   ]);
 
+  const relocationRequests = await getRelocationRequests(shifts.filter((shift) => shift.assignments.length === 0));
+
   const requesterPersonIds = Array.from(
     new Set(
       shifts.flatMap((shift) =>
@@ -196,6 +200,7 @@ export async function getAdminRequestsPageState(
         timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
         pendingCount: pending.length,
         resolvedCount: resolved.length,
+        relocationCandidates: currentAssignment ? [] : relocationCandidates({ ...shift, requests: pending }, relocationRequests),
         requesters: pending.map((request) => ({
           id: request.id,
           name: `${request.person.firstName} ${request.person.lastName}`,
@@ -339,6 +344,8 @@ export async function getShiftAssignmentPageState(
     }),
   ]);
 
+  const relocationRequests = await getRelocationRequests([shift]);
+
   const pendingRequests = shift.requests.filter(
     (request) => request.status === ShiftRequestStatus.PENDING,
   );
@@ -366,6 +373,7 @@ export async function getShiftAssignmentPageState(
       blocks: shift.blocks.map((block) => block.reason),
     },
     config,
+    relocationCandidates: relocationCandidates({ ...shift, requests: pendingRequests }, relocationRequests),
     pendingRequests: pendingRequests.map((request) => ({
       id: request.id,
       personId: request.person.id,

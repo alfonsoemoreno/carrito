@@ -11,6 +11,8 @@ import {
   confirmShiftAssignmentSchema,
   rejectShiftRequestSchema,
 } from "@/features/admin/assignment/validations";
+import { getRelocationRequests } from "./relocation-queries";
+import { isSameSlotInOtherZone } from "./relocation";
 import { toDateOnlyString } from "@/features/public/utils";
 
 function redirectTo(path: string): never {
@@ -221,6 +223,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
           shift: {
             select: {
               id: true,
+              zoneId: true,
               shiftDate: true,
               startTime: true,
               endTime: true,
@@ -241,6 +244,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
           shift: {
             select: {
               id: true,
+              zoneId: true,
               shiftDate: true,
               startTime: true,
               endTime: true,
@@ -276,6 +280,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
           shift: {
             select: {
               id: true,
+              zoneId: true,
               shiftDate: true,
               startTime: true,
               endTime: true,
@@ -293,6 +298,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
           shift: {
             select: {
               id: true,
+              zoneId: true,
               shiftDate: true,
               startTime: true,
               endTime: true,
@@ -317,6 +323,29 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
       }),
     );
   }
+
+  if (person1.id === person2.id) {
+    redirectTo(buildShiftRedirect(parsed.shiftId, { error: "Debes seleccionar dos personas diferentes." }));
+  }
+
+  const consentIds = new Set(formData.getAll("relocationConsent").map(String));
+  const relocations = [
+    { personId: person1.id, requests: person1PendingRequests },
+    { personId: person2.id, requests: person2PendingRequests },
+  ].filter(({ personId, requests }) =>
+    !shift.requests.some((request) => request.personId === personId) &&
+    requests.some((request) => isSameSlotInOtherZone(shift, request)),
+  );
+  const eligibleRelocations = await getRelocationRequests([shift]);
+  for (const relocation of relocations) {
+    if (!consentIds.has(relocation.personId)) {
+      redirectTo(buildShiftRedirect(parsed.shiftId, { error: "Debes registrar la aceptación por WhatsApp de cada persona que cambiará de lugar." }));
+    }
+    if (!eligibleRelocations.some((request) => request.personId === relocation.personId && isSameSlotInOtherZone(shift, request.shift))) {
+      redirectTo(buildShiftRedirect(parsed.shiftId, { error: "Una persona ya no está disponible para el cambio de lugar. Actualiza y revisa sus solicitudes." }));
+    }
+  }
+  const relocatingIds = new Set(relocations.map((relocation) => relocation.personId));
 
   const warnings = buildAssignmentWarnings({
     config: {
@@ -349,8 +378,8 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
     relationshipTypes: relationships.map((relationship) => relationship.type),
     person1Assignments,
     person2Assignments,
-    person1PendingRequests,
-    person2PendingRequests,
+    person1PendingRequests: person1PendingRequests.filter((request) => !relocatingIds.has(person1.id) || !isSameSlotInOtherZone(shift, request)),
+    person2PendingRequests: person2PendingRequests.filter((request) => !relocatingIds.has(person2.id) || !isSameSlotInOtherZone(shift, request)),
     person1Availability,
     person2Availability,
     activeAssignmentId: shift.assignments[0]?.id ?? null,
@@ -377,110 +406,147 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
 
   const now = new Date();
 
-  await prisma.$transaction(async (tx) => {
-    const currentAssignment = shift.assignments[0];
-
-    if (currentAssignment) {
-      await tx.assignment.update({
-        where: { id: currentAssignment.id },
-        data: {
-          status: AssignmentStatus.REPLACED,
-          cancelledAt: now,
-          ruleExceptionUsed: Boolean(parsed.exceptionReason),
-          exceptionReason: parsed.exceptionReason || "Reemplazo administrativo.",
-          decidedByAdminId: admin.id,
-        },
-      });
-    }
-
-    const assignment = await tx.assignment.create({
-      data: {
-        shiftId: shift.id,
-        person1Id: person1.id,
-        person2Id: person2.id,
-        status: AssignmentStatus.CONFIRMED,
-        ruleExceptionUsed: warnings.length > 0 || Boolean(parsed.exceptionReason),
-        exceptionReason: parsed.exceptionReason || null,
-        decidedByAdminId: admin.id,
-        confirmedAt: now,
-      },
-    });
-
-    for (const personId of [person1.id, person2.id]) {
-      const resolvedRequests = await tx.shiftRequest.updateMany({
-        where: {
-          shiftId: shift.id,
-          personId,
-          status: ShiftRequestStatus.PENDING,
-        },
-        data: {
-          status: ShiftRequestStatus.CONFIRMED,
-          resolvedAt: now,
-          cancelledAt: null,
-        },
-      });
-
-      if (resolvedRequests.count === 0) {
-        const existingConfirmedRequest = await tx.shiftRequest.findFirst({
-          where: {
-            shiftId: shift.id,
-            personId,
-            status: ShiftRequestStatus.CONFIRMED,
+  try {
+    await prisma.$transaction(async (tx) => {
+      const freshShift = await tx.shift.findUnique({ where: { id: shift.id }, include: { assignments: { where: { status: "CONFIRMED" } } } });
+      if (!freshShift || freshShift.status !== shift.status || freshShift.assignments[0]?.id !== shift.assignments[0]?.id) {
+        throw new Error("RELOCATION_STALE");
+      }
+      const freshCandidates = await getRelocationRequests([shift], tx);
+      for (const personId of relocatingIds) {
+        if (!freshCandidates.some((request) => request.personId === personId && isSameSlotInOtherZone(shift, request.shift))) {
+          throw new Error("RELOCATION_STALE");
+        }
+      }
+      const transferredRequests = freshCandidates.filter((request) => relocatingIds.has(request.personId) && isSameSlotInOtherZone(shift, request.shift));
+      for (const request of transferredRequests) {
+        await tx.shiftRequest.update({
+          where: { id: request.id },
+          data: {
+            status: "CANCELLED", cancelledAt: now, resolvedAt: now,
+            comments: appendAdminNote(request.comments, `Cambio a turno ${shift.id}, aceptado por WhatsApp y registrado por el administrador.`),
           },
         });
+        await tx.auditLog.create({ data: {
+          actorType: "ADMIN", actorAdminId: admin.id, entityType: "shift_request", entityId: request.id,
+          action: "SHIFT_REQUEST_RELOCATED",
+          beforeData: { shiftId: request.shift.id, status: "PENDING" },
+          afterData: { shiftId: shift.id, personId: request.personId, consentChannel: "WHATSAPP", consentRecordedAt: now.toISOString() },
+        } });
+      }
+      const currentAssignment = shift.assignments[0];
 
-        if (existingConfirmedRequest) continue;
-
-        await tx.shiftRequest.create({
+      if (currentAssignment) {
+        await tx.assignment.update({
+          where: { id: currentAssignment.id },
           data: {
-            shiftId: shift.id,
-            personId,
-            status: ShiftRequestStatus.CONFIRMED,
-            resolvedAt: now,
-            comments: "[Admin] Confirmado manualmente sin solicitud previa.",
+            status: AssignmentStatus.REPLACED,
+            cancelledAt: now,
+            ruleExceptionUsed: Boolean(parsed.exceptionReason),
+            exceptionReason: parsed.exceptionReason || "Reemplazo administrativo.",
+            decidedByAdminId: admin.id,
           },
         });
       }
-    }
 
-    await tx.shiftRequest.updateMany({
-      where: {
-        shiftId: shift.id,
-        status: ShiftRequestStatus.PENDING,
-        personId: {
-          notIn: [person1.id, person2.id],
-        },
-      },
-      data: {
-        status: ShiftRequestStatus.REJECTED,
-        resolvedAt: now,
-      },
-    });
-
-    await tx.shift.update({
-      where: { id: shift.id },
-      data: {
-        status: ShiftStatus.FULL,
-      },
-    });
-
-    await tx.auditLog.create({
-      data: {
-        actorType: "ADMIN",
-        entityType: "assignment",
-        entityId: assignment.id,
-        actorAdminId: admin.id,
-        action: currentAssignment ? "SHIFT_ASSIGNMENT_REPLACED" : "SHIFT_ASSIGNMENT_CONFIRMED",
-        afterData: {
+      const assignment = await tx.assignment.create({
+        data: {
           shiftId: shift.id,
           person1Id: person1.id,
           person2Id: person2.id,
-          warnings,
+          status: AssignmentStatus.CONFIRMED,
+          ruleExceptionUsed: warnings.length > 0 || Boolean(parsed.exceptionReason),
           exceptionReason: parsed.exceptionReason || null,
+          decidedByAdminId: admin.id,
+          confirmedAt: now,
         },
-      },
-    });
-  });
+      });
+
+      for (const personId of [person1.id, person2.id]) {
+        const resolvedRequests = await tx.shiftRequest.updateMany({
+          where: {
+            shiftId: shift.id,
+            personId,
+            status: ShiftRequestStatus.PENDING,
+          },
+          data: {
+            status: ShiftRequestStatus.CONFIRMED,
+            resolvedAt: now,
+            cancelledAt: null,
+          },
+        });
+
+        if (resolvedRequests.count === 0) {
+          const existingConfirmedRequest = await tx.shiftRequest.findFirst({
+            where: {
+              shiftId: shift.id,
+              personId,
+              status: ShiftRequestStatus.CONFIRMED,
+            },
+          });
+
+          if (existingConfirmedRequest) continue;
+
+          await tx.shiftRequest.create({
+            data: {
+              shiftId: shift.id,
+              personId,
+              status: ShiftRequestStatus.CONFIRMED,
+              resolvedAt: now,
+              comments: relocatingIds.has(personId)
+                ? "[Admin] Cambio de lugar aceptado por WhatsApp y registrado por el administrador."
+                : "[Admin] Confirmado manualmente sin solicitud previa.",
+            },
+          });
+        }
+      }
+
+      await tx.shiftRequest.updateMany({
+        where: {
+          shiftId: shift.id,
+          status: ShiftRequestStatus.PENDING,
+          personId: {
+            notIn: [person1.id, person2.id],
+          },
+        },
+        data: {
+          status: ShiftRequestStatus.REJECTED,
+          resolvedAt: now,
+        },
+      });
+
+      await tx.shift.update({
+        where: { id: shift.id },
+        data: {
+          status: ShiftStatus.FULL,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorType: "ADMIN",
+          entityType: "assignment",
+          entityId: assignment.id,
+          actorAdminId: admin.id,
+          action: currentAssignment ? "SHIFT_ASSIGNMENT_REPLACED" : "SHIFT_ASSIGNMENT_CONFIRMED",
+          afterData: {
+            shiftId: shift.id,
+            person1Id: person1.id,
+            person2Id: person2.id,
+            warnings,
+            exceptionReason: parsed.exceptionReason || null,
+          },
+        },
+      });
+    }, { isolationLevel: "Serializable" });
+  } catch (error) {
+    if ((error instanceof Error && error.message === "RELOCATION_STALE") ||
+        (error && typeof error === "object" && "code" in error && error.code === "P2034")) {
+      redirectTo(buildShiftRedirect(parsed.shiftId, { error: "Las solicitudes o asignaciones cambiaron. Revisa la disponibilidad antes de volver a confirmar." }));
+    }
+    throw error;
+  }
+
 
   revalidatePath("/admin");
   revalidatePath("/admin/solicitudes");

@@ -1,9 +1,12 @@
 "use client";
 
-import { Alert, AlertTitle, MenuItem, Stack, TextField } from "@mui/material";
+import { Alert, AlertTitle, Checkbox, FormControlLabel, MenuItem, Stack, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { confirmShiftAssignmentAction } from "@/features/admin/assignment/actions";
+
+import { RelocationCandidates } from "./relocation-candidates";
+import type { RelocationCandidate } from "@/features/admin/assignment/relocation";
 
 type PersonOption = {
   id: string;
@@ -37,6 +40,7 @@ type Props = {
     endTime: string;
   };
   people: PersonOption[];
+  relocationCandidates: RelocationCandidate[];
   assignments: SameDayAssignment[];
   pendingRequests: SameDayRequest[];
   rules: {
@@ -59,11 +63,13 @@ export function AssignmentConfirmationForm({
   people,
   assignments,
   pendingRequests,
+  relocationCandidates,
   rules,
   defaults,
 }: Props) {
   const [person1Id, setPerson1Id] = useState(defaults.person1Id);
   const [person2Id, setPerson2Id] = useState(defaults.person2Id);
+  const selectedRelocations = relocationCandidates.filter((candidate) => [person1Id, person2Id].includes(candidate.personId));
   const scheduleAlerts = useMemo(() => {
     const selectedPeople = new Map(
       [person1Id, person2Id]
@@ -106,6 +112,8 @@ export function AssignmentConfirmationForm({
     }
 
     for (const request of pendingRequests) {
+      if (relocationCandidates.some((candidate) => candidate.personId === request.personId) &&
+          request.startTime === shift.startTime && request.endTime === shift.endTime && request.zoneName !== shift.zoneName) continue;
       const personLabel = selectedPeople.get(request.personId);
       if (!personLabel) continue;
 
@@ -129,11 +137,12 @@ export function AssignmentConfirmationForm({
       consecutive: [...new Set(consecutive)],
       requestConflicts: [...new Set(requestConflicts)],
     };
-  }, [assignments, pendingRequests, people, person1Id, person2Id, rules, shift]);
+  }, [assignments, pendingRequests, relocationCandidates, people, person1Id, person2Id, rules, shift]);
 
   return (
     <form action={confirmShiftAssignmentAction}>
       <Stack spacing={2}>
+        <RelocationCandidates candidates={relocationCandidates} />
         <input type="hidden" name="shiftId" value={shift.id} />
         <TextField
           select
@@ -146,7 +155,7 @@ export function AssignmentConfirmationForm({
           {people.map((person) => (
             <MenuItem key={person.id} value={person.id}>
               {person.label}
-              {person.requested ? " · con solicitud" : ""}
+              {person.requested ? " · con solicitud" : relocationCandidates.some((candidate) => candidate.personId === person.id) ? " · solicitó en otro lugar" : ""}
             </MenuItem>
           ))}
         </TextField>
@@ -161,10 +170,18 @@ export function AssignmentConfirmationForm({
           {people.map((person) => (
             <MenuItem key={person.id} value={person.id}>
               {person.label}
-              {person.requested ? " · con solicitud" : ""}
+              {person.requested ? " · con solicitud" : relocationCandidates.some((candidate) => candidate.personId === person.id) ? " · solicitó en otro lugar" : ""}
             </MenuItem>
           ))}
         </TextField>
+
+        {selectedRelocations.map((candidate) => (
+          <FormControlLabel
+            key={candidate.requestId}
+            control={<Checkbox name="relocationConsent" value={candidate.personId} required />}
+            label={`${candidate.name} aceptó por WhatsApp cambiar de ${candidate.sourceZone} a ${shift.zoneName}.`}
+          />
+        ))}
 
         {scheduleAlerts.overlaps.length > 0 ? (
           <Alert severity="warning">

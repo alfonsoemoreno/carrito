@@ -37,3 +37,17 @@ export function buildAssignmentWhatsAppLink(input: {
   const message = `Hola, ${input.name}. ${assignmentNotice(input.status)}.\nLugar: ${input.zone}\nFecha: ${input.date}\nHorario: ${input.time}\nPareja de esta asignación: ${input.partner}\nRevisa el estado actual en Mis turnos: ${new URL("/asignaciones", input.siteUrl)}`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
+
+export function buildRelocationWhatsAppLink(input: {
+  phone: string | null;
+  name: string;
+  sourceZone: string;
+  targetZone: string;
+  date: string;
+  time: string;
+}) {
+  const phone = normalizeWhatsAppPhone(input.phone);
+  if (!phone) return null;
+  const message = `Hola, ${input.name}. Solicitaste un turno en ${input.sourceZone} el ${input.date}, de ${input.time}. ¿Aceptarías cambiar el lugar a ${input.targetZone}, manteniendo el mismo día y horario?\nPor favor, confirma por este chat si aceptas el cambio. La asignación quedará pendiente hasta que recibamos tu respuesta y la confirme el administrador.`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+}
