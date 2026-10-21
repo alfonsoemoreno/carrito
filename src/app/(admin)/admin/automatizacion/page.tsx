@@ -181,7 +181,7 @@ export default async function AdminAutomationPage() {
               <Stack spacing={1}>
                 <Typography variant="body2">
                   Maximo confirmados por semana:{" "}
-                  {data.config?.maxConfirmedPerWeek ?? 2}
+                  {data.config?.maxConfirmedPerWeek ?? 5}
                 </Typography>
                 <Typography variant="body2">
                   Maximo confirmados por mes:{" "}

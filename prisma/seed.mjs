@@ -269,7 +269,7 @@ async function main() {
       pinMaxAttempts: 5,
       pinLockMinutes: 15,
       maxRequestsPerWeek: 4,
-      maxConfirmedPerWeek: 2,
+      maxConfirmedPerWeek: 5,
       maxConfirmedPerMonth: 6,
       allowConsecutiveDays: false,
       allowMultiplePerDay: true,

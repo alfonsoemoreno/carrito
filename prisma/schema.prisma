@@ -313,7 +313,7 @@ model SystemConfig {
   pinMaxAttempts              Int               @default(5) @map("pin_max_attempts")
   pinLockMinutes              Int               @default(15) @map("pin_lock_minutes")
   maxRequestsPerWeek          Int               @default(4) @map("max_requests_per_week")
-  maxConfirmedPerWeek         Int               @default(2) @map("max_confirmed_per_week")
+  maxConfirmedPerWeek         Int               @default(5) @map("max_confirmed_per_week")
   maxConfirmedPerMonth        Int               @default(6) @map("max_confirmed_per_month")
   allowConsecutiveDays        Boolean           @default(false) @map("allow_consecutive_days")
   allowMultiplePerDay         Boolean           @default(true) @map("allow_multiple_per_day")

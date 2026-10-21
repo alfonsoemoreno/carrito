@@ -352,7 +352,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
       allowSameSexPairing: config?.allowSameSexPairing ?? true,
       allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
       allowOverlapping: config?.allowOverlapping ?? false,
-      maxConfirmedPerWeek: config?.maxConfirmedPerWeek ?? 2,
+      maxConfirmedPerWeek: config?.maxConfirmedPerWeek ?? 5,
       maxConfirmedPerMonth: config?.maxConfirmedPerMonth ?? 6,
     },
     pair: {

@@ -24,7 +24,7 @@ const DEFAULT_CONFIG = {
   pinMaxLength: 8,
   pinMaxAttempts: 5,
   pinLockMinutes: 15,
-  maxConfirmedPerWeek: 2,
+  maxConfirmedPerWeek: 5,
   maxConfirmedPerMonth: 6,
   allowMultiplePerDay: true,
   allowOverlapping: false,
