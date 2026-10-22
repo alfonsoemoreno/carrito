@@ -467,3 +467,7 @@ function buildPdfDocument(pages: PageState[]) {
 
 export { buildZoneShiftsPdf };
 export default buildZoneShiftsPdf;
+
+// Shared low-level PDF drawing primitives; the operational report stays unchanged.
+export { drawFilledRect, drawStrokedRect, drawText, drawTextBlock, wrapText, buildPdfDocument };
+export type { PageState };

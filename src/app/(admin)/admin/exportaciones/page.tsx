@@ -43,7 +43,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
         <AdminPageShell
           eyebrow="Reportes"
           title="Exportaciones"
-          description="Descarga datos operativos en CSV compatible con Excel y abre un calendario imprimible por rango."
+          description="Descarga reportes PDF, archivos CSV compatibles con Excel y el calendario imprimible por rango."
         >
           <Card
             sx={{
@@ -149,7 +149,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", xl: "repeat(4, minmax(0, 1fr))" },
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
               gap: 2.5,
             }}
           >
@@ -182,6 +182,17 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                   Abrir calendario
                 </Button>
               </Link>
+            </FormCard>
+            <FormCard
+              title="PDF de turnos pendientes"
+              description="Solo horarios por cubrir, agrupados por lugar y día. Sin nombres ni datos de solicitantes. Incluye turnos con solicitudes en revisión y sin pareja confirmada."
+            >
+              <Button component="a" href={`/api/exports/pending-shifts-pdf?${query}`} variant="contained" startIcon={<DownloadRoundedIcon />}>
+                Descargar pendientes PDF
+              </Button>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Usa el lugar y las fechas del filtro. Con «Todas» incluye todos los lugares. Excluye turnos iniciados, bloqueados o cerrados.
+              </Typography>
             </FormCard>
             <FormCard
               title="PDF por lugar"
@@ -217,7 +228,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
                     Auditoria reciente de exportaciones
                   </Typography>
                   <Typography color="text.secondary">
-                    Cada descarga CSV queda registrada con administrador, fecha,
+                    Cada descarga CSV o PDF queda registrada con administrador, fecha,
                     volumen y contexto basico.
                   </Typography>
                 </Box>
