@@ -188,7 +188,7 @@ export default async function AdminExportsPage({ searchParams }: Props) {
               title="PDF por día"
               description="Todos los lugares en un solo reporte: horarios, parejas confirmadas y turnos por completar. Sin nombres de solicitantes."
             >
-              <form action="/api/exports/daily-shifts-pdf" method="get">
+              <form action="/api/exports/daily-shifts-pdf" method="get" data-suppress-global-feedback="true">
                 <Stack spacing={1.5}>
                   <TextField name="date" type="date" label="Día del reporte" defaultValue={EVENT.startDate} required
                     slotProps={{ inputLabel: { shrink: true } }} fullWidth />
