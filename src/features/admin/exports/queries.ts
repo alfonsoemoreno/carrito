@@ -339,6 +339,7 @@ export async function getExportsPageState(
             "EXPORT_REQUESTS_CSV_DOWNLOADED",
             "EXPORT_ZONE_SHIFTS_PDF_DOWNLOADED",
             "EXPORT_PENDING_SHIFTS_PDF_DOWNLOADED",
+            "EXPORT_DAILY_SHIFTS_PDF_DOWNLOADED",
           ],
         },
       },
@@ -393,7 +394,9 @@ export async function getExportsPageState(
               ? "Turnos PDF"
               : meta.exportType === "pending-shifts-pdf"
                 ? "Pendientes PDF"
-                : "Asignaciones CSV",
+                : meta.exportType === "daily-shifts-pdf"
+                  ? "Reporte diario PDF"
+                  : "Asignaciones CSV",
         fileName: meta.fileName ?? "",
         rowCount: typeof meta.rowCount === "number" ? meta.rowCount : 0,
         ipAddress: meta.ipAddress ?? "",
