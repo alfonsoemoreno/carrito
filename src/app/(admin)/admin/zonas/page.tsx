@@ -1,5 +1,4 @@
 import {
-  deleteZoneAction,
   updateZoneVisibilityAction,
 } from "@/features/admin/master-data/actions";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
@@ -145,16 +144,9 @@ export default async function AdminZonesPage() {
                         </ActionSubmitButton>
                       </Box>
                     </form>
-                    <form action={deleteZoneAction}>
-                      <input type="hidden" name="id" value={zone.id} />
-                      <ActionSubmitButton
-                        variant="contained"
-                        color="error"
-                        loadingMessage="Estamos eliminando el lugar y sus registros asociados."
-                      >
-                        Eliminar lugar y registros asociados
-                      </ActionSubmitButton>
-                    </form>
+                    <Typography variant="body2" color="text.secondary">
+                      Desactivar u ocultar conserva los turnos, las solicitudes y las asignaciones. Puedes volver a activar el lugar cuando lo necesites.
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>

@@ -1,5 +1,7 @@
 "use server";
 
+import { setZoneVisibility } from "./zone-visibility";
+
 import { randomUUID } from "node:crypto";
 import { hashPin } from "@/lib/pin";
 import { prisma } from "@/lib/prisma";
@@ -295,6 +297,7 @@ export async function createRelationshipAction(formData: FormData) {
 }
 
 export async function createZoneAction(formData: FormData) {
+  const admin = await requireCurrentAdminActor();
   const parsed = createZoneSchema.parse({
     name: formData.get("name"),
     description: formData.get("description"),
@@ -302,8 +305,12 @@ export async function createZoneAction(formData: FormData) {
     publicVisible: booleanFromFormData(formData.get("publicVisible")),
   });
 
-  await prisma.zone.create({
-    data: parsed,
+  await prisma.$transaction(async (tx) => {
+    const zone = await tx.zone.create({ data: parsed });
+    await tx.auditLog.create({ data: {
+      actorType: "ADMIN", actorAdminId: admin.id, entityType: "zone", entityId: zone.id, action: "ZONE_CREATED",
+      afterData: { name: zone.name, status: zone.status, publicVisible: zone.publicVisible },
+    } });
   });
 
   revalidatePath("/admin");
@@ -314,7 +321,7 @@ export async function saveZoneAction(
   _previousState: { error: string; success: boolean },
   formData: FormData,
 ) {
-  await requireCurrentAdminActor();
+  const admin = await requireCurrentAdminActor();
   const parsed = saveZoneSchema.safeParse({
     id: formData.get("id") ?? "",
     name: formData.get("name"),
@@ -333,12 +340,19 @@ export async function saveZoneAction(
   const data = { ...values, description: values.description ?? null };
   const duplicate = await prisma.zone.findFirst({ where: { name: data.name, ...(id ? { id: { not: id } } : {}) }, select: { id: true } });
   if (duplicate) return { error: "Ya existe un lugar con ese nombre.", success: false };
-  if (id) {
-    const result = await prisma.zone.updateMany({ where: { id }, data });
-    if (!result.count) return { error: "El lugar ya no existe. Recarga la página.", success: false };
-  } else {
-    await prisma.zone.create({ data });
-  }
+  const saved = await prisma.$transaction(async (tx) => {
+    const before = id ? await tx.zone.findUnique({ where: { id }, select: { name: true, status: true, publicVisible: true } }) : null;
+    if (id && !before) return false;
+    const zone = id ? await tx.zone.update({ where: { id }, data }) : await tx.zone.create({ data });
+    await tx.auditLog.create({ data: {
+      actorType: "ADMIN", actorAdminId: admin.id, entityType: "zone", entityId: zone.id,
+      action: id ? "ZONE_UPDATED" : "ZONE_CREATED",
+      ...(before ? { beforeData: before } : {}),
+      afterData: { name: zone.name, status: zone.status, publicVisible: zone.publicVisible },
+    } });
+    return true;
+  });
+  if (!saved) return { error: "El lugar ya no existe. Recarga la página.", success: false };
   revalidatePath("/admin", "layout");
   revalidatePath("/mapa");
   revalidatePath("/solicitar");
@@ -347,158 +361,30 @@ export async function saveZoneAction(
 }
 
 export async function updateZoneVisibilityAction(formData: FormData) {
-  await requireCurrentAdminActor();
+  const admin = await requireCurrentAdminActor();
   const parsed = updateZoneVisibilitySchema.parse({
     id: formData.get("id"),
     publicVisible: booleanFromFormData(formData.get("publicVisible")),
     status: formData.get("status"),
   });
-
-  await prisma.zone.update({
-    where: { id: parsed.id },
-    data: {
-      publicVisible: parsed.publicVisible,
-      status: parsed.status,
-    },
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/zonas");
+  await prisma.$transaction((tx) => setZoneVisibility(tx, { ...parsed, adminId: admin.id }));
+  revalidatePath("/admin", "layout");
   revalidatePath("/mapa");
+  revalidatePath("/solicitar");
+  revalidatePath("/asignaciones");
 }
 
+// Keep the existing action safe for previously loaded clients: archive, never delete.
 export async function deleteZoneAction(formData: FormData) {
-  const parsed = deleteZoneSchema.parse({
-    id: formData.get("id"),
-  });
-  await requireCurrentAdminActor();
-
-  await prisma.$transaction(async (tx) => {
-    const zone = await tx.zone.findUnique({
-      where: { id: parsed.id },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        status: true,
-        publicVisible: true,
-        shifts: {
-          select: {
-            id: true,
-            requests: {
-              select: { id: true },
-            },
-            assignments: {
-              select: { id: true },
-            },
-          },
-        },
-        templates: {
-          select: { id: true },
-        },
-        blocks: {
-          select: { id: true },
-        },
-      },
-    });
-
-    if (!zone) {
-      return;
-    }
-
-    const shiftIds = zone.shifts.map((shift) => shift.id);
-    const requestIds = zone.shifts.flatMap((shift) =>
-      shift.requests.map((request) => request.id),
-    );
-    const assignmentIds = zone.shifts.flatMap((shift) =>
-      shift.assignments.map((assignment) => assignment.id),
-    );
-    const templateIds = zone.templates.map((template) => template.id);
-    const directBlockIds = zone.blocks.map((block) => block.id);
-    const shiftBlockIds =
-      shiftIds.length > 0
-        ? await tx.shiftBlock.findMany({
-            where: {
-              shiftId: { in: shiftIds },
-            },
-            select: { id: true },
-          })
-        : [];
-    const allBlockIds = [
-      ...directBlockIds,
-      ...shiftBlockIds.map((block) => block.id),
-    ];
-
-    await tx.auditLog.deleteMany({
-      where: {
-        entityType: "zone",
-        entityId: zone.id,
-      },
-    });
-
-    if (requestIds.length > 0) {
-      await tx.auditLog.deleteMany({
-        where: {
-          entityType: "shift_request",
-          entityId: { in: requestIds },
-        },
-      });
-    }
-
-    if (assignmentIds.length > 0) {
-      await tx.auditLog.deleteMany({
-        where: {
-          entityType: "assignment",
-          entityId: { in: assignmentIds },
-        },
-      });
-    }
-
-    if (allBlockIds.length > 0) {
-      await tx.shiftBlock.deleteMany({
-        where: {
-          id: { in: allBlockIds },
-        },
-      });
-    }
-
-    if (shiftIds.length > 0) {
-      await tx.shiftBlock.deleteMany({
-        where: {
-          shiftId: { in: shiftIds },
-        },
-      });
-
-      await tx.shift.deleteMany({
-        where: {
-          id: { in: shiftIds },
-        },
-      });
-    }
-
-    if (templateIds.length > 0) {
-      await tx.shiftTemplate.deleteMany({
-        where: {
-          id: { in: templateIds },
-        },
-      });
-    }
-
-    await tx.zone.delete({
-      where: { id: zone.id },
-    });
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/zonas");
-  revalidatePath("/admin/plantillas");
-  revalidatePath("/admin/bloqueos");
-  revalidatePath("/admin/solicitudes");
-  revalidatePath("/admin/estadisticas");
-  revalidatePath("/admin/exportaciones");
-  revalidatePath("/solicitar");
+  const admin = await requireCurrentAdminActor();
+  const parsed = deleteZoneSchema.parse({ id: formData.get("id") });
+  await prisma.$transaction((tx) => setZoneVisibility(tx, {
+    id: parsed.id, status: "INACTIVE", publicVisible: false, adminId: admin.id,
+  }));
+  revalidatePath("/admin", "layout");
   revalidatePath("/mapa");
-  revalidatePath("/admin/mapa");
+  revalidatePath("/solicitar");
+  revalidatePath("/asignaciones");
 }
 
 export async function createTemplateAction(formData: FormData) {
