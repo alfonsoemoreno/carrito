@@ -207,11 +207,13 @@ El modo claro/oscuro sigue siendo una preferencia independiente de cada usuario.
 - `src/theme/events/ironman-valdivia.css` y `.ts`: identidad inspirada en la página de IRONMAN Valdivia, con azules de río, fondos oscuros y títulos condensados.
 - `src/theme/event-theme.ts`: registro de marcas y selección del tema.
 - `src/lib/event-editions.ts`: nombres y fechas de cada edición. Actualiza aquí la edición anual sin modificar los temas. Las fechas también determinan el rango público de turnos y el cierre de solicitudes.
-- `public/icons/<tema>/`: iconos independientes. Los originales se conservan bajo `tour-de-france`; el nuevo icono es un monograma de Valdivia con una onda de río.
+- `public/icons/<tema>/`: iconos independientes. Los originales se conservan bajo `tour-de-france`; el icono de la aplicación es un monograma de Valdivia con una onda de río. El encabezado de Ironman utiliza una reconstrucción vectorial sin patrocinador: `logo-light.svg` (tinta oscura) y `logo-dark.svg` (blanco), ambos transparentes. El archivo original `official-logo.png` se conserva únicamente como referencia.
 
-La edición IRONMAN 2026 usa el 29 de noviembre, fecha de la carrera publicada en
-[la página oficial](https://www.ironman.com/races/im-valdivia). Si la coordinación
-incluye días anteriores o posteriores, ajusta `startDate`, `endDate`, `dateLabel`
-y `shortDateLabel` en su edición antes de habilitar esos turnos.
+La coordinación de IRONMAN 2026 abarca del **23 al 29 de noviembre de 2026**, ambos incluidos. La carrera se celebra el 29 de noviembre según [la página oficial](https://www.ironman.com/races/im-valdivia).
+
+En esta edición cada persona puede tener hasta **5 turnos confirmados**. Este límite se comprueba dentro de la transacción de asignación y no admite excepción administrativa. Las solicitudes pendientes no cuentan como asignaciones. Reemplazar una pareja en el mismo turno no duplica su cómputo; las asignaciones canceladas o reemplazadas no cuentan.
+
+Si las mismas dos personas tienen otro turno confirmado durante la semana de lunes a domingo, el formulario muestra una advertencia, independientemente del orden de las personas o del lugar y horario. Para continuar, el administrador debe ingresar un motivo de excepción, que queda en la auditoría. El servidor vuelve a comprobar la pareja al guardar para detectar cambios hechos por otros administradores.
+
 Cambiar de tema no migra ni separa personas, solicitudes, zonas o asignaciones de
 la base de datos y no crea nuevos turnos.

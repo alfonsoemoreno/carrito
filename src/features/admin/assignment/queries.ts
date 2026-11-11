@@ -5,6 +5,7 @@ import { buildAssignmentWhatsAppLink } from "@/lib/assignment-notifications";
 import { getPublicSiteUrl } from "@/lib/site-url";
 import { prisma } from "@/lib/prisma";
 import {
+  getWeekRangeUtc,
   formatDate,
   toDateOnlyString,
   formatTime,
@@ -283,7 +284,7 @@ export async function getShiftAssignmentPageState(
     return null;
   }
 
-  const [activePeople, config, sameDayAssignments, sameDayRequests] = await Promise.all([
+  const [activePeople, config, weeklyAssignments, sameDayRequests] = await Promise.all([
     prisma.person.findMany({
       where: {
         status: "ACTIVE",
@@ -309,7 +310,7 @@ export async function getShiftAssignmentPageState(
       where: {
         status: AssignmentStatus.CONFIRMED,
         shiftId: { not: shift.id },
-        shift: { shiftDate: shift.shiftDate },
+        shift: { shiftDate: { gte: getWeekRangeUtc(shift.shiftDate).start, lte: getWeekRangeUtc(shift.shiftDate).end } },
       },
       orderBy: [{ shift: { startTime: "asc" } }],
       select: {
@@ -318,6 +319,7 @@ export async function getShiftAssignmentPageState(
         shift: {
           select: {
             id: true,
+            shiftDate: true,
             startTime: true,
             endTime: true,
             zone: { select: { name: true } },
@@ -368,6 +370,7 @@ export async function getShiftAssignmentPageState(
       id: shift.id,
       zoneName: shift.zone.name,
       dateLabel: formatDate(shift.shiftDate),
+      shiftDate: toDateOnlyString(shift.shiftDate),
       timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
       startTime: formatTime(shift.startTime),
       endTime: formatTime(shift.endTime),
@@ -425,7 +428,13 @@ export async function getShiftAssignmentPageState(
       label: `${person.firstName} ${person.lastName}`,
       requested: selectedPendingIds.includes(person.id),
     })),
-    sameDayAssignments: sameDayAssignments.map((assignment) => ({
+    weeklyAssignments: weeklyAssignments.map((assignment) => ({
+      shiftId: assignment.shift.id,
+      shiftDate: toDateOnlyString(assignment.shift.shiftDate),
+      person1Id: assignment.person1Id,
+      person2Id: assignment.person2Id,
+    })),
+    sameDayAssignments: weeklyAssignments.filter((assignment) => toDateOnlyString(assignment.shift.shiftDate) === toDateOnlyString(shift.shiftDate)).map((assignment) => ({
       shiftId: assignment.shift.id,
       person1Id: assignment.person1Id,
       person2Id: assignment.person2Id,

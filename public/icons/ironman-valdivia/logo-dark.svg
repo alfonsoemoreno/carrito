@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 602 225" width="602" height="225" role="img" aria-labelledby="logo-title" style="color:#ffffff"><title id="logo-title">IRONMAN Valdivia Chile</title><g fill="currentColor">
+  <circle cx="361" cy="28" r="25"/>
+  <path d="M4 70H35V175H4Z"/>
+  <path fill-rule="evenodd" d="M43 175V70H94Q121 70 121 97V112Q121 128 108 134L126 175H93L77 137H73V175ZM73 94V115H85Q92 115 92 108V101Q92 94 85 94Z"/>
+  <path fill-rule="evenodd" d="M155 70H182Q208 70 208 96V149Q208 175 182 175H155Q130 175 130 149V96Q130 70 155 70ZM166 96Q160 96 160 103V142Q160 149 166 149H172Q178 149 178 142V103Q178 96 172 96Z"/>
+  <path d="M216 175V70H246L272 112V70H302V175H272L246 132V175Z"/>
+  <path d="M310 175V70H342L361 109 380 70H412V175H382V124L361 164 340 124V175Z"/>
+  <path fill-rule="evenodd" d="M420 175 443 70H479L504 175H474L470 158H452L448 175ZM456 136H466L461 106Z"/>
+  <path d="M512 175V70H542L568 112V70H598V175H568L542 132V175Z"/>
+  <g transform="translate(5 191) scale(1.3571428571428572 1)" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="miter"><path transform="translate(0)" d="M0 0 12 30 24 0"/><path transform="translate(36)" d="M0 30 12 0 24 30 M4.8 19H19.2"/><path transform="translate(72)" d="M0 0V30H20"/><path transform="translate(104)" d="M0 0V30H8C29 30 29 0 8 0Z"/><path transform="translate(140)" d="M0 0V30"/><path transform="translate(152)" d="M0 0 12 30 24 0"/><path transform="translate(188)" d="M0 0V30"/><path transform="translate(200)" d="M0 30 12 0 24 30 M4.8 19H19.2"/></g>
+  <g transform="translate(351 208)">
+    <path d="M-2 13C-15 10-19-1-15-10-5-7 0 1-2 13Z"/>
+    <path d="M2 13C15 10 19-1 15-10 5-7 0 1 2 13Z"/>
+    <path d="M0 9C-7-2-6-12 0-18 6-12 7-2 0 9Z"/>
+  </g>
+  <g transform="translate(391 191) scale(1.4855072463768115 1)" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="miter"><path transform="translate(0)" d="M24 3C-8-10-8 40 24 27"/><path transform="translate(36)" d="M0 0V30 M24 0V30 M0 15H24"/><path transform="translate(72)" d="M0 0V30"/><path transform="translate(84)" d="M0 0V30H20"/><path transform="translate(116)" d="M22 0H0V30H22 M0 15H19"/></g>
+</g></svg>

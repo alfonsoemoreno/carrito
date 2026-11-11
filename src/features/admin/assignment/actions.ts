@@ -3,6 +3,8 @@
 import { AssignmentStatus, ShiftRequestStatus, ShiftStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { EVENT } from "@/lib/event";
+import { getEventAssignmentLimitErrors, getRepeatedPairWarning } from "@/lib/assignment-event-rules";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentAdminActor } from "@/features/admin/master-data/auth";
 import { appendAdminNote, buildAssignmentWarnings } from "@/features/admin/assignment/utils";
@@ -352,7 +354,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
       allowSameSexPairing: config?.allowSameSexPairing ?? true,
       allowMultiplePerDay: config?.allowMultiplePerDay ?? true,
       allowOverlapping: config?.allowOverlapping ?? false,
-      maxConfirmedPerWeek: config?.maxConfirmedPerWeek ?? 5,
+      maxConfirmedPerWeek: EVENT.maxAssignmentsPerPerson ?? config?.maxConfirmedPerWeek ?? 5,
       maxConfirmedPerMonth: config?.maxConfirmedPerMonth ?? 6,
     },
     pair: {
@@ -411,6 +413,34 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
       const freshShift = await tx.shift.findUnique({ where: { id: shift.id }, include: { assignments: { where: { status: "CONFIRMED" } } } });
       if (!freshShift || freshShift.status !== shift.status || freshShift.assignments[0]?.id !== shift.assignments[0]?.id) {
         throw new Error("RELOCATION_STALE");
+      }
+      // Read inside the serializable transaction so two admins cannot both add a sixth shift.
+      const confirmed = await tx.assignment.findMany({
+        where: {
+          status: AssignmentStatus.CONFIRMED,
+          shiftId: { not: shift.id },
+          OR: [
+            { person1Id: { in: [person1.id, person2.id] } },
+            { person2Id: { in: [person1.id, person2.id] } },
+          ],
+        },
+        select: { person1Id: true, person2Id: true, shift: { select: { id: true, shiftDate: true } } },
+      });
+      const freshRules = {
+        shift,
+        pair: {
+          person1: { id: person1.id, label: `${person1.firstName} ${person1.lastName}` },
+          person2: { id: person2.id, label: `${person2.firstName} ${person2.lastName}` },
+        },
+        person1Assignments: confirmed.filter((row) => row.person1Id === person1.id || row.person2Id === person1.id).map((row) => row.shift),
+        person2Assignments: confirmed.filter((row) => row.person1Id === person2.id || row.person2Id === person2.id).map((row) => row.shift),
+      };
+      const limitErrors = getEventAssignmentLimitErrors(freshRules);
+      if (limitErrors.length) throw new Error(`ASSIGNMENT_RULE:${limitErrors.join(" ")}`);
+      const pairWarning = getRepeatedPairWarning(freshRules);
+      if (pairWarning) {
+        if (!parsed.exceptionReason) throw new Error(`ASSIGNMENT_RULE:${pairWarning} Ingresa un motivo de excepción para continuar.`);
+        if (!warnings.includes(pairWarning)) warnings.push(pairWarning);
       }
       const freshCandidates = await getRelocationRequests([shift], tx);
       for (const personId of relocatingIds) {
@@ -540,6 +570,9 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
       });
     }, { isolationLevel: "Serializable" });
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith("ASSIGNMENT_RULE:")) {
+      redirectTo(buildShiftRedirect(parsed.shiftId, { error: error.message.slice("ASSIGNMENT_RULE:".length) }));
+    }
     if ((error instanceof Error && error.message === "RELOCATION_STALE") ||
         (error && typeof error === "object" && "code" in error && error.code === "P2034")) {
       redirectTo(buildShiftRedirect(parsed.shiftId, { error: "Las solicitudes o asignaciones cambiaron. Revisa la disponibilidad antes de volver a confirmar." }));

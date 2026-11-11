@@ -84,3 +84,8 @@
 :root[data-event-theme="ironman-valdivia"] .event-intro .MuiTypography-root { position: relative; z-index: 1; }
 :root[data-event-theme="ironman-valdivia"] .event-intro .MuiTypography-overline { color: #9bd5e9; }
 :root[data-event-theme="ironman-valdivia"] .event-intro :is(.MuiTypography-h6, .MuiTypography-body1) { color: #d2e3ec; }
+
+.app-brand-official { display: flex; align-items: center; gap: 16px; }
+.app-brand-official img { display: block; width: 148px; height: auto; }
+.app-brand-official__subtitle { color: var(--app-muted); font-size: 0.72rem !important; font-weight: 600 !important; }
+@media (max-width: 600px) { .app-brand-official__subtitle { display: none; } }

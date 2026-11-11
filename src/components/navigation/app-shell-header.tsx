@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EVENT_BRAND } from "@/theme/event-theme";
@@ -564,6 +565,12 @@ export function AppShellHeader({
             }}
           >
             <Link href={homeHref as never}>
+              {EVENT_BRAND.logo ? (
+                <Box className="app-brand-official" aria-label={`${brandTitle} · ${brandSubtitle}`}>
+                  <Image src={EVENT_BRAND.logo[mode]} alt="IRONMAN Valdivia Chile" width={602} height={225} unoptimized />
+                  <Typography component="span" className="app-brand-official__subtitle">{brandSubtitle}</Typography>
+                </Box>
+              ) : (
               <Box
                 aria-label={`${brandTitle} · ${brandSubtitle}`}
                 className="app-brand-lockup"
@@ -592,6 +599,7 @@ export function AppShellHeader({
                   </Typography>
                 </Box>
               </Box>
+              )}
             </Link>
 
             {hasSections ? (

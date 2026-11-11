@@ -1,4 +1,5 @@
 import { AssignmentStatus, ShiftRequestStatus, ShiftStatus } from "@prisma/client";
+import { EVENT } from "@/lib/event";
 import { prisma } from "@/lib/prisma";
 import { findTemplateHorizonGaps } from "@/features/admin/automation/service";
 import { formatDate, formatTime } from "@/features/admin/master-data/utils";
@@ -116,7 +117,7 @@ export async function getAutomationDashboardData() {
   ]);
 
   return {
-    config,
+    config: config ? { ...config, maxConfirmedPerWeek: EVENT.maxAssignmentsPerPerson ?? config.maxConfirmedPerWeek } : config,
     alerts: {
       pendingRequests,
       uncoveredShifts,

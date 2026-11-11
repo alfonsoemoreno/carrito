@@ -1,3 +1,4 @@
+import { getRepeatedPairWarning } from "@/lib/assignment-event-rules";
 import { RelationshipType } from "@prisma/client";
 import {
   getWeekKey,
@@ -189,6 +190,9 @@ export function buildAssignmentWarnings(context: AssignmentRuleContext) {
       context.config,
     ),
   );
+
+  const repeatedPair = getRepeatedPairWarning(context);
+  if (repeatedPair) warnings.push(repeatedPair);
 
   return [...new Set(warnings)];
 }

@@ -8,7 +8,7 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getPublicSession } from "@/features/public/session";
-import { clampToEventDateRange, getEventDateRange, hasEventEnded } from "@/lib/event";
+import { EVENT, clampToEventDateRange, getEventDateRange, hasEventEnded } from "@/lib/event";
 import {
   formatDate,
   formatLongDate,
@@ -73,6 +73,7 @@ export const getPublicConfig = cache(async () => {
   return {
     ...DEFAULT_CONFIG,
     ...config,
+    maxConfirmedPerWeek: EVENT.maxAssignmentsPerPerson ?? config?.maxConfirmedPerWeek ?? DEFAULT_CONFIG.maxConfirmedPerWeek,
   };
 });
 

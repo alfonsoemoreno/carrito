@@ -1,11 +1,16 @@
 export const EVENT_THEMES = {
   "tour-de-france": {
+    logo: null,
     label: "Tour de France",
     category: "Amateur",
     color: "#f5ed00",
     iconDirectory: "/icons/tour-de-france",
   },
   "ironman-valdivia": {
+    logo: {
+      light: "/icons/ironman-valdivia/logo-light.svg",
+      dark: "/icons/ironman-valdivia/logo-dark.svg",
+    },
     label: "IRONMAN Valdivia",
     category: "Triatlón",
     color: "#276e8a",

@@ -202,6 +202,7 @@ export default async function AdminShiftAssignmentPage({
                     shift={state.shift}
                     people={state.activePeople}
                     assignments={state.sameDayAssignments}
+                    weeklyAssignments={state.weeklyAssignments}
                     pendingRequests={state.sameDayRequests}
                     relocationCandidates={state.relocationCandidates}
                     rules={{

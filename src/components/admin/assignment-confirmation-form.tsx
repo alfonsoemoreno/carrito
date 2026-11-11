@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { confirmShiftAssignmentAction } from "@/features/admin/assignment/actions";
 
+import { getEventAssignmentLimitErrors, getRepeatedPairWarning } from "@/lib/assignment-event-rules";
 import { RelocationCandidates } from "./relocation-candidates";
 import type { RelocationCandidate } from "@/features/admin/assignment/relocation";
 
@@ -36,12 +37,14 @@ type Props = {
     id: string;
     zoneName: string;
     dateLabel: string;
+    shiftDate: string;
     startTime: string;
     endTime: string;
   };
   people: PersonOption[];
   relocationCandidates: RelocationCandidate[];
   assignments: SameDayAssignment[];
+  weeklyAssignments: Array<{ shiftId: string; shiftDate: string; person1Id: string; person2Id: string }>;
   pendingRequests: SameDayRequest[];
   rules: {
     allowMultiplePerDay: boolean;
@@ -62,6 +65,7 @@ export function AssignmentConfirmationForm({
   shift,
   people,
   assignments,
+  weeklyAssignments,
   pendingRequests,
   relocationCandidates,
   rules,
@@ -69,6 +73,20 @@ export function AssignmentConfirmationForm({
 }: Props) {
   const [person1Id, setPerson1Id] = useState(defaults.person1Id);
   const [person2Id, setPerson2Id] = useState(defaults.person2Id);
+  const asShifts = (personId: string) => weeklyAssignments
+    .filter((row) => row.person1Id === personId || row.person2Id === personId)
+    .map((row) => ({ id: row.shiftId, shiftDate: new Date(`${row.shiftDate}T00:00:00Z`) }));
+  const eventRules = {
+    shift: { id: shift.id, shiftDate: new Date(`${shift.shiftDate}T00:00:00Z`) },
+    pair: {
+      person1: { id: person1Id, label: people.find((p) => p.id === person1Id)?.label ?? "Persona 1" },
+      person2: { id: person2Id, label: people.find((p) => p.id === person2Id)?.label ?? "Persona 2" },
+    },
+    person1Assignments: asShifts(person1Id),
+    person2Assignments: asShifts(person2Id),
+  };
+  const pairWarning = getRepeatedPairWarning(eventRules);
+  const limitErrors = getEventAssignmentLimitErrors(eventRules);
   const selectedRelocations = relocationCandidates.filter((candidate) => [person1Id, person2Id].includes(candidate.personId));
   const scheduleAlerts = useMemo(() => {
     const selectedPeople = new Map(
@@ -219,6 +237,9 @@ export function AssignmentConfirmationForm({
           </Alert>
         ) : null}
 
+        {pairWarning ? <Alert severity="warning"><AlertTitle>Pareja repetida esta semana</AlertTitle>{pairWarning} Ingresa un motivo de excepción para continuar.</Alert> : null}
+        {limitErrors.map((message) => <Alert severity="error" key={message}>{message}</Alert>)}
+
         <TextField
           name="exceptionReason"
           label="Motivo de excepción o reemplazo"
@@ -229,6 +250,7 @@ export function AssignmentConfirmationForm({
         />
         <ActionSubmitButton
           variant="contained"
+          disabled={limitErrors.length > 0}
           loadingMessage="Estamos confirmando la asignación."
         >
           Confirmar pareja para este turno
