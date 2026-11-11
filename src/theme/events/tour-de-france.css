@@ -1,0 +1,48 @@
+:root[data-event-theme="tour-de-france"] {
+  --font-sans: var(--font-tour-sans);
+  --font-condensed: var(--font-tour-condensed);
+  --app-background: #ffffff;
+  --app-surface: #ffffff;
+  --app-ink: #111111;
+  --app-muted: #5b5b5b;
+  --app-accent: #f5ed00;
+  --app-accent-strong: #ddd500;
+  --app-accent-deep: #111111;
+  --app-button-ink: #111111;
+  --app-button-disabled-bg: #e5e5e5;
+  --app-button-disabled-ink: #707070;
+  --app-header: rgba(255, 255, 255, 0.9);
+  --app-border: #dedede;
+  --app-form-border: #a9a9a9;
+  --app-form-border-strong: #333333;
+  --app-form-label: #292929;
+  --app-form-muted: #666666;
+  --app-form-fill: #fdfdf8;
+  --app-surface-muted: #f7f5d8;
+  --app-shadow-soft: 0 1px 2px rgba(60, 64, 67, 0.08), 0 2px 6px rgba(60, 64, 67, 0.06);
+  --app-selection: #fff5a3;
+}
+
+:root[data-event-theme="tour-de-france"][data-color-mode="dark"] {
+  --app-background: #121212;
+  --app-surface: #1c1c1c;
+  --app-ink: #f2f2f2;
+  --app-muted: #c2c2c2;
+  --app-accent: #f5ed00;
+  --app-accent-strong: #ddd500;
+  --app-accent-deep: #fff58a;
+  --app-button-ink: #111111;
+  --app-button-disabled-bg: #3a3a3a;
+  --app-button-disabled-ink: #9a9a9a;
+  --app-header: rgba(28, 28, 28, 0.92);
+  --app-border: #494949;
+  --app-form-border: #747474;
+  --app-form-border-strong: #dedede;
+  --app-form-label: #f2f2f2;
+  --app-form-muted: #c2c2c2;
+  --app-form-fill: #222222;
+  --app-surface-muted: #292817;
+  --app-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --app-selection: rgba(245, 237, 0, 0.24);
+}
+

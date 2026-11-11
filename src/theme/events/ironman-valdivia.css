@@ -1,0 +1,86 @@
+/* Valdivia's river blues, dark surfaces and condensed sporting headlines. */
+:root[data-event-theme="ironman-valdivia"] {
+  --font-sans: "Helvetica Neue", Arial, sans-serif;
+  --font-condensed: "Arial Narrow", Impact, sans-serif;
+  --app-background: #f3f6f8;
+  --app-surface: #ffffff;
+  --app-ink: #102330;
+  --app-muted: #526674;
+  --app-accent: #276e8a;
+  --app-accent-strong: #1b526a;
+  --app-accent-deep: #205d76;
+  --app-button-ink: #ffffff;
+  --app-button-disabled-bg: #dce4e9;
+  --app-button-disabled-ink: #657783;
+  --app-header: rgba(255, 255, 255, 0.96);
+  --app-border: #d5e0e6;
+  --app-form-border: #859aa8;
+  --app-form-border-strong: #365c70;
+  --app-form-label: #183747;
+  --app-form-muted: #526674;
+  --app-form-fill: #f8fbfc;
+  --app-surface-muted: #e7f0f4;
+  --app-shadow-soft: 0 2px 8px rgba(12, 38, 54, 0.05);
+  --app-selection: #c3e3ef;
+  --app-menu-accent: var(--app-accent);
+  --app-menu-surface: var(--app-surface);
+  --app-menu-ink: var(--app-ink);
+}
+
+:root[data-event-theme="ironman-valdivia"][data-color-mode="dark"] {
+  --app-background: #0b141c;
+  --app-surface: #14222e;
+  --app-ink: #edf5f8;
+  --app-muted: #b3c5d0;
+  --app-accent: #7dc3dc;
+  --app-accent-strong: #a6d9eb;
+  --app-accent-deep: #a6d9eb;
+  --app-button-ink: #071e2a;
+  --app-button-disabled-bg: #2d404f;
+  --app-button-disabled-ink: #9aadb9;
+  --app-header: rgba(11, 20, 28, 0.96);
+  --app-border: #354958;
+  --app-form-border: #718b9b;
+  --app-form-border-strong: #b3d2e2;
+  --app-form-label: #edf5f8;
+  --app-form-muted: #b3c5d0;
+  --app-form-fill: #10202c;
+  --app-surface-muted: #192e3d;
+  --app-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --app-selection: #284d60;
+}
+
+:root[data-event-theme="ironman-valdivia"] .app-brand-title {
+  font-style: normal;
+  letter-spacing: 0.015em !important;
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem) !important;
+}
+:root[data-event-theme="ironman-valdivia"] .app-brand-category { font-style: normal; }
+:root[data-event-theme="ironman-valdivia"] .app-brand-rule { transform: none; width: 52px; }
+:root[data-event-theme="ironman-valdivia"] :is(.MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4) {
+  font-family: var(--font-condensed) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.005em !important;
+}
+:root[data-event-theme="ironman-valdivia"] .app-mobile-menu-toggle__bars span { transform: none; }
+:root[data-event-theme="ironman-valdivia"] .official-mobile-menu__cta { background: var(--app-accent); color: var(--app-button-ink); }
+:root[data-event-theme="ironman-valdivia"] .official-mobile-menu__account-name { color: var(--app-muted); }
+:root[data-event-theme="ironman-valdivia"] .event-intro {
+  padding: clamp(24px, 4vw, 44px);
+  max-width: none;
+  border-left: 5px solid #7dc3dc;
+  color: #ffffff;
+  background: linear-gradient(115deg, #0b1823 0%, #163b50 70%, #245e73 100%);
+  position: relative;
+  overflow: hidden;
+}
+:root[data-event-theme="ironman-valdivia"] .event-intro::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 75%;
+  background: repeating-linear-gradient(120deg, transparent 0 28px, rgba(125, 195, 220, 0.08) 28px 30px);
+  pointer-events: none;
+}
+:root[data-event-theme="ironman-valdivia"] .event-intro .MuiTypography-root { position: relative; z-index: 1; }
+:root[data-event-theme="ironman-valdivia"] .event-intro .MuiTypography-overline { color: #9bd5e9; }
+:root[data-event-theme="ironman-valdivia"] .event-intro :is(.MuiTypography-h6, .MuiTypography-body1) { color: #d2e3ec; }

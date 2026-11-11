@@ -46,7 +46,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
             ...(admin ? [["hidden", "Ocultos / inactivos"]] : []),
           ].map(([value, label]) => <Chip key={value} label={label} clickable variant={filter === value ? "filled" : "outlined"}
             onClick={() => { setFilter(value); setSelectedId(null); }}
-            sx={filter === value ? { bgcolor: "#f5ed00", color: "#111", "&:hover": { bgcolor: "#ddd500" } } : {}} />)}
+            sx={filter === value ? { bgcolor: "var(--app-accent)", color: "var(--app-button-ink)", "&:hover": { bgcolor: "var(--app-accent-strong)" } } : {}} />)}
         </Stack>
         <Button startIcon={<CenterFocusStrongRoundedIcon />} variant="outlined" onClick={() => { setSelectedId(null); setFitVersion((value) => value + 1); }}>
           Ver todos los puntos
@@ -67,7 +67,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
                 sx={{ display: "flex", gap: 1.5, width: "100%", textAlign: "left", font: "inherit", cursor: "pointer", p: 2.5,
                   color: "text.primary", bgcolor: place.id === selected?.id ? "action.selected" : "transparent", border: 0,
                   borderBottom: "1px solid", borderColor: "divider", "&:hover": { bgcolor: "action.hover" },
-                  "&:focus-visible": { outline: "3px solid #f5ed00", outlineOffset: -3 } }}>
+                  "&:focus-visible": { outline: "3px solid var(--app-accent)", outlineOffset: -3 } }}>
                 <Box component="span" sx={{ flexShrink: 0, width: 28, height: 28, display: "grid", placeItems: "center", bgcolor: getMapColor(place.mapColor), color: "#111", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>{place.number ?? index + 1}</Box>
                 <Box component="span" sx={{ minWidth: 0 }}>
                   <Typography component="span" sx={{ display: "block", fontWeight: 700, fontSize: 15 }}>{place.name}</Typography>
@@ -91,7 +91,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
           {selected ? (
             <Box ref={detailsRef} role="region" aria-label={`Detalle de ${selected.name}`} aria-live="polite"
               sx={{ position: { xs: "relative", md: "absolute" }, bottom: { md: 24 }, left: { md: 24 }, width: { md: "min(380px, calc(100% - 80px))" },
-                bgcolor: "background.paper", border: "1px solid", borderColor: "divider", boxShadow: "0 8px 32px #11111118", borderTop: "4px solid #f5ed00", scrollMarginTop: "96px", p: 2.5 }}>
+                bgcolor: "background.paper", border: "1px solid", borderColor: "divider", boxShadow: "0 8px 32px #11111118", borderTop: "4px solid var(--app-accent)", scrollMarginTop: "96px", p: 2.5 }}>
               <Stack spacing={1.5}>
                 <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }} spacing={1}>
                   <Box>
@@ -104,7 +104,7 @@ export function PlacesExplorer({ places, admin = false }: { places: MapPlace[]; 
                 {selected.address ? <Typography variant="body2">{selected.address}</Typography> : !selected.description ? <Typography variant="body2">Sin dirección de referencia</Typography> : null}
                 {hasCoordinates(selected) ? (
                   <Button component="a" href={directionsUrl(selected.latitude, selected.longitude)} target="_blank" rel="noopener noreferrer"
-                    startIcon={<NearMeOutlinedIcon />} sx={{ bgcolor: "#f5ed00", color: "#111", "&:hover": { bgcolor: "#ddd500" } }}>Cómo llegar</Button>
+                    startIcon={<NearMeOutlinedIcon />} sx={{ bgcolor: "var(--app-accent)", color: "var(--app-button-ink)", "&:hover": { bgcolor: "var(--app-accent-strong)" } }}>Cómo llegar</Button>
                 ) : <Alert severity="info">Ubicación pendiente de agregar.</Alert>}
                 {selected.status === "ACTIVE" && selected.publicVisible ?
                   <Button component="a" href={`/solicitar?zoneId=${selected.id}`} variant="outlined" fullWidth>Ver y solicitar turnos</Button> : null}

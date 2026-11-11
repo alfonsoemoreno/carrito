@@ -1,36 +1,13 @@
 import { createTheme, type PaletteMode } from "@mui/material/styles";
+import { ACTIVE_EVENT_THEME, type EventThemeId } from "@/theme/event-theme";
+import { getTourDeFrancePalette } from "@/theme/events/tour-de-france";
+import { getIronmanValdiviaPalette } from "@/theme/events/ironman-valdivia";
 
-function getPaletteTokens(mode: PaletteMode) {
-  if (mode === "dark") {
-    return {
-      primary: { main: "#f5ed00", dark: "#ddd500", light: "#fff58a" },
-      secondary: { main: "#fff58a" },
-      background: { default: "#101418", paper: "#191c20" },
-      text: { primary: "#e3e2e6", secondary: "#c4c7c5" },
-      divider: "#44474e",
-      inputBackground: "#1d2025",
-      cardBorder: "#44474e",
-      checkbox: "#c2c2c2",
-      checkboxDisabled: "#767676",
-    };
-  }
-
-  return {
-    primary: { main: "#111111", dark: "#000000", light: "#f5ed00" },
-    secondary: { main: "#f5ed00" },
-    background: { default: "#ffffff", paper: "#ffffff" },
-    text: { primary: "#111111", secondary: "#5b5b5b" },
-    divider: "#dedede",
-    inputBackground: "#fdfdf8",
-    cardBorder: "#dedede",
-    checkbox: "#5b5b5b",
-    checkboxDisabled: "#999999",
-  };
-}
-
-export function getAppTheme(mode: PaletteMode) {
-  const palette = getPaletteTokens(mode);
-  const primaryWash = mode === "dark" ? "rgba(245, 237, 0, 0.18)" : "rgba(245, 237, 0, 0.24)";
+export function getAppTheme(mode: PaletteMode, eventTheme: EventThemeId = ACTIVE_EVENT_THEME) {
+  const palette = eventTheme === "tour-de-france" ? getTourDeFrancePalette(mode) : getIronmanValdiviaPalette(mode);
+  const primaryWash = eventTheme === "tour-de-france"
+    ? (mode === "dark" ? "rgba(245, 237, 0, 0.18)" : "rgba(245, 237, 0, 0.24)")
+    : (mode === "dark" ? "rgba(125, 195, 220, 0.18)" : "rgba(39, 110, 138, 0.12)");
 
   return createTheme({
     palette: {
@@ -67,7 +44,7 @@ export function getAppTheme(mode: PaletteMode) {
             "&:active": { transform: "translateY(1px)" },
             "&.MuiButton-containedPrimary": {
               backgroundColor: palette.primary.main,
-              color: "#111111",
+              color: eventTheme === "tour-de-france" ? "#111111" : mode === "dark" ? "#071e2a" : "#ffffff",
               "&:hover": { backgroundColor: palette.primary.dark },
             },
             "&.MuiButton-outlined": {

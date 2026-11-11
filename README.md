@@ -193,3 +193,25 @@ npm run test
 - [Fase 7 - Automatizacion y Reglas](/Users/alfonsomoreno/Developer/carrito/docs/fase-7-automatizacion-y-reglas.md)
 - [Fase 8 - Estadisticas y Exportaciones](/Users/alfonsomoreno/Developer/carrito/docs/fase-8-estadisticas-y-exportaciones.md)
 - [Fase 9 - Hardening y Documentacion](/Users/alfonsomoreno/Developer/carrito/docs/fase-9-hardening-y-documentacion.md)
+
+## Temas y ediciones de eventos
+
+La identidad activa es `ironman-valdivia`. Se puede elegir globalmente con
+`NEXT_PUBLIC_EVENT_THEME=ironman-valdivia` o `NEXT_PUBLIC_EVENT_THEME=tour-de-france`
+en el entorno. Reinicia `npm run dev` después del cambio; en producción genera
+un nuevo build. El servidor y el navegador usan la misma configuración, por lo
+que el nombre, las fechas, los metadatos, los iconos y los estilos coinciden.
+El modo claro/oscuro sigue siendo una preferencia independiente de cada usuario.
+
+- `src/theme/events/tour-de-france.css` y `.ts`: identidad original, con sus fuentes Galibier y amarillo.
+- `src/theme/events/ironman-valdivia.css` y `.ts`: identidad inspirada en la página de IRONMAN Valdivia, con azules de río, fondos oscuros y títulos condensados.
+- `src/theme/event-theme.ts`: registro de marcas y selección del tema.
+- `src/lib/event-editions.ts`: nombres y fechas de cada edición. Actualiza aquí la edición anual sin modificar los temas. Las fechas también determinan el rango público de turnos y el cierre de solicitudes.
+- `public/icons/<tema>/`: iconos independientes. Los originales se conservan bajo `tour-de-france`; el nuevo icono es un monograma de Valdivia con una onda de río.
+
+La edición IRONMAN 2026 usa el 29 de noviembre, fecha de la carrera publicada en
+[la página oficial](https://www.ironman.com/races/im-valdivia). Si la coordinación
+incluye días anteriores o posteriores, ajusta `startDate`, `endDate`, `dateLabel`
+y `shortDateLabel` en su edición antes de habilitar esos turnos.
+Cambiar de tema no migra ni separa personas, solicitudes, zonas o asignaciones de
+la base de datos y no crea nuevos turnos.

@@ -17,7 +17,7 @@ export default async function HomePage() {
       <Box component="main" sx={{ py: { xs: 4, md: 7 } }}>
         <Container maxWidth="lg">
           <Stack spacing={{ xs: 3, md: 4 }}>
-            <Box sx={{ maxWidth: 820 }}>
+            <Box className="event-intro" sx={{ maxWidth: 820 }}>
               <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800 }}>
                 Coordinación del evento
               </Typography>
@@ -96,7 +96,7 @@ export default async function HomePage() {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, color: "text.secondary" }}>
               <CalendarMonthRoundedIcon fontSize="small" color="action" />
-              <Typography variant="body2">Actividad programada del 26 de octubre al 1 de noviembre.</Typography>
+              <Typography variant="body2">Actividad programada: {EVENT.dateLabel}.</Typography>
             </Box>
 
             <Box sx={{ pt: 1 }}>

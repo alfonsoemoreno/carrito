@@ -66,9 +66,9 @@ function ZoneForm({ zone, onClose }: { zone?: MapPlace; onClose: () => void }) {
               {MAP_COLORS.map((option) => (
                 <Button key={option.value} aria-label={option.label} aria-pressed={color === option.value}
                   onClick={() => setColor(option.value)} sx={{ minWidth: 0, minHeight: 48, px: 1, py: 1,
-                    color: "#111", fontSize: 12, backgroundColor: option.value, border: "2px solid", borderColor: color === option.value ? "#111" : "transparent",
-                    outline: color === option.value ? "2px solid #f5ed00" : "none", outlineOffset: 1,
-                    "&:hover": { backgroundColor: option.value, borderColor: "#111" }, "&:focus-visible": { outline: "3px solid #f5ed00" } }}>
+                    color: "var(--app-button-ink)", fontSize: 12, backgroundColor: option.value, border: "2px solid", borderColor: color === option.value ? "#111" : "transparent",
+                    outline: color === option.value ? "2px solid var(--app-accent)" : "none", outlineOffset: 1,
+                    "&:hover": { backgroundColor: option.value, borderColor: "#111" }, "&:focus-visible": { outline: "3px solid var(--app-accent)" } }}>
                   {color === option.value ? "✓ " : ""}{option.label}
                 </Button>
               ))}
@@ -78,7 +78,7 @@ function ZoneForm({ zone, onClose }: { zone?: MapPlace; onClose: () => void }) {
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} disabled={pending}>{state.success ? "Cerrar" : "Cancelar"}</Button>
-        <Button type="submit" disabled={pending || (!zone && state.success)} sx={{ bgcolor: "#f5ed00", color: "#111", "&:hover": { bgcolor: "#ddd500" } }}>
+        <Button type="submit" disabled={pending || (!zone && state.success)} sx={{ bgcolor: "var(--app-accent)", color: "var(--app-button-ink)", "&:hover": { bgcolor: "var(--app-accent-strong)" } }}>
           {pending ? "Guardando…" : zone ? "Guardar cambios" : "Crear lugar"}
         </Button>
       </DialogActions>

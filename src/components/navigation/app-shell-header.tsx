@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { EVENT_BRAND } from "@/theme/event-theme";
 import { useThemeMode } from "@/components/providers/theme-mode-provider";
 
 export type AppShellSection = {
@@ -580,7 +581,7 @@ export function AppShellHeader({
                 </Typography>
                 <Box className="app-brand-detail">
                   <Typography component="span" className="app-brand-category">
-                    Amateur
+                    {EVENT_BRAND.category}
                   </Typography>
                   <Typography
                     component="span"

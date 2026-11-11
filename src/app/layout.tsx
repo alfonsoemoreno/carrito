@@ -3,6 +3,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { AppProviders } from "@/components/providers/app-providers";
 import { EVENT } from "@/lib/event";
+import { ACTIVE_EVENT_THEME, EVENT_BRAND } from "@/theme/event-theme";
 import { getPublicSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -17,7 +18,7 @@ const galibier = localFont({
     { path: "./fonts/galibier-regular.woff", weight: "400", style: "normal" },
     { path: "./fonts/galibier-bold.woff", weight: "800", style: "normal" },
   ],
-  variable: "--font-sans",
+  variable: "--font-tour-sans",
   display: "swap",
 });
 
@@ -26,7 +27,7 @@ const galibierEtroit = localFont({
     { path: "./fonts/galibier-etroit-regular.woff", weight: "400", style: "normal" },
     { path: "./fonts/galibier-etroit-bold.woff", weight: "800", style: "normal" },
   ],
-  variable: "--font-condensed",
+  variable: "--font-tour-condensed",
   display: "swap",
 });
 
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     default: EVENT.name,
     template: `%s | ${EVENT.name}`,
   },
-  description: `${EVENT.name} en ${EVENT.location}, del 26 de octubre al 1 de noviembre de 2026.`,
+  description: `${EVENT.name} en ${EVENT.location} · ${EVENT.dateLabel}.`,
   applicationName: EVENT.name,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -45,20 +46,9 @@ export const metadata: Metadata = {
     title: EVENT.name,
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/app-icon-192.png", sizes: "192x192", type: "image/png" },
-    ],
-    apple: [
-      {
-        url: "/icons/apple-touch-icon.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ],
-    shortcut: "/favicon.ico",
+    icon: [{ url: `${EVENT_BRAND.iconDirectory}/event-mark.svg`, type: "image/svg+xml" }],
+    apple: [{ url: `${EVENT_BRAND.iconDirectory}/apple-touch-icon.png`, sizes: "180x180", type: "image/png" }],
+    shortcut: `${EVENT_BRAND.iconDirectory}/event-mark.svg`,
   },
 };
 
@@ -70,6 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      data-event-theme={ACTIVE_EVENT_THEME}
       suppressHydrationWarning
       className={`${mono.variable} ${galibier.variable} ${galibierEtroit.variable}`}
     >

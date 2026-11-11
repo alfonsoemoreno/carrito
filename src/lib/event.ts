@@ -1,12 +1,8 @@
-export const EVENT = {
-  name: "Tour de France Amateur",
-  location: "Valdivia",
-  dateLabel: "26 de octubre – 1 de noviembre de 2026",
-  startDate: "2026-10-26",
-  endDate: "2026-11-01",
-} as const;
+import { ACTIVE_EVENT_THEME } from "@/theme/event-theme";
+import { EVENT_EDITIONS } from "@/lib/event-editions";
 
-export const EVENT_BRAND_SUBTITLE = `${EVENT.location} · 26 oct – 1 nov 2026`;
+export const EVENT = EVENT_EDITIONS[ACTIVE_EVENT_THEME];
+export const EVENT_BRAND_SUBTITLE = `${EVENT.location} · ${EVENT.shortDateLabel}`;
 
 export function getEventDateRange() {
   return {
