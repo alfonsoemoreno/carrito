@@ -10,8 +10,8 @@ export async function getDailyShiftsReportData(date: string): Promise<DailyShift
     orderBy: [{ zone: { name: "asc" } }, { startTime: "asc" }, { endTime: "asc" }],
     select: {
       id: true, shiftDate: true, startTime: true, endTime: true, status: true,
-      blocks: { select: { startDate: true, endDate: true } },
-      zone: { select: { id: true, name: true, status: true, blocks: { where: { shiftId: null }, select: { startDate: true, endDate: true } } } },
+      blocks: { select: { startDate: true, endDate: true, excludedShiftIds: true } },
+      zone: { select: { id: true, name: true, status: true, blocks: { where: { shiftId: null }, select: { startDate: true, endDate: true, excludedShiftIds: true } } } },
       assignments: {
         where: { status: "CONFIRMED" },
         orderBy: [{ confirmedAt: "desc" }, { id: "asc" }],

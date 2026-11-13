@@ -31,6 +31,13 @@ const galibierEtroit = localFont({
   display: "swap",
 });
 
+const brandFont = localFont({
+  src: "../../scripts/assets/manrope/Manrope.ttf",
+  variable: "--font-brand",
+  weight: "200 800",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: getPublicSiteUrl(),
   title: {
@@ -62,7 +69,7 @@ export default function RootLayout({
       lang="es"
       data-event-theme={ACTIVE_EVENT_THEME}
       suppressHydrationWarning
-      className={`${mono.variable} ${galibier.variable} ${galibierEtroit.variable}`}
+      className={`${mono.variable} ${galibier.variable} ${galibierEtroit.variable} ${brandFont.variable}`}
     >
       <body>
         <a href="#main-content" className="skip-link">

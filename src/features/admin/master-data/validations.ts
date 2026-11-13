@@ -3,8 +3,6 @@ import {
   PersonStatus,
   RelationshipDirection,
   RelationshipType,
-  ShiftBlockType,
-  TemplateStatus,
   ZoneStatus,
 } from "@prisma/client";
 import { z } from "zod";
@@ -107,43 +105,6 @@ export const updateZoneVisibilitySchema = z.object({
 export const deleteZoneSchema = z.object({
   id: z.string().uuid(),
 });
-
-export const createTemplateSchema = z
-  .object({
-    zoneId: z.string().uuid(),
-    dayOfWeek: z.coerce.number().int().min(0).max(6),
-    startTime: z.string().regex(/^\d{2}:\d{2}$/),
-    endTime: z.string().regex(/^\d{2}:\d{2}$/),
-    status: z.nativeEnum(TemplateStatus).default(TemplateStatus.ACTIVE),
-  })
-  .refine((values) => values.startTime < values.endTime, {
-    path: ["endTime"],
-    message: "La hora de termino debe ser posterior al inicio.",
-  });
-
-export const createShiftBlockSchema = z
-  .object({
-    zoneId: z
-      .string()
-      .uuid()
-      .optional()
-      .or(z.literal(""))
-      .transform((value) => value || undefined),
-    shiftId: z
-      .string()
-      .uuid()
-      .optional()
-      .or(z.literal(""))
-      .transform((value) => value || undefined),
-    blockType: z.nativeEnum(ShiftBlockType),
-    startDate: z.string().date(),
-    endDate: z.string().date(),
-    reason: z.string().trim().min(4).max(300),
-  })
-  .refine((values) => values.zoneId || values.shiftId, {
-    path: ["zoneId"],
-    message: "Debes seleccionar un lugar o un turno especifico.",
-  });
 
 export const createAvailabilitySchema = z
   .object({

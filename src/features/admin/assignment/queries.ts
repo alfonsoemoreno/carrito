@@ -275,6 +275,7 @@ export async function getShiftAssignmentPageState(
           reason: true,
           startDate: true,
           endDate: true,
+          excludedShiftIds: true,
         },
       },
     },
@@ -369,6 +370,7 @@ export async function getShiftAssignmentPageState(
     shift: {
       id: shift.id,
       zoneName: shift.zone.name,
+      zoneId: shift.zoneId,
       dateLabel: formatDate(shift.shiftDate),
       shiftDate: toDateOnlyString(shift.shiftDate),
       timeLabel: `${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,

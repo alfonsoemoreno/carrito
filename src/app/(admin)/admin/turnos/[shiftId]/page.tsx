@@ -92,6 +92,9 @@ export default async function AdminShiftAssignmentPage({
                         state.shift.status === "FULL" ? "success" : "default"
                       }
                     />
+                    <Link href={`/admin/zonas/${state.shift.zoneId}/turnos?week=${state.shift.shiftDate}&view=calendar`}>
+                      <Button variant="outlined">Volver al lugar</Button>
+                    </Link>
                     <Link href="/admin/solicitudes">
                       <Button variant="outlined">Volver a bandeja</Button>
                     </Link>

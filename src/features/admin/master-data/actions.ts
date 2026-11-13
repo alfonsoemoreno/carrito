@@ -11,8 +11,6 @@ import {
   createAvailabilitySchema,
   createPersonSchema,
   createRelationshipSchema,
-  createShiftBlockSchema,
-  createTemplateSchema,
   createZoneSchema,
   deleteAvailabilitySchema,
   deletePersonSchema,
@@ -22,7 +20,7 @@ import {
   saveZoneSchema,
   updateZoneVisibilitySchema,
 } from "./validations";
-import { parseDateOnly, parseTimeOnly } from "./utils";
+import { parseDateOnly } from "./utils";
 
 function booleanFromFormData(value: FormDataEntryValue | null) {
   return value === "on" || value === "true";
@@ -385,56 +383,6 @@ export async function deleteZoneAction(formData: FormData) {
   revalidatePath("/mapa");
   revalidatePath("/solicitar");
   revalidatePath("/asignaciones");
-}
-
-export async function createTemplateAction(formData: FormData) {
-  const parsed = createTemplateSchema.parse({
-    zoneId: formData.get("zoneId"),
-    dayOfWeek: formData.get("dayOfWeek"),
-    startTime: formData.get("startTime"),
-    endTime: formData.get("endTime"),
-    status: formData.get("status") ?? "ACTIVE",
-  });
-
-  await prisma.shiftTemplate.create({
-    data: {
-      zoneId: parsed.zoneId,
-      dayOfWeek: parsed.dayOfWeek,
-      startTime: parseTimeOnly(parsed.startTime),
-      endTime: parseTimeOnly(parsed.endTime),
-      status: parsed.status,
-    },
-  });
-
-  revalidatePath("/admin/plantillas");
-}
-
-export async function createShiftBlockAction(formData: FormData) {
-  const parsed = createShiftBlockSchema.parse({
-    zoneId: formData.get("zoneId"),
-    shiftId: formData.get("shiftId"),
-    blockType: formData.get("blockType"),
-    startDate: formData.get("startDate"),
-    endDate: formData.get("endDate"),
-    reason: formData.get("reason"),
-  });
-
-  const admin = await requireCurrentAdminActor();
-
-  await prisma.shiftBlock.create({
-    data: {
-      zoneId: parsed.zoneId,
-      shiftId: parsed.shiftId,
-      blockType: parsed.blockType,
-      startDate: parseDateOnly(parsed.startDate),
-      endDate: parseDateOnly(parsed.endDate),
-      reason: parsed.reason,
-      createdByAdminId: admin.id,
-    },
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/bloqueos");
 }
 
 export async function createAvailabilityAction(formData: FormData) {

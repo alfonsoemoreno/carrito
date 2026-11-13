@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { formatTime, toDateOnlyString } from "@/features/public/utils";
+import { blockAppliesToShift, type DateBlock } from "@/lib/shift-blocks";
+import { formatTime } from "@/features/public/utils";
 
 export const dailyShiftsFiltersSchema = z.object({ date: z.iso.date() });
 
-type DateBlock = { startDate: Date; endDate: Date };
 export type DailyShift = {
   id: string;
   shiftDate: Date;
@@ -20,10 +20,9 @@ export type DailyShift = {
 
 export function dailyShiftRows(shifts: DailyShift[]) {
   return shifts.map((shift) => {
-    const date = toDateOnlyString(shift.shiftDate);
     const confirmed = shift.assignments[0];
     const blocked = shift.status === "BLOCKED" || shift.status === "CLOSED" || shift.zone.status !== "ACTIVE" ||
-      [...shift.blocks, ...shift.zone.blocks].some((block) => toDateOnlyString(block.startDate) <= date && toDateOnlyString(block.endDate) >= date);
+      [...shift.blocks, ...shift.zone.blocks].some((block) => blockAppliesToShift(shift.id, shift.shiftDate, block));
     const status = confirmed ? "Completo" : blocked ? "No disponible" : "Por completar";
     // Only names belonging to a confirmed assignment may enter this report.
     return {

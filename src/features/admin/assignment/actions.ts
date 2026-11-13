@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { EVENT } from "@/lib/event";
 import { getEventAssignmentLimitErrors, getRepeatedPairWarning } from "@/lib/assignment-event-rules";
+import { blockAppliesToShift, type DateBlock } from "@/lib/shift-blocks";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentAdminActor } from "@/features/admin/master-data/auth";
 import { appendAdminNote, buildAssignmentWarnings } from "@/features/admin/assignment/utils";
@@ -33,19 +34,12 @@ function buildShiftRedirect(shiftId: string, params: Record<string, string | nul
   return `${url.pathname}${url.search}`;
 }
 
-function appliesDateBlock(
-  shiftDate: Date,
-  block: { startDate: Date; endDate: Date },
-) {
-  const target = toDateOnlyString(shiftDate);
-  return target >= toDateOnlyString(block.startDate) && target <= toDateOnlyString(block.endDate);
-}
-
 function resolveShiftStatus(input: {
+  shiftId: string;
   shiftDate: Date;
   confirmedAssignments: number;
-  shiftBlocks: Array<{ startDate: Date; endDate: Date }>;
-  zoneBlocks: Array<{ startDate: Date; endDate: Date }>;
+  shiftBlocks: DateBlock[];
+  zoneBlocks: DateBlock[];
 }) {
   if (toDateOnlyString(input.shiftDate) < toDateOnlyString(new Date())) {
     return ShiftStatus.CLOSED;
@@ -56,7 +50,7 @@ function resolveShiftStatus(input: {
   }
 
   const blocked = [...input.shiftBlocks, ...input.zoneBlocks].some((block) =>
-    appliesDateBlock(input.shiftDate, block),
+    blockAppliesToShift(input.shiftId, input.shiftDate, block),
   );
 
   return blocked ? ShiftStatus.BLOCKED : ShiftStatus.OPEN;
@@ -148,15 +142,18 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
             select: {
               startDate: true,
               endDate: true,
+              excludedShiftIds: true,
               reason: true,
             },
           },
           zone: {
             select: {
               blocks: {
+                where: { shiftId: null },
                 select: {
                   startDate: true,
                   endDate: true,
+                  excludedShiftIds: true,
                   reason: true,
                 },
               },
@@ -388,7 +385,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
   });
 
   if (
-    (shift.status === ShiftStatus.BLOCKED || shift.blocks.length > 0 || shift.zone.blocks.length > 0) &&
+    (shift.status === ShiftStatus.BLOCKED || [...shift.blocks, ...shift.zone.blocks].some((block) => blockAppliesToShift(shift.id, shift.shiftDate, block))) &&
     !parsed.exceptionReason
   ) {
     redirectTo(
@@ -411,7 +408,7 @@ export async function confirmShiftAssignmentAction(formData: FormData) {
   try {
     await prisma.$transaction(async (tx) => {
       const freshShift = await tx.shift.findUnique({ where: { id: shift.id }, include: { assignments: { where: { status: "CONFIRMED" } } } });
-      if (!freshShift || freshShift.status !== shift.status || freshShift.assignments[0]?.id !== shift.assignments[0]?.id) {
+      if (!freshShift || freshShift.status !== shift.status || freshShift.startTime.getTime() !== shift.startTime.getTime() || freshShift.endTime.getTime() !== shift.endTime.getTime() || freshShift.assignments[0]?.id !== shift.assignments[0]?.id) {
         throw new Error("RELOCATION_STALE");
       }
       // Read inside the serializable transaction so two admins cannot both add a sixth shift.
@@ -630,14 +627,17 @@ export async function cancelShiftAssignmentAction(formData: FormData) {
             select: {
               startDate: true,
               endDate: true,
+              excludedShiftIds: true,
             },
           },
           zone: {
             select: {
               blocks: {
+                where: { shiftId: null },
                 select: {
                   startDate: true,
                   endDate: true,
+                  excludedShiftIds: true,
                 },
               },
             },
@@ -716,6 +716,7 @@ export async function cancelShiftAssignmentAction(formData: FormData) {
       where: { id: assignment.shift.id },
       data: {
         status: resolveShiftStatus({
+          shiftId: assignment.shift.id,
           shiftDate: assignment.shift.shiftDate,
           confirmedAssignments,
           shiftBlocks: assignment.shift.blocks,

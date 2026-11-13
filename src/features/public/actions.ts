@@ -20,6 +20,8 @@ import {
   getPublicShiftBoard,
   listPublicZonesForFlow,
 } from "@/features/public/queries";
+import { getVisibleShiftWhere, isShiftVisible } from "@/features/public/shift-visibility";
+import { blockAppliesToShift } from "@/lib/shift-blocks";
 import { toDateOnlyString } from "@/features/public/utils";
 
 export async function startPublicSessionAction(personId: string) {
@@ -141,6 +143,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
   const shifts = await prisma.shift.findMany({
     where: {
+      AND: [getVisibleShiftWhere()],
       id: {
         in: selectedShiftIds,
       },
@@ -157,9 +160,11 @@ export async function submitShiftRequestsAction(formData: FormData) {
           status: true,
           publicVisible: true,
           blocks: {
+            where: { shiftId: null },
             select: {
               startDate: true,
               endDate: true,
+              excludedShiftIds: true,
             },
           },
         },
@@ -168,6 +173,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
         select: {
           startDate: true,
           endDate: true,
+          excludedShiftIds: true,
         },
       },
       requests: {
@@ -213,15 +219,7 @@ export async function submitShiftRequestsAction(formData: FormData) {
       );
     }
 
-    const blockedByShift = [...shift.blocks, ...shift.zone.blocks].some(
-      (block) => {
-        const target = toDateOnlyString(shift.shiftDate);
-        return (
-          target >= toDateOnlyString(block.startDate) &&
-          target <= toDateOnlyString(block.endDate)
-        );
-      },
-    );
+    const blockedByShift = [...shift.blocks, ...shift.zone.blocks].some((block) => blockAppliesToShift(shift.id, shift.shiftDate, block));
 
     if (blockedByShift) {
       redirectWithRequestError(
@@ -237,33 +235,56 @@ export async function submitShiftRequestsAction(formData: FormData) {
 
   }
 
-  await prisma.$transaction(async (tx) => {
-    for (const shift of shifts) {
-      const created = await tx.shiftRequest.create({
-        data: {
-          shiftId: shift.id,
-          personId: currentPerson.id,
-          suggestedPartnerId: null,
-          comments: comments || null,
-          status: ShiftRequestStatus.PENDING,
-        },
-      });
-
-      await tx.auditLog.create({
-        data: {
-          actorType: "PUBLIC_PERSON",
-          entityType: "shift_request",
-          entityId: created.id,
-          actorPersonId: currentPerson.id,
-          action: "PUBLIC_REQUEST_CREATED",
-          afterData: {
-            shiftId: shift.id,
-            suggestedPartnerId: null,
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const shift of shifts) {
+        // Recheck inside the same serializable transaction as the request write.
+        // A schedule edit or suspension must not accept a request for stale times.
+        const fresh = await tx.shift.findUnique({
+          where: { id: shift.id },
+          include: {
+            zone: { include: { blocks: { where: { shiftId: null } } } },
+            blocks: true,
+            requests: { where: { personId: currentPerson.id, status: { in: [ShiftRequestStatus.PENDING, ShiftRequestStatus.CONFIRMED] } } },
           },
-        },
-      });
+        });
+        if (!fresh || !isShiftVisible(fresh) || fresh.status !== ShiftStatus.OPEN || fresh.zone.status !== "ACTIVE" || !fresh.zone.publicVisible ||
+            fresh.startTime.getTime() !== shift.startTime.getTime() || fresh.endTime.getTime() !== shift.endTime.getTime() ||
+            fresh.requests.length || [...fresh.blocks, ...fresh.zone.blocks].some((b) => blockAppliesToShift(fresh.id, fresh.shiftDate, b))) {
+          throw new Error("SHIFT_CHANGED");
+        }
+        const created = await tx.shiftRequest.create({
+          data: {
+            shiftId: shift.id,
+            personId: currentPerson.id,
+            suggestedPartnerId: null,
+            comments: comments || null,
+            status: ShiftRequestStatus.PENDING,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorType: "PUBLIC_PERSON",
+            entityType: "shift_request",
+            entityId: created.id,
+            actorPersonId: currentPerson.id,
+            action: "PUBLIC_REQUEST_CREATED",
+            afterData: {
+              shiftId: shift.id,
+              suggestedPartnerId: null,
+            },
+          },
+        });
+      }
+    }, { isolationLevel: "Serializable" });
+  } catch (error) {
+    if ((error instanceof Error && error.message === "SHIFT_CHANGED") ||
+        (error && typeof error === "object" && "code" in error && error.code === "P2034")) {
+      redirectWithRequestError("Un turno cambió o dejó de estar disponible. Revisa los horarios antes de volver a solicitar.");
     }
-  });
+    throw error;
+  }
 
   revalidatePath("/solicitar");
   revalidatePath("/asignaciones");

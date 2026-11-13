@@ -14,8 +14,8 @@ export async function getPendingShiftsReportData(input: { from?: string | null; 
     orderBy: [{ zone: { name: "asc" } }, { shiftDate: "asc" }, { startTime: "asc" }],
     select: {
       id: true, shiftDate: true, startTime: true, endTime: true,
-      blocks: { select: { startDate: true, endDate: true } },
-      zone: { select: { id: true, name: true, blocks: { where: { shiftId: null }, select: { startDate: true, endDate: true } } } },
+      blocks: { select: { startDate: true, endDate: true, excludedShiftIds: true } },
+      zone: { select: { id: true, name: true, blocks: { where: { shiftId: null }, select: { startDate: true, endDate: true, excludedShiftIds: true } } } },
     },
   });
   return {

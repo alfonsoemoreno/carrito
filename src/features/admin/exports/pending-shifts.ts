@@ -1,3 +1,4 @@
+import { blockAppliesToShift, type DateBlock } from "@/lib/shift-blocks";
 import type { Prisma } from "@prisma/client";
 import { formatTime, toDateOnlyString } from "@/features/public/utils";
 
@@ -6,8 +7,8 @@ export type PendingShift = {
   shiftDate: Date;
   startTime: Date;
   endTime: Date;
-  blocks: { startDate: Date; endDate: Date }[];
-  zone: { id: string; name: string; blocks: { startDate: Date; endDate: Date }[] };
+  blocks: DateBlock[];
+  zone: { id: string; name: string; blocks: DateBlock[] };
 };
 
 export function pendingShiftsWhere(from: Date, to: Date, zoneId?: string | null): Prisma.ShiftWhereInput {
@@ -32,7 +33,7 @@ export function pendingShiftRows(shifts: PendingShift[], now = new Date()) {
     const date = toDateOnlyString(shift.shiftDate);
     if (date < today || (date === today && formatTime(shift.startTime) <= time)) return false;
     return ![...shift.blocks, ...shift.zone.blocks].some((block) =>
-      toDateOnlyString(block.startDate) <= date && toDateOnlyString(block.endDate) >= date,
+      blockAppliesToShift(shift.id, shift.shiftDate, block),
     );
   }).map((shift) => ({
     zoneId: shift.zone.id,

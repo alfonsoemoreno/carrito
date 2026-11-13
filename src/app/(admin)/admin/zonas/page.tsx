@@ -41,7 +41,7 @@ export default async function AdminZonesPage() {
       <AdminPageShell
         eyebrow="Lugares"
         title="Gestion de lugares"
-        description="Define los lugares principales y su visibilidad publica."
+        description="Administra cada lugar, sus horarios habituales y su calendario de turnos."
       >
         <Card>
           <CardContent>
@@ -114,6 +114,7 @@ export default async function AdminZonesPage() {
                         {hasCoordinates(zone) ? `${zone.latitude}, ${zone.longitude}` : "Ubicación pendiente"}
                       </Typography>
                     </Stack>
+                    <RouteButton href={`/admin/zonas/${zone.id}/turnos`} variant="contained">Gestionar turnos</RouteButton>
                     <ZoneEditor zone={{ id: zone.id, name: zone.name, description: zone.description,
                       address: zone.address, latitude: zone.latitude, longitude: zone.longitude,
                       mapColor: zone.mapColor, status: zone.status, publicVisible: zone.publicVisible }} />

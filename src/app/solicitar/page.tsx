@@ -29,7 +29,7 @@ export default async function SolicitarPage({ searchParams }: Props) {
             {state.notice && state.currentPerson ? <Alert severity="success">{state.notice}</Alert> : null}
             {state.authError ? <Alert severity="error">{state.authError}</Alert> : null}
             {state.eventEnded ? (
-              <Alert severity="info">El período del evento ya finalizó. Puedes consultar aquí tus turnos y solicitudes.</Alert>
+              <Alert severity="info">El período del evento ya finalizó. No hay turnos disponibles.</Alert>
             ) : state.config.maintenanceModeEnabled ? (
               <Alert severity="warning">El sistema está en modo mantenimiento. Puedes consultar los turnos, pero no registrar nuevas solicitudes.</Alert>
             ) : null}

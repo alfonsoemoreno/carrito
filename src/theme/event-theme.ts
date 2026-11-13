@@ -8,6 +8,10 @@ export const EVENT_THEMES = {
   },
   "ironman-valdivia": {
     logo: {
+      mark: {
+        light: "/icons/ironman-valdivia/mark-light.svg",
+        dark: "/icons/ironman-valdivia/mark-dark.svg",
+      },
       light: "/icons/ironman-valdivia/logo-light.svg",
       dark: "/icons/ironman-valdivia/logo-dark.svg",
     },

@@ -85,7 +85,15 @@
 :root[data-event-theme="ironman-valdivia"] .event-intro .MuiTypography-overline { color: #9bd5e9; }
 :root[data-event-theme="ironman-valdivia"] .event-intro :is(.MuiTypography-h6, .MuiTypography-body1) { color: #d2e3ec; }
 
-.app-brand-official { display: flex; align-items: center; gap: 16px; }
-.app-brand-official img { display: block; width: 148px; height: auto; }
-.app-brand-official__subtitle { color: var(--app-muted); font-size: 0.72rem !important; font-weight: 600 !important; }
-@media (max-width: 600px) { .app-brand-official__subtitle { display: none; } }
+.app-brand-event-link { display: inline-flex; align-items: center; min-width: 0; }
+.app-brand-event { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
+.app-brand-event__mark { display: block; width: 36px; height: auto; flex: 0 0 36px; }
+:root[data-event-theme="ironman-valdivia"] { --app-brand-accent: #347b88; --app-brand-label-ink: #ffffff; }
+:root[data-event-theme="ironman-valdivia"][data-color-mode="dark"] { --app-brand-accent: #7ebfcb; --app-brand-label-ink: #102330; }
+.app-brand-event__name { display: block; padding: 10px 12px; background: var(--app-brand-accent); color: var(--app-brand-label-ink); font-family: var(--font-brand), var(--font-sans), sans-serif; font-size: 20px; font-weight: 800; line-height: 1.05; letter-spacing: 0.5px; white-space: nowrap; }
+@media (max-width: 1199px) { .app-brand-event-link { margin-right: 54px; } }
+@media (max-width: 600px) {
+  .app-brand-event { gap: 10px; }
+  .app-brand-event__mark { width: 32px; flex-basis: 32px; }
+  .app-brand-event__name { padding: 10px; font-size: clamp(18px, 4.6vw, 20px); letter-spacing: 0.35px; }
+}

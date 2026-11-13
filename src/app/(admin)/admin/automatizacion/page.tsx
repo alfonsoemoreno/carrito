@@ -13,12 +13,12 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { RouteButton } from "@/components/navigation/route-button";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { ActionSubmitButton } from "@/components/feedback/action-submit-button";
 import { EmptyState, FormCard } from "@/components/admin/master-data-cards";
 import { requireCurrentAdminPageAccess } from "@/features/admin/master-data/auth";
 import {
-  generateMissingFutureShiftsAction,
   refreshShiftStatusesAction,
 } from "@/features/admin/automation/actions";
 import { getAutomationDashboardData } from "@/features/admin/automation/queries";
@@ -89,8 +89,8 @@ export default async function AdminAutomationPage() {
             }}
           >
             <FormCard
-              title="Ejecucion manual"
-              description="Permite operar la automatizacion hoy, aun antes de conectar un cron externo."
+              title="Herramientas operativas"
+              description="Los horarios y sus excepciones se administran desde cada lugar."
             >
               <Stack spacing={2}>
                 <Typography color="text.secondary">
@@ -103,41 +103,11 @@ export default async function AdminAutomationPage() {
                   {data.config?.maintenanceModeEnabled ? "Activo" : "Inactivo"}.
                 </Typography>
                 <Typography color="text.secondary">
-                  Selecciona el rango exacto de días que quieres abrir o recalcular. La ejecución manual trabajará solo dentro de ese calendario.
+                  Para recalcular los estados operativos, selecciona el rango exacto de fechas. Para crear turnos usa la gestión por lugar, donde podrás revisar los cambios antes de aplicarlos.
                 </Typography>
-                <form action={generateMissingFutureShiftsAction}>
-                  <Stack spacing={1.5}>
-                    <Stack
-                      direction={{ xs: "column", md: "row" }}
-                      spacing={1.5}
-                    >
-                      <TextField
-                        name="from"
-                        label="Desde"
-                        type="date"
-                        required
-                        defaultValue={defaultFromValue}
-                        fullWidth
-                        slotProps={{ inputLabel: { shrink: true } }}
-                      />
-                      <TextField
-                        name="to"
-                        label="Hasta"
-                        type="date"
-                        required
-                        defaultValue={defaultToValue}
-                        fullWidth
-                        slotProps={{ inputLabel: { shrink: true } }}
-                      />
-                    </Stack>
-                    <ActionSubmitButton
-                      variant="contained"
-                      loadingMessage="Estamos generando los turnos faltantes dentro del rango seleccionado."
-                    >
-                      Abrir turnos dentro de este rango
-                    </ActionSubmitButton>
-                  </Stack>
-                </form>
+                <RouteButton href="/admin/zonas" variant="contained">
+                  Gestionar horarios y turnos por lugar
+                </RouteButton>
                 <form action={refreshShiftStatusesAction}>
                   <Stack spacing={1.5}>
                     <Stack

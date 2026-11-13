@@ -186,12 +186,14 @@ model ShiftTemplate {
   startTime  DateTime       @map("start_time") @db.Time(6)
   endTime    DateTime       @map("end_time") @db.Time(6)
   status     TemplateStatus @default(ACTIVE)
+  validFrom  DateTime       @default("1970-01-01T00:00:00.000Z") @map("valid_from") @db.Date
+  validTo    DateTime?      @map("valid_to") @db.Date
   createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
   zone       Zone           @relation(fields: [zoneId], references: [id], onDelete: Cascade)
   shifts     Shift[]
 
-  @@unique([zoneId, dayOfWeek, startTime, endTime])
+  @@unique([zoneId, dayOfWeek, startTime, endTime, validFrom], map: "shift_templates_schedule_period_key")
   @@index([zoneId, status])
   @@map("shift_templates")
 }
@@ -227,6 +229,7 @@ model ShiftBlock {
   endDate          DateTime       @map("end_date") @db.Date
   blockType        ShiftBlockType @map("block_type")
   reason           String
+  excludedShiftIds String[]       @default([]) @map("excluded_shift_ids") @db.Uuid
   createdByAdminId String?        @map("created_by_admin_id") @db.Uuid
   createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   zone             Zone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)

@@ -28,21 +28,9 @@ const modules = [
   },
   {
     href: "/admin/zonas",
-    title: "Lugares",
-    description: "Lugares principales con visibilidad publica configurable.",
+    title: "Lugares y turnos",
+    description: "Horarios habituales, turnos puntuales y suspensiones de cada lugar.",
     badge: "Maestro",
-  },
-  {
-    href: "/admin/plantillas",
-    title: "Plantillas",
-    description: "Horarios recurrentes por lugar para generar turnos futuros.",
-    badge: "Maestro",
-  },
-  {
-    href: "/admin/bloqueos",
-    title: "Bloqueos",
-    description: "Bloqueos por turno, fecha, lugar y rango de fechas.",
-    badge: "Operación",
   },
   {
     href: "/admin/disponibilidad",

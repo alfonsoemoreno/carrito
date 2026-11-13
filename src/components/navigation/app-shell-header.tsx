@@ -22,6 +22,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { EVENT } from "@/lib/event";
 import { EVENT_BRAND } from "@/theme/event-theme";
 import { useThemeMode } from "@/components/providers/theme-mode-provider";
 
@@ -564,12 +565,12 @@ export function AppShellHeader({
               py: { xs: hasSections ? 0 : 1.4, md: 0.8 },
             }}
           >
-            <Link href={homeHref as never}>
+            <Link href={homeHref as never} className={EVENT_BRAND.logo ? "app-brand-event-link" : undefined}>
               {EVENT_BRAND.logo ? (
-                <Box className="app-brand-official" aria-label={`${brandTitle} · ${brandSubtitle}`}>
-                  <Image src={EVENT_BRAND.logo[mode]} alt="IRONMAN Valdivia Chile" width={602} height={225} unoptimized />
-                  <Typography component="span" className="app-brand-official__subtitle">{brandSubtitle}</Typography>
-                </Box>
+                <span className="app-brand-event">
+                  <Image className="app-brand-event__mark" src={EVENT_BRAND.logo.mark[mode]} alt="" width={40} height={52} unoptimized />
+                  <span className="app-brand-event__name">{`IRONMAN ${EVENT.startDate.slice(0, 4)}`}</span>
+                </span>
               ) : (
               <Box
                 aria-label={`${brandTitle} · ${brandSubtitle}`}

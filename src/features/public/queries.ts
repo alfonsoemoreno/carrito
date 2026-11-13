@@ -1,3 +1,5 @@
+import { getVisibleShiftWhere, isShiftVisible } from "@/features/public/shift-visibility";
+import { blockAppliesToShift, type DateBlock } from "@/lib/shift-blocks";
 import {
   AssignmentStatus,
   PersonStatus,
@@ -43,17 +45,12 @@ function matchesSearchTerm(value: string) {
 }
 
 function isShiftBlocked(shift: {
+  id: string;
   shiftDate: Date;
-  shiftBlocks: Array<{ startDate: Date; endDate: Date }>;
-  zoneBlocks: Array<{ startDate: Date; endDate: Date }>;
+  shiftBlocks: DateBlock[];
+  zoneBlocks: DateBlock[];
 }) {
-  const target = toDateOnlyString(shift.shiftDate);
-
-  return [...shift.shiftBlocks, ...shift.zoneBlocks].some((block) => {
-    const start = toDateOnlyString(block.startDate);
-    const end = toDateOnlyString(block.endDate);
-    return target >= start && target <= end;
-  });
+  return [...shift.shiftBlocks, ...shift.zoneBlocks].some((block) => blockAppliesToShift(shift.id, shift.shiftDate, block));
 }
 
 const getCachedPublicConfigRecord = unstable_cache(
@@ -185,6 +182,7 @@ async function getUncachedPublicShiftBoard(input: {
 
   const shifts = await prisma.shift.findMany({
     where: {
+      AND: [getVisibleShiftWhere()],
       shiftDate: {
         gte: from,
         lte: to,
@@ -210,9 +208,11 @@ async function getUncachedPublicShiftBoard(input: {
           name: true,
           mapColor: true,
           blocks: {
+            where: { shiftId: null },
             select: {
               startDate: true,
               endDate: true,
+              excludedShiftIds: true,
               reason: true,
             },
           },
@@ -250,6 +250,7 @@ async function getUncachedPublicShiftBoard(input: {
         select: {
           startDate: true,
           endDate: true,
+          excludedShiftIds: true,
           reason: true,
         },
       },
@@ -261,6 +262,7 @@ async function getUncachedPublicShiftBoard(input: {
       const blocked =
         shift.status === ShiftStatus.BLOCKED ||
         isShiftBlocked({
+          id: shift.id,
           shiftDate: shift.shiftDate,
           shiftBlocks: shift.blocks,
           zoneBlocks: shift.zone.blocks,
@@ -285,6 +287,7 @@ async function getUncachedPublicShiftBoard(input: {
         fullDateLabel: formatLongDate(shift.shiftDate),
         startLabel: formatTime(shift.startTime),
         endLabel: formatTime(shift.endTime),
+        endTime: shift.endTime,
         status: shift.status,
         blocked,
         pendingCount,
@@ -318,6 +321,7 @@ export async function getOwnPendingRequests(personId: string) {
     where: {
       personId,
       status: ShiftRequestStatus.PENDING,
+      shift: getVisibleShiftWhere(),
     },
     orderBy: [{ shift: { shiftDate: "asc" } }, { shift: { startTime: "asc" } }],
     select: {
@@ -353,7 +357,7 @@ const getCachedPublicShiftBoard = unstable_cache(
       from,
       to,
     }),
-  ["public-shift-board"],
+  ["public-shift-board-v2"],
   { revalidate: 15 },
 );
 
@@ -369,9 +373,14 @@ export async function getPublicShiftBoard(input: {
     input.to ?? "",
   );
 
-  return input.zoneId
-    ? board.filter((shift) => shift.zoneId === input.zoneId)
-    : board;
+  const now = new Date();
+  // Check after reading the cache so a shift disappears as soon as it ends.
+  return board
+    .filter((shift) => isShiftVisible(shift, now) && (!input.zoneId || shift.zoneId === input.zoneId))
+    .map(({ endTime, ...shift }) => {
+      void endTime;
+      return shift;
+    });
 }
 
 export async function getOwnConfirmedAssignments(
@@ -383,6 +392,7 @@ export async function getOwnConfirmedAssignments(
     where: {
       status: AssignmentStatus.CONFIRMED,
       shift: {
+        AND: [getVisibleShiftWhere()],
         shiftDate: {
           gte: from,
           lte: to,
@@ -434,6 +444,7 @@ export async function getPublicAssignmentsSnapshot(
         where: {
           status: AssignmentStatus.CONFIRMED,
           shift: {
+            AND: [getVisibleShiftWhere()],
             shiftDate: {
               gte: from,
               lte: to,
@@ -482,6 +493,7 @@ export async function getPublicAssignmentsSnapshot(
             where: {
               status: ShiftRequestStatus.PENDING,
               shift: {
+                AND: [getVisibleShiftWhere()],
                 shiftDate: {
                   gte: from,
                   lte: to,
@@ -506,6 +518,7 @@ export async function getPublicAssignmentsSnapshot(
                 { person2Id: currentPersonId },
               ],
               shift: {
+                AND: [getVisibleShiftWhere()],
                 shiftDate: { gte: from, lte: to },
               },
             },
@@ -553,6 +566,7 @@ export async function getPublicAssignmentsSnapshot(
             where: {
               personId: currentPersonId,
               shift: {
+                AND: [getVisibleShiftWhere()],
                 shiftDate: { gte: from, lte: to },
               },
             },
@@ -705,6 +719,7 @@ export async function getAsignacionesPageState(
     ? await prisma.assignment.findMany({
         where: {
           decidedByAdminId: { not: null },
+          shift: getVisibleShiftWhere(),
           OR: [{ person1Id: currentPerson.id }, { person2Id: currentPerson.id }],
         },
         orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
@@ -759,6 +774,7 @@ export async function getAsignacionesCalendarPageState() {
         where: {
           status: AssignmentStatus.CONFIRMED,
           shift: {
+            AND: [getVisibleShiftWhere()],
             shiftDate: {
               gte: from,
               lte: to,

@@ -17,8 +17,8 @@ const adminSections: AppShellSection[] = [
     items: [
       {
         href: "/admin/zonas",
-        label: "Lugares",
-        description: "Puntos de actividad del evento.",
+        label: "Lugares y turnos",
+        description: "Lugares, horarios y calendario de turnos.",
       },
       {
         href: "/admin/mapa",
@@ -29,16 +29,6 @@ const adminSections: AppShellSection[] = [
         href: "/admin/relaciones",
         label: "Relaciones",
         description: "Parejas y excepciones.",
-      },
-      {
-        href: "/admin/plantillas",
-        label: "Plantillas",
-        description: "Horarios de los turnos.",
-      },
-      {
-        href: "/admin/bloqueos",
-        label: "Bloqueos",
-        description: "Fechas o turnos que no se usarán.",
       },
       {
         href: "/admin/disponibilidad",

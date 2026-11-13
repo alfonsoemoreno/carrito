@@ -1,5 +1,8 @@
-import { ShiftStatus } from "@prisma/client";
+import { Prisma, ShiftStatus } from "@prisma/client";
+import { blockAppliesToShift, type DateBlock } from "@/lib/shift-blocks";
 import { prisma } from "@/lib/prisma";
+import { loadScheduleSnapshot, persistSchedulePlan } from "@/features/admin/scheduling/service";
+import { planSchedule, templateDates } from "@/features/admin/scheduling/planning";
 import { addDaysUtc, startOfTodayUtc, toDateOnlyString } from "@/features/public/utils";
 
 type AutomationDateRangeInput = {
@@ -8,19 +11,12 @@ type AutomationDateRangeInput = {
   weeksOverride?: number;
 };
 
-function appliesDateBlock(
-  shiftDate: Date,
-  block: { startDate: Date; endDate: Date },
-) {
-  const target = toDateOnlyString(shiftDate);
-  return target >= toDateOnlyString(block.startDate) && target <= toDateOnlyString(block.endDate);
-}
-
 function computeShiftStatus(input: {
+  shiftId: string;
   shiftDate: Date;
   confirmedAssignments: number;
-  zoneBlocks: Array<{ startDate: Date; endDate: Date }>;
-  shiftBlocks: Array<{ startDate: Date; endDate: Date }>;
+  zoneBlocks: DateBlock[];
+  shiftBlocks: DateBlock[];
 }) {
   const today = startOfTodayUtc();
 
@@ -33,7 +29,7 @@ function computeShiftStatus(input: {
   }
 
   const blocked = [...input.zoneBlocks, ...input.shiftBlocks].some((block) =>
-    appliesDateBlock(input.shiftDate, block),
+    blockAppliesToShift(input.shiftId, input.shiftDate, block),
   );
 
   if (blocked) {
@@ -41,25 +37,6 @@ function computeShiftStatus(input: {
   }
 
   return ShiftStatus.OPEN;
-}
-
-function buildExpectedTemplateDates(input: {
-  dayOfWeek: number;
-  from: Date;
-  to: Date;
-}) {
-  const results: Date[] = [];
-  const cursor = new Date(input.from);
-
-  while (cursor <= input.to) {
-    if (cursor.getUTCDay() === input.dayOfWeek) {
-      results.push(new Date(cursor));
-    }
-
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-
-  return results;
 }
 
 async function resolveGenerationWeeks(weeksOverride?: number) {
@@ -107,148 +84,22 @@ export async function generateMissingFutureShifts(
     horizonWeeks,
   } = await resolveAutomationDateRange(rangeInput);
 
-  const [templates, zoneBlocks, existingShifts] = await Promise.all([
-    prisma.shiftTemplate.findMany({
-      where: {
-        status: "ACTIVE",
-        zone: {
-          status: "ACTIVE",
-        },
-      },
-      select: {
-        id: true,
-        zoneId: true,
-        dayOfWeek: true,
-        startTime: true,
-        endTime: true,
-      },
-      orderBy: [{ zoneId: "asc" }, { dayOfWeek: "asc" }],
-    }),
-    prisma.shiftBlock.findMany({
-      where: {
-        shiftId: null,
-        startDate: {
-          lte: to,
-        },
-        endDate: {
-          gte: from,
-        },
-      },
-      select: {
-        zoneId: true,
-        startDate: true,
-        endDate: true,
-      },
-    }),
-    prisma.shift.findMany({
-      where: {
-        shiftDate: {
-          gte: from,
-          lte: to,
-        },
-      },
-      select: {
-        id: true,
-        zoneId: true,
-        shiftDate: true,
-        startTime: true,
-        endTime: true,
-      },
-    }),
-  ]);
-
-  const existingKeys = new Set(
-    existingShifts.map((shift) =>
-      [
-        shift.zoneId,
-        toDateOnlyString(shift.shiftDate),
-        shift.startTime.toISOString(),
-        shift.endTime.toISOString(),
-      ].join("|"),
-    ),
-  );
-
-  const pendingCreates: Array<{
-    zoneId: string;
-    templateId: string;
-    shiftDate: Date;
-    startTime: Date;
-    endTime: Date;
-    status: ShiftStatus;
-  }> = [];
-
-  for (const template of templates) {
-    const matchingZoneBlocks = zoneBlocks.filter((block) => block.zoneId === template.zoneId);
-    const dates = buildExpectedTemplateDates({
-      dayOfWeek: template.dayOfWeek,
-      from,
-      to,
-    });
-
-    for (const shiftDate of dates) {
-      const key = [
-        template.zoneId,
-        toDateOnlyString(shiftDate),
-        template.startTime.toISOString(),
-        template.endTime.toISOString(),
-      ].join("|");
-
-      if (existingKeys.has(key)) {
-        continue;
-      }
-
-      pendingCreates.push({
-        zoneId: template.zoneId,
-        templateId: template.id,
-        shiftDate,
-        startTime: template.startTime,
-        endTime: template.endTime,
-        status: matchingZoneBlocks.some((block) => appliesDateBlock(shiftDate, block))
-          ? ShiftStatus.BLOCKED
-          : ShiftStatus.OPEN,
-      });
-      existingKeys.add(key);
+  const today = toDateOnlyString(startOfTodayUtc());
+  const operation = { kind: "generate" as const, from: toDateOnlyString(from), to: toDateOnlyString(to) };
+  const createdCount = await prisma.$transaction(async (tx) => {
+    const zones = await tx.zone.findMany({ where: { status: "ACTIVE" }, select: { id: true }, orderBy: { id: "asc" } });
+    let count = 0;
+    for (const zone of zones) {
+      const snapshot = await loadScheduleSnapshot(tx, zone.id);
+      if (!snapshot) continue;
+      const plan = planSchedule(snapshot, operation, today);
+      if (plan.conflicts.length) throw new Error(plan.conflicts.map((c) => c.message).join(" "));
+      await persistSchedulePlan(tx, snapshot, operation, plan, actorAdminId);
+      count += plan.shiftCreates.length;
     }
-  }
-
-  if (pendingCreates.length > 0) {
-    await prisma.shift.createMany({
-      data: pendingCreates.map((shift) => ({
-        zoneId: shift.zoneId,
-        templateId: shift.templateId,
-        shiftDate: shift.shiftDate,
-        startTime: shift.startTime,
-        endTime: shift.endTime,
-        status: shift.status,
-        generated: true,
-      })),
-      skipDuplicates: true,
-    });
-  }
-
-  if (actorAdminId) {
-    await prisma.auditLog.create({
-      data: {
-        actorType: "ADMIN",
-        entityType: "shift_generation_run",
-        entityId: actorAdminId,
-        actorAdminId,
-        action: "GENERATE_MISSING_FUTURE_SHIFTS",
-        afterData: {
-          createdCount: pendingCreates.length,
-          from: from.toISOString(),
-          to: to.toISOString(),
-        },
-      },
-    });
-  }
-
-  return {
-    createdCount: pendingCreates.length,
-    horizonWeeks,
-    from,
-    to,
-  };
+    return count;
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 });
+  return { createdCount, horizonWeeks, from, to };
 }
 
 export async function refreshFutureShiftStatuses(
@@ -280,6 +131,7 @@ export async function refreshFutureShiftStatuses(
         select: {
           startDate: true,
           endDate: true,
+          excludedShiftIds: true,
         },
       },
       zone: {
@@ -291,6 +143,7 @@ export async function refreshFutureShiftStatuses(
             select: {
               startDate: true,
               endDate: true,
+              excludedShiftIds: true,
             },
           },
         },
@@ -302,6 +155,7 @@ export async function refreshFutureShiftStatuses(
     .map((shift) => ({
       id: shift.id,
       nextStatus: computeShiftStatus({
+        shiftId: shift.id,
         shiftDate: shift.shiftDate,
         confirmedAssignments: shift.assignments.length,
         zoneBlocks: shift.zone.blocks,
@@ -364,55 +218,33 @@ export async function findTemplateHorizonGaps(weeksOverride?: number) {
     },
     select: {
       id: true,
+      zoneId: true,
       dayOfWeek: true,
       startTime: true,
       endTime: true,
+      validFrom: true,
+      validTo: true,
       zone: {
         select: {
           name: true,
         },
       },
-      shifts: {
-        where: {
-          shiftDate: {
-            gte: from,
-            lte: to,
-          },
-        },
-        select: {
-          shiftDate: true,
-          startTime: true,
-          endTime: true,
-        },
-      },
     },
   });
 
+  const existing = await prisma.shift.findMany({
+    where: { shiftDate: { gte: from, lte: to } },
+    select: { zoneId: true, templateId: true, shiftDate: true, startTime: true, endTime: true },
+  });
+
   return templates.map((template) => {
-    const expectedDates = buildExpectedTemplateDates({
-      dayOfWeek: template.dayOfWeek,
-      from,
-      to,
-    });
-    const existingKeys = new Set(
-      template.shifts.map((shift) =>
-        [
-          toDateOnlyString(shift.shiftDate),
-          shift.startTime.toISOString(),
-          shift.endTime.toISOString(),
-        ].join("|"),
-      ),
-    );
-
-    const missingDates = expectedDates.filter((shiftDate) => {
-      const key = [
-        toDateOnlyString(shiftDate),
-        template.startTime.toISOString(),
-        template.endTime.toISOString(),
-      ].join("|");
-
-      return !existingKeys.has(key);
-    });
+    const expectedDates = templateDates({
+      id: template.id, dayOfWeek: template.dayOfWeek, status: "ACTIVE",
+      startTime: "00:00", endTime: "23:59", validFrom: toDateOnlyString(template.validFrom),
+      validTo: template.validTo ? toDateOnlyString(template.validTo) : null,
+    }, toDateOnlyString(from), toDateOnlyString(to));
+    const existingDates = new Set(existing.filter((s) => s.zoneId === template.zoneId && (s.templateId === template.id || s.startTime.getTime() === template.startTime.getTime() && s.endTime.getTime() === template.endTime.getTime())).map((s) => toDateOnlyString(s.shiftDate)));
+    const missingDates = expectedDates.filter((date) => !existingDates.has(date)).map((date) => new Date(`${date}T00:00:00Z`));
 
     return {
       templateId: template.id,
